@@ -1,0 +1,120 @@
+<template>
+    <div class="slds-p-horizontal_small">
+        <div class="containerClass">
+            <template for:each={timelinePosts.data} for:item="timelinePost">
+                <c-chat-timeline-tile key={timelinePost.Id} timeline-post={timelinePost} onseen={openSeenModal}
+                current-name={curName}></c-chat-timeline-tile>
+            </template>
+        </div>
+        <div class="slds-grid slds-wrap slds-p-top_small">
+            <div class="slds-col slds-size_11-of-12">
+                <lightning-input-rich-text variant="bottom-toolbar" value={messageValue}
+                    placeholder="Enter Timeline Message..." onchange={handleMessageChange} formats={formats}>
+                </lightning-input-rich-text>
+            </div>
+            <div class="slds-col slds-size_1-of-12">
+                <div class="slds-grid slds-wrap">
+                    <div class="slds-col slds-size_1-of-1 slds-align_absolute-center">
+                        <lightning-button-icon data-id="timelineSendButton" class="slds-m-top_small" name="save"
+                            variant="brand" onclick={createMessage} icon-name="utility:send" icon-position="right"
+                            disabled={msgSendDisable} tooltip="Send">
+                        </lightning-button-icon>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-align_absolute-center">
+                        <template if:false={timelineFile}>
+                            <lightning-button-icon class="slds-m-top_small" name="save" icon-name="utility:attach"
+                                variant="border" onclick={openTimelineFile} icon-position="right" tooltip="Add/Attach">
+                            </lightning-button-icon>
+                        </template>
+                        <template if:true={timelineFile}>
+                            <lightning-button-icon class="slds-m-top_small" name="save" icon-name="utility:collapse_all"
+                                variant="border" onclick={closeTimelineFile} icon-position="right" tooltip="Collapse">
+                            </lightning-button-icon>
+                        </template>
+                    </div>
+                </div>
+            </div>
+            <div class="slds-col slds-size_1-of-1 slds-p-around_x-small">
+                <template if:true={timelineFile}>
+                    <lightning-file-upload label="Attach file" name="fileUploader" record-id={recordId}
+                        onuploadfinished={handleUploadFinished} multiple>
+                    </lightning-file-upload>
+                    <lightning-spinner if:true={isLoading} alternative-text="Loading" size="small"></lightning-spinner>
+                    <h3 class="userList">{title}</h3>
+                    <div class="slds-m-horizontal_x-small attachmentContainer">
+                        <!-- <template if:true={fileName}>
+                                        {fileName} &nbsp; &nbsp; {fileSize}
+                                    </template> -->
+                        <ul>
+                            <template if:true={loaded}>
+                                <template for:each={attachments} for:item="attachment">
+                                    <li key={attachment.Id} class="forceContentVirtualRelatedListStencil forceRecordLayout">
+                                        <div class="slds-list_horizontal slds-media_center slds-var-p-bottom_xx-small">
+                                            <div class="slds-show_inline-block slds-align-middle thumbnailImg">
+                                                <lightning-icon icon-name={attachment.icon} alternative-text="Doctype file"
+                                                    data-id={attachment.Id} title="Doctype"></lightning-icon>
+                                                <img src={attachment.src} class="thumbnailImg slds-hide"
+                                                    data-id={attachment.Id} onload={handleLoad} />
+                                            </div>
+                                            <div
+                                                class="slds-show_inline-block slds-var-p-left_x-small slds-truncate slds-var-m-right_x-small">
+                                                <a class="itemTitle uiOutputText" onclick={openPreview}
+                                                    data-id={attachment.ContentDocumentId}>{attachment.ContentDocument.Title}</a>
+                                                <p
+                                                    class="slds-m-around_none secondaryFields slds-text-body_small slds-truncate">
+                                                    <span>
+                                                        <lightning-formatted-date-time
+                                                            value={attachment.ContentDocument.CreatedDate}>
+                                                        </lightning-formatted-date-time>
+                                                    </span>
+                                                    <span>{attachment.size}</span>
+                                                    <span>{attachment.ContentDocument.FileExtension}</span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </template>
+                            </template>
+                        </ul>
+                        <template if:true={moreRecords}>
+                            <a onclick={loadMore}>
+                                <div class="slds-card__footer">
+                                    <template if:true={moreLoaded}>
+                                        <span>View More</span>
+                                    </template>
+                                    <template if:false={moreLoaded}>
+                                        <div style="position: relative; min-height:50px;">
+                                            <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                                        </div>
+                                    </template>
+                                </div>
+                            </a>
+                        </template>
+                    </div>
+                    <!-- <h3 class="userList">Ticket Members</h3>
+                    <lightning-record-edit-form object-api-name="User_Ticket_Relationship__c" onsubmit={handleUserSubmit}
+                        onsuccess={handleUserSuccess} data-id="userSubmit">
+                        <div class="slds-grid">
+                            <div class="slds-col slds-size_10-of-12 slds-align-bottom">
+                                <lightning-input-field field-name="User__c" data-id="userUpdate" variant="label-hidden"
+                                    style="margin-bottom: 0;" onchange={handleUserChange}></lightning-input-field>
+                            </div>
+                            <div class="slds-col slds-size_1-of-12 slds-align-bottom slds-var-p-left_xx-small">
+                                <lightning-button label="Add" variant="brand" onclick={handleUserSubmit}></lightning-button>
+                            </div>
+                        </div>
+    
+                    </lightning-record-edit-form>
+                    <div class="slds-p-around_x-small ticketUserContainer">
+                        <template if:true={ticketUsers}>
+                            <template for:each={ticketUsers.data} for:item="ticketUser">
+                                <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser}>
+                                </c-ticket-view-user-list>
+                            </template>
+                        </template>
+                    </div> -->
+                </template>
+            </div>
+        </div>
+    </div>
+</template>

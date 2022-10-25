@@ -1,0 +1,6 @@
+.containerClass{
+    display:flex;
+    max-height: Min(50vh,50rem);
+    overflow-y: auto;
+    flex-direction:column-reverse;
+}

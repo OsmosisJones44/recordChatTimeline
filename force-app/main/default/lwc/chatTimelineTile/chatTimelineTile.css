@@ -1,0 +1,17 @@
+.messageClass{
+    padding:none;
+}
+.rightClass{
+    text-align: left;
+    background-color: rgba(226, 226, 226, 0.89);
+    border-bottom: 2px solid #cccccc;
+}
+.leftClass{
+    text-align: left;
+    background-color: white;
+    border-bottom: 2px solid #cccccc;
+}
+.timeClass{
+    opacity: .4;
+    font-size: smaller;
+}
