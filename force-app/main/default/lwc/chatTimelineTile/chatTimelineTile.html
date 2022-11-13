@@ -8,19 +8,49 @@
                 </div>
                 <lightning-formatted-rich-text value={timelinePost.Message__c}>
                 </lightning-formatted-rich-text><br>
+                <template if:true={followUpTask}>
+                    <div class="slds-grid">
+                        <div class="slds-col slds-size_1-of-1 animateFade">
+                            <lightning-card title="Follow Up Task" class="slds-card_boundary">
+                                <div class="slds-grid slds-wrap">
+                                    <div class="slds-col slds-size_1-of-1">
+                                        <!-- subject -->
+                                        <p class="slds-truncate">{taskSubject}</p>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3">
+                                    <!-- Status -->
+                                    {taskStatus}
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3">
+                                    <!-- DueDate -->
+                                    <lightning-formatted-date-time value={taskDate} ></lightning-formatted-date-time>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3">
+                                        <!-- assigned to -->
+                                        <p class="slds-truncate">{taskOwner}</p>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1">
+                                    <!-- comments -->
+                                    <p class="lineClamper">{taskComments}</p>
+                                    </div>
+                                </div>
+                            </lightning-card>
+                        </div>
+                    </div>
+                </template>
                 <template if:true={timelinePost.DocumentId__c}>
-                    <div class="slds-p-vertical_x-small slds-p-left_x-small">
+                    <div class="slds-p-vertical_x-small slds-p-left_x-small animateFade">
                         <lightning-button icon-name="utility:preview" variant="Neutral" onclick={openPreview}
                             label="Preview File" icon-position="right" size="small"></lightning-button>
                     </div>
                 </template>
                 <template if:true={timelinePost.CloseMsg__c}>
-                    <div class="slds-p-vertical_x-small slds-p-left_x-small">
+                    <div class="slds-p-vertical_x-small slds-p-left_x-small animateFade">
                         <lightning-button icon-name="utility:check" variant="Neutral" onclick={closeTicket}
                             label="Close Ticket" icon-position="right" size="small"></lightning-button>
                     </div>
                 </template>
-                <div class="slds-grid timeClass slds-hide" data-id="hoverSelect">
+                <div class="slds-grid timeClass slds-hide animateFade" data-id="hoverSelect">
                     <div class="slds-col slds-size_7-of-12">
                         <lightning-formatted-date-time value={timelinePost.CreatedDate} year="numeric" month="short"
                             day="2-digit" weekday="long" hour="2-digit" minute="2-digit" hour12="true">

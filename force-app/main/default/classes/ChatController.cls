@@ -1,7 +1,18 @@
 public with sharing class ChatController {
 
+    // For Infinite Scroll or Pagination
+    // Integer offset = (pageNumber - 1) * pageSize;
+
     @AuraEnabled(cacheable=true)
     public static List<Ticket_Message__c> getMessages(string parentId ){
+        try{return [SELECT Id, SeenBy__c, CreatedDate,Record_Id_Form__c,Parent_Record_Id__c, DocumentId__c, Name, Message__c, OwnerId, OwnerName__c,Parent_Ticket__c,Owner_URL__c,timelineClassName__c, CloseMsg__c
+        FROM Ticket_Message__c WHERE Record_Id_Form__c =:parentId ORDER BY CreatedDate DESC];
+        }catch(system.QueryException e){
+            return null;
+        }
+    }
+    @AuraEnabled
+    public static sObject getRecordInfo(string recordId , ){
         try{return [SELECT Id, SeenBy__c, CreatedDate,Record_Id_Form__c,Parent_Record_Id__c, DocumentId__c, Name, Message__c, OwnerId, OwnerName__c,Parent_Ticket__c,Owner_URL__c,timelineClassName__c, CloseMsg__c
         FROM Ticket_Message__c WHERE Record_Id_Form__c =:parentId ORDER BY CreatedDate DESC];
         }catch(system.QueryException e){
@@ -44,6 +55,23 @@ public with sharing class ChatController {
         }
         return numberOfUnread;
 
+    }
+    // TODO Follow Up Task for Multiple People
+    @AuraEnabled
+    public static void createTask(string subject, string comments, date dueDate, string priority, list<Id> idList){
+        try {
+           Task newTask = new Task();
+           newTask.Subject = subject;
+           newTask.Subject = subject;
+           newTask.Subject = subject;
+           newTask.Subject = subject;
+           newTask.Subject = subject;
+           for () {
+
+           }
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
     }
 
 }

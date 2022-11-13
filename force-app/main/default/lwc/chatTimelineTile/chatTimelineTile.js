@@ -10,7 +10,7 @@ import getCurUser from '@salesforce/apex/BirthdayController.getCurUser';
 import createReadStatus from '@salesforce/apex/BirthdayController.createReadStatus';
 import USER_ID from '@salesforce/user/Id';
 
-export default class ChatTimelineTile extends LightningElement {
+export default class ChatTimelineTile extends NavigationMixin(LightningElement) {
     @api timelinePost;
     @api curName;
     @api curUser;
@@ -22,6 +22,9 @@ export default class ChatTimelineTile extends LightningElement {
     error;
 
     connectedCallback() {
+        // Promise.all(
+
+        // )
         getCurrentUserPhoto({
             userId: this.timelinePost.OwnerId
         })

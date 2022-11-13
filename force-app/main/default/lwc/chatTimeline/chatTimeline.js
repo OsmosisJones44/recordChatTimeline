@@ -1,6 +1,10 @@
 import { LightningElement, api, wire } from 'lwc';
 import getReadUsers from '@salesforce/apex/BirthdayController.getReadUsers';
+import getCurUser from '@salesforce/apex/BirthdayController.getCurUser';
 import getMessages from '@salesforce/apex/ChatController.getMessages';
+import initFiles from "@salesforce/apex/contentManager.initFiles";
+import queryFiles from "@salesforce/apex/contentManager.queryFiles";
+import loadFiles from "@salesforce/apex/contentManager.loadFiles";
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { createRecord } from 'lightning/uiRecordApi';
 import { refreshApex } from '@salesforce/apex';
@@ -20,18 +24,25 @@ import MESSAGE_FIELD from '@salesforce/schema/Ticket_Message__c.Message__c';
 import OWNER_FIELD from '@salesforce/schema/Ticket_Message__c.OwnerId';
 import PARENT_FIELD from '@salesforce/schema/Ticket_Message__c.Parent_Record_Id__c';
 import DOC_FIELD from '@salesforce/schema/Ticket_Message__c.DocumentId__c';
+import SOURCE_FIELD from '@salesforce/schema/Ticket_Message__c.Message_Source__c';
+import PREVIEW_FIELD from '@salesforce/schema/Ticket_Message__c.Preview_Name__c';
 import USER_ID from '@salesforce/user/Id';
-
 
 const MAX_FILE_SIZE = 4500000;
 const CHUNK_SIZE = 750000;
 
 export default class ChatTimeline extends LightningElement { 
     @api recordId;
+    @api source;
+    @api previewMe;
     @api defaultNbFileDisplayed;
     @api limitRows;  
     @api timelinePost;
+    sendEmail;
+    sendEmailVal;
+    followUpTask;
     timelineView;
+    timelineFile;
     messageValue;
     createdMessage;
     userId = USER_ID;
@@ -40,6 +51,7 @@ export default class ChatTimeline extends LightningElement {
     uploadedFiles = []; 
     tempTicketUsers = [];
     file; 
+    fids = '';
     fileContents; 
     fileReader; 
     content; 
@@ -49,6 +61,7 @@ export default class ChatTimeline extends LightningElement {
     attachments = {};
     totalFiles;
     moreRecords;
+    isLoading;
     offset=0;
     sortIcon = 'utility:arrowdown';
     sortOrder = 'DESC';
@@ -97,6 +110,13 @@ export default class ChatTimeline extends LightningElement {
     get noRecords(){
         return this.totalFiles == 0;
     }
+    get options() {
+        return [
+            { label: 'High', value: 'High' },
+            { label: 'Normal', value: 'Normal' },
+            { label: 'Low', value: 'Low' },
+        ];
+    }
 
 
     @wire(getMessages, {parentId: '$recordId'}) timelinePosts;
@@ -130,8 +150,22 @@ export default class ChatTimeline extends LightningElement {
                     variant: error
                 })
             );
-        });
+            });
+        this.runGetUser();
     }
+    runGetUser(){
+        getCurUser({userId:this.userId})
+        .then((result) => {
+            //console.log(JSON.stringify(result));
+            this.curUser = result;
+            this.curName = result.Name;
+            this.error = undefined;
+        })
+        .catch((error) => {
+            this.error = error;
+            this.curUser = undefined;
+        });
+    }    
     handleEditTimeline() {
         const event = {
             detail: {
@@ -156,6 +190,18 @@ export default class ChatTimeline extends LightningElement {
     handleMessageChange(event) {
         this.messageValue = event.target.value;
     }
+    handleSubjectChange(event) {
+        this.subjectValue = event.detail.value;
+    }
+    handlePriorityChange(event) {
+        this.subjectValue = event.detail.value;
+    }
+    handleIncludeTask() {
+        this.followUpTask = !this.followUpTask;
+    }
+    handleEmailChange(event) {
+        this.sendEmailVal = event.target.checked;
+    }
     scrollToBottom(){
         let containerChoosen = this.template.querySelector(".containerClass");
         containerChoosen.scrollTop = containerChoosen.scrollHeight;
@@ -165,12 +211,18 @@ export default class ChatTimeline extends LightningElement {
             this.createMessage();
         }
     }
+    updateCounters(recordCount){
+        this.offset += recordCount;
+        this.moreRecords = this.offset < this.totalFiles;
+    }
     createMessage() {
         if(this.messageValue){
             const fields = {};
             fields[MESSAGE_FIELD.fieldApiName] = this.messageValue;
             fields[OWNER_FIELD.fieldApiName] = this.userId;
             fields[PARENT_FIELD.fieldApiName] = this.recordId;
+            fields[SOURCE_FIELD.fieldApiName] = this.source;
+            fields[PREVIEW_FIELD.fieldApiName] = this.source + ' : ' + this.previewMe;
             const recordInput = { apiName: MESSAGE_OBJECT.objectApiName, fields };
             createRecord(recordInput)
                 .then(result => {
@@ -367,9 +419,7 @@ export default class ChatTimeline extends LightningElement {
         return item;
     }
     initRecords() {
-        if (this.editRec === true) {
-            this.recordId = this.tempOppId;
-        }
+        this.isLoading = true;
         initFiles({ 
             recordId: this.recordId, 
             filters: this.conditions, 
@@ -401,15 +451,23 @@ export default class ChatTimeline extends LightningElement {
             if(result.totalCount > this.defaultNbFileDisplayed){
                 nbFiles = this.defaultNbFileDisplayed + '+';
             }
-            this.title = 'Statement Files (' + nbFiles + ')';
+            this.fileTitle = 'Files (' + nbFiles + ')';
             this.disabled = false;
             this.loaded = true;
-        })
-        .catch(error => {
-            this.showNotification("", "Error", "error");
+        }).catch(error => {
+            console.log(error);
+            this.showNotification("Error Loading Files", JSON.stringify(error.message), "error");
         }).finally(() => {
             this.isLoading = false;
         });
+    }
+    showNotification(title, message, variant) {
+        const event = new ShowToastEvent({
+            title: title,
+            message: message,
+            variant: variant
+        });
+        this.dispatchEvent(event);
     }
     formatBytes(bytes,decimals) {
         if(bytes == 0) return '0 Bytes';
@@ -479,8 +537,8 @@ export default class ChatTimeline extends LightningElement {
     openTimelineFile(){
         this.timelineFile = true;
         this.initRecords();
-        refreshApex(this.ticketUsers);
-        //refreshApex(wiredFiles);
+        // refreshApex(this.ticketUsers);
+        // refreshApex(wiredFiles);
     }    
     closeTimelineFile(){
         this.timelineFile = false;

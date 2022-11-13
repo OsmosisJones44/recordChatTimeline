@@ -15,3 +15,15 @@
     opacity: .4;
     font-size: smaller;
 }
+.animateFade{
+    animation: fadeIn .25s;
+}
+
+@keyframes fadeIn {
+    from {
+        transform: translateY(-.2rem);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
