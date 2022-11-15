@@ -38,6 +38,10 @@ export default class ChatTimeline extends LightningElement {
     @api defaultNbFileDisplayed;
     @api limitRows;  
     @api timelinePost;
+    ticketSeenUsers;
+    ticketMessageId;
+    isModalOpen;
+    seenModal;
     sendEmail;
     sendEmailVal;
     followUpTask;
@@ -120,7 +124,7 @@ export default class ChatTimeline extends LightningElement {
 
 
     @wire(getMessages, {parentId: '$recordId'}) timelinePosts;
-    // @wire(getReadUsers, { ticketMessageId: '$ticketMessageId' }) ticketSeenUsers;
+    @wire(getReadUsers, { ticketMessageId: '$ticketMessageId' }) ticketSeenUsers;
 
     
     connectedCallback() {
@@ -493,7 +497,6 @@ export default class ChatTimeline extends LightningElement {
             this.ticketMessageId = event.detail;
             this.isModalOpen = true;
             this.seenModal = true;
-            this.infoModal = false;
         });
     }
     closeModal() {

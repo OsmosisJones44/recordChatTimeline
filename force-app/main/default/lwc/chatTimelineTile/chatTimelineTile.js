@@ -20,6 +20,7 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
     seenBy; 
     statusId;
     error;
+    liked;
 
     connectedCallback() {
         // Promise.all(
@@ -51,6 +52,9 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
                 selectedRecordId: this.timelinePost.DocumentId__c
             }
         })
+    }
+    handleToggle() {
+        this.liked = !this.liked;
     }
     handleHover(){
         const eventElement = this.template.querySelector('div[data-id="hoverSelect"]');
