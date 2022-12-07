@@ -57,13 +57,15 @@
                         </lightning-formatted-date-time>
                     </div>
                     <div class="slds-col slds-size_1-of-12">
-                        <lightning-button-icon-stateful icon-name="utility:like" size="x-small" selected={liked} alternative-text="Like"
-                            onclick={handleToggle}>
-                        </lightning-button-icon-stateful>
+                        <template if:true={showLikes}>
+                            <lightning-button-icon-stateful icon-name="utility:like" size="x-small" selected={liked} alternative-text="Like"
+                                onclick={handleLiked}>
+                            </lightning-button-icon-stateful>
+                        </template>
                     </div>
                     <div class="slds-col slds-size_2-of-12 slds-text-align_right slds-p-right_xxx-small slds-truncate"
                         data-id="seenSelect">
-                        <p><a onclick={openSeenBy}>Seen By</a></p>
+                        <p><a onclick={openSeenBy}>Seen By / Likes</a></p>
                     </div>
                 </div>
             </lightning-tile>

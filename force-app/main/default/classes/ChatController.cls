@@ -50,8 +50,7 @@ public with sharing class ChatController {
     }
     @AuraEnabled(cacheable=true)
     public static Help_Desk_Message_Status__c getUserMsgStatus(string userId, string msgId){
-        try{return [SELECT Id, CreatedDate, Name, Ticket_Message__c, OwnerId,Read__c,Liked__c
-        FROM Help_Desk_Message_Status__c WHERE OwnerId =:userId AND Ticket_Message__c = :msgId LIMIT 1];
+        try{return [SELECT Id, CreatedDate, Name, Ticket_Message__c, OwnerId,Read__c,Liked__c FROM Help_Desk_Message_Status__c WHERE OwnerId = :userId AND Ticket_Message__c = :msgId LIMIT 1];
         }catch(system.QueryException e){
             return null;
         }        

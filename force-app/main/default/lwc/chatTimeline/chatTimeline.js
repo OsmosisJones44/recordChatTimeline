@@ -38,6 +38,8 @@ export default class ChatTimeline extends LightningElement {
     @api defaultNbFileDisplayed;
     @api limitRows;  
     @api timelinePost;
+    @api title;
+    msgSendDisable;
     ticketSeenUsers;
     ticketMessageId;
     isModalOpen;
@@ -128,7 +130,7 @@ export default class ChatTimeline extends LightningElement {
 
     
     connectedCallback() {
-        console.log(this.recordId);
+        // console.log(this.recordId);
         Promise.all([
             loadScript(this, CONFETTI + '/confetti.browser.min.js'),
             loadScript(this, PARTY + '/party.min.js'),
@@ -220,6 +222,7 @@ export default class ChatTimeline extends LightningElement {
         this.moreRecords = this.offset < this.totalFiles;
     }
     createMessage() {
+        this.msgSendDisable = true;
         if(this.messageValue){
             const fields = {};
             fields[MESSAGE_FIELD.fieldApiName] = this.messageValue;
@@ -238,9 +241,10 @@ export default class ChatTimeline extends LightningElement {
                         }),
                     );
                     refreshApex(this.timelinePosts)
-                    .then(() => {
-                        this.messageValue = '';
-                        this.scrollToBottom();                
+                        .then(() => {
+                            this.msgSendDisable = false;
+                            this.messageValue = '';
+                            this.scrollToBottom();                
                     })
                         .catch(err => {
                             console.log(JSON.stringify(err));

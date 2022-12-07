@@ -1,14 +1,18 @@
 import { LightningElement, api, wire } from 'lwc';
-import getCurrentUserPhoto from '@salesforce/apex/BirthdayController.getCurrentUserPhoto';
 import { NavigationMixin } from 'lightning/navigation';
-// import { createRecord } from 'lightning/uiRecordApi';
+import { updateRecord } from 'lightning/uiRecordApi';
+import getCurrentUserPhoto from '@salesforce/apex/BirthdayController.getCurrentUserPhoto';
+import getCurUser from '@salesforce/apex/BirthdayController.getCurUser';
+import createReadStatus from '@salesforce/apex/BirthdayController.createReadStatus';
+import getUserMsgStatus from '@salesforce/apex/ChatController.getUserMsgStatus';
 // import MESSAGE_OBJECT from '@salesforce/schema/Help_Desk_Message_Status__c';
 // import TICKET_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Ticket_Message__c';
 // import READ_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Read__c';
+import ID_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Id';
+import LIKED_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Liked__c';
 // import OWNER_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.OwnerId';
-import getCurUser from '@salesforce/apex/BirthdayController.getCurUser';
-import createReadStatus from '@salesforce/apex/BirthdayController.createReadStatus';
 import USER_ID from '@salesforce/user/Id';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class ChatTimelineTile extends NavigationMixin(LightningElement) {
     @api timelinePost;
@@ -21,11 +25,30 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
     statusId;
     error;
     liked;
+    userMsgStatus;
+    showLikes = false;
+
 
     connectedCallback() {
-        // Promise.all(
-
-        // )
+        console.log(this.userId);
+        console.log(this.timelinePost.Id);
+        getUserMsgStatus({
+            userId: this.userId,
+            msgId: this.timelinePost.Id
+        })
+            .then(result => {
+                console.log(result);
+                this.showLikes = true;
+                this.userMsgStatus = result;
+                this.liked = this.userMsgStatus.Liked__c;
+                this.error = undefined;
+                console.log(this.userMsgStatus);
+            })
+            .catch(error => {
+                this.userMsgStatus = undefined;
+                this.error = error;
+                console.log(error);
+            })
         getCurrentUserPhoto({
             userId: this.timelinePost.OwnerId
         })
@@ -53,8 +76,35 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
             }
         })
     }
-    handleToggle() {
+    handleLiked() {
         this.liked = !this.liked;
+        const fields = {};
+        fields[ID_FIELD.fieldApiName] = this.userMsgStatus.Id;
+        fields[LIKED_FIELD.fieldApiName] = this.liked;
+
+        const recordInput = { fields };
+
+        updateRecord(recordInput)
+            .then(() => {
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Success',
+                        message: 'Message Liked',
+                        variant: 'success'
+                    })
+                );
+                // Display fresh data in the form
+                return refreshApex(this.contact);
+            })
+            .catch(error => {
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Error Liking Message - Screenshot Me and send to your Salesoforce Administrator',
+                        message: error.body.message,
+                        variant: 'error'
+                    })
+                );
+            });
     }
     handleHover(){
         const eventElement = this.template.querySelector('div[data-id="hoverSelect"]');
