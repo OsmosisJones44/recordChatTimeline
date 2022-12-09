@@ -260,15 +260,16 @@ export default class ChatTimeline extends LightningElement {
                         }),
                     );
                 });
-        }else{
+        } else {
             this.dispatchEvent(
                 new ShowToastEvent({
                     title: 'Empty Message',
                     message: 'Please Add Something to the Message in order to Send into the Timeline. Contact your Salesforce Administrator w/ any questions.',
                     variant: 'error',
                 }),
-            );
-        }
+                );
+            }
+            this.msgSendDisable = false;
     }
     handleFilesChange(event) {
         if(event.target.files.length > 0) {
