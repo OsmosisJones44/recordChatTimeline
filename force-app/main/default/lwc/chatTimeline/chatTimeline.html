@@ -183,7 +183,7 @@
                         <template if:true={seenModal}>
                             <template if:true={ticketSeenUsers}>
                                 <template for:each={ticketSeenUsers.data} for:item="ticketUser">
-                                    <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser} timeline-post-id={ticketMessageId}>
+                                    <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser} timeline-post-id={ticketMessageId} show-likes>
                                     </c-ticket-view-user-list>
                                 </template>
                             </template>

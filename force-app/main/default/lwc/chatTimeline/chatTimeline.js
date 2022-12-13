@@ -39,7 +39,7 @@ export default class ChatTimeline extends LightningElement {
     @api limitRows;  
     @api timelinePost;
     @api title;
-    msgSendDisable;
+    msgSendDisable = false;
     ticketSeenUsers;
     ticketMessageId;
     isModalOpen;
