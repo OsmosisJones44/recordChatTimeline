@@ -21,7 +21,7 @@
 
 @keyframes fadeIn {
     from {
-        transform: scale(.98) translateY(-.1rem);
+        transform: scale(.99) translateY(-.05rem);
     }
     to {
         transform: scale(1.0) translateY(0);
