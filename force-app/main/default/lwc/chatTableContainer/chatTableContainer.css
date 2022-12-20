@@ -1,0 +1,14 @@
+.leftGridClass{
+    height: 75vh;
+    overflow-y: scroll;
+}
+.gridClass{
+    max-height: 75vh;
+    overflow:scroll;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+/* Hide scrollbar for Chrome, Safari and Opera */
+.gridClass::-webkit-scrollbar {
+    display: none;
+}

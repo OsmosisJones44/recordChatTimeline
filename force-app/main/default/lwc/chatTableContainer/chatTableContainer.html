@@ -1,0 +1,22 @@
+<template>
+    <lightning-card title="Timeline Messages" icon-name="standard:past_chat">
+        <div class="slds-grid slds-wrap slds-border_top slds-border_bottom slds-p-horizontal_xx-small gridClass">
+            <div class="slds-col slds-size_1-of-3 slds-border_right leftGridClass">
+                <div class="slds-grid slds-wrap">
+                    <div class="slds-col slds-size_1-of-1 slds-p-around_xx-small">
+                        <lightning-input type="search" label="Search Timeline" onchange={handleSearch}>
+                        </lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1">
+                        <template if:true={recentMsgs} for:each={recentMsgs} for:item="post" for:index="index">
+                            <c-chat-table-tile timeline-post={post} key={post.Id} ontimeline={handleTimelineView}></c-chat-table-tile>
+                        </template>
+                    </div>
+                </div>
+            </div>
+            <div class="slds-col slds-size_2-of-3 slds-p-horizontal_x-small slds-p-top_x-small">
+                <c-chat-timeline record-id={recordId} title="Timeline" source={source}></c-chat-timeline>
+            </div>
+        </div>
+    </lightning-card>
+</template>
