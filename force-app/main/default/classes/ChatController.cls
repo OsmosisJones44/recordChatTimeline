@@ -34,7 +34,7 @@ public with sharing class ChatController {
     @AuraEnabled
     public static integer getUnseenMessages(string ticketId, string userId){
         integer numberOfUnread = 0;
-        List<Ticket_Message__c> messageList = [SELECT Id, SeenBy__c, CreatedDate, DocumentId__c, Name, Message__c, OwnerId, OwnerName__c,Parent_Ticket__c,Owner_URL__c,timelineClassName__c 
+        List<Ticket_Message__c> messageList = [SELECT Id, SeenBy__c, CreatedDate, DocumentId__c, Name,Record_Id_Form__c, Parent_Record_Id__c, Message__c, OwnerId, OwnerName__c,Parent_Ticket__c,Owner_URL__c,timelineClassName__c 
         FROM Ticket_Message__c WHERE Parent_Ticket__c =:ticketId];
         Set<Id> messageIds = new Set<Id>();
         for(Ticket_Message__c a: messageList){
@@ -54,6 +54,28 @@ public with sharing class ChatController {
         }catch(system.QueryException e){
             return null;
         }        
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static list<Ticket_Message__c> findRecentTicketMessages(string userId){
+        try {
+            List<Help_Desk_Message_Status__c> msgStatuses = [SELECT Id, CreatedDate, Name, Ticket_Message__c,Ticket_Message__r.Record_Id_Form__c, OwnerId,Read__c,Liked__c FROM Help_Desk_Message_Status__c WHERE OwnerId = :userId ORDER BY CreatedDate DESC];
+            Set<Id> parentMsgIds = new Set<Id>();
+            Set<Id> ticketMsgs = new Set<Id>();
+            for(Help_Desk_Message_Status__c a: msgStatuses){
+                if(parentMsgIds.contains(a.Ticket_Message__r.Record_Id_Form__c)){
+                    continue;
+                } else {
+                    parentMsgIds.add(a.Ticket_Message__r.Record_Id_Form__c);
+                    ticketMsgs.add(a.Ticket_Message__c);
+                }
+            }
+            List<Ticket_Message__c> recentMsgs = [SELECT Id, SeenBy__c, CreatedDate, DocumentId__c,Record_Id_Form__c, Parent_Record_Id__c, Name, Message__c, OwnerId, OwnerName__c,Parent_Ticket__c,Owner_URL__c,timelineClassName__c 
+                FROM Ticket_Message__c WHERE Record_Id_Form__c != '' AND Id IN :ticketMsgs ORDER BY CreatedDate DESC];
+            return recentMsgs;
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
     }
     
     
