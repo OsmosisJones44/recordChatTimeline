@@ -1,0 +1,32 @@
+.messageClass{
+    padding:none;
+}
+.rightClass{
+    text-align: left;
+    background-color: rgba(241, 241, 241, 0.89);
+    border-bottom: 2px solid #cccccc;
+    cursor: pointer;
+}
+.rightClass:hover{
+    text-align: left;
+    background-color: rgb(228, 228, 228);
+    border-bottom: 2px solid #cccccc;
+}
+.timeClass{
+    font-size: smaller;
+}
+.opacityClass{
+    opacity: .4;
+}
+.animateFade{
+    animation: fadeIn .25s;
+}
+
+@keyframes fadeIn {
+    from {
+        transform: scale(.99) translateY(-.05rem);
+    }
+    to {
+        transform: scale(1.0) translateY(0);
+    }
+}
