@@ -37,9 +37,14 @@ export default class ChatTimeline extends LightningElement {
     @api previewMe;
     @api defaultNbFileDisplayed;
     @api limitRows;  
-    @api timelinePost;
     @api title;
-    msgSendDisable = false;
+    timelinePostKey;
+    timelinePosts;
+    mainArea;
+    lastSavedData;
+    disableButton;
+    showFilters;
+    showSearch;
     ticketSeenUsers;
     ticketMessageId;
     isModalOpen;
@@ -101,7 +106,6 @@ export default class ChatTimeline extends LightningElement {
         'table',
         'header',
     ];
-    title;
     conditions;
     documentForceUrl;
     get DateSorted() {
@@ -125,11 +129,31 @@ export default class ChatTimeline extends LightningElement {
     }
 
 
-    @wire(getMessages, {parentId: '$recordId'}) timelinePosts;
+    // @wire(getMessages, {parentId: '$recordId'}) timelinePosts;
+    @wire(getMessages, {parentId: '$recordId'})
+    ticketSetup(result) {
+        this.timelinePostKey = result;
+        const { data, error } = result;
+        if (data) {
+            this.timelinePosts = JSON.parse(JSON.stringify(data));
+            this.error = undefined;
+        } else if (error) {
+            this.timelinePosts = undefined;
+            this.error = error;
+            console.error(error);
+        } else {
+            this.error = undefined;
+            this.timelinePosts = undefined;
+        }
+        this.lastSavedData = this.timelinePosts;
+        this.isLoading = false;
+    };
     @wire(getReadUsers, { ticketMessageId: '$ticketMessageId' }) ticketSeenUsers;
 
     
     connectedCallback() {
+        this.disableButton = false;
+        this.mainArea = true;
         // console.log(this.recordId);
         Promise.all([
             loadScript(this, CONFETTI + '/confetti.browser.min.js'),
@@ -190,7 +214,10 @@ export default class ChatTimeline extends LightningElement {
         }
         this.handleEdit(event);
     }  
-    refreshTimelinePosts(){
+    @api
+    refreshTimelinePosts(rowId) {
+        this.recordId = rowId;
+        console.log('logMe');
         refreshApex(this.timelinePosts);
     }
     handleMessageChange(event) {
@@ -208,6 +235,12 @@ export default class ChatTimeline extends LightningElement {
     handleEmailChange(event) {
         this.sendEmailVal = event.target.checked;
     }
+    toggleListFilters() {
+        this.showFilters = !this.showFilters;
+        this.showSearch = !this.showSearch;
+        this.timelinePosts = this.lastSavedData;
+        refreshApex(this.timelinePostKey);
+    }    
     scrollToBottom(){
         let containerChoosen = this.template.querySelector(".containerClass");
         containerChoosen.scrollTop = containerChoosen.scrollHeight;
@@ -222,7 +255,7 @@ export default class ChatTimeline extends LightningElement {
         this.moreRecords = this.offset < this.totalFiles;
     }
     createMessage() {
-        this.msgSendDisable = true;
+        this.disableButton = true;
         if(this.messageValue){
             const fields = {};
             fields[MESSAGE_FIELD.fieldApiName] = this.messageValue;
@@ -242,13 +275,13 @@ export default class ChatTimeline extends LightningElement {
                     );
                     refreshApex(this.timelinePosts)
                         .then(() => {
-                            this.msgSendDisable = false;
+                            this.disableButton = false;
                             this.messageValue = '';
                             this.scrollToBottom();                
-                    })
+                        })
                         .catch(err => {
                             console.log(JSON.stringify(err));
-                    })
+                        })
                 })
                 .catch(error => {
                     console.log(JSON.stringify(error));
@@ -669,4 +702,35 @@ export default class ChatTimeline extends LightningElement {
             // Error contains the server-side error
         });
     }    
+
+    handleSearch(event) {
+        const searchKey = event.target.value.toLowerCase();
+        console.log( 'Search String is ' + searchKey );
+        if ( searchKey ) {
+            this.timelinePosts = this.lastSavedData;
+            console.log( 'Tickets Records are ' + JSON.stringify( this.timelinePosts ) );
+            if ( this.timelinePosts ) {
+                let recs = [];
+                for ( let rec of this.timelinePosts ) {
+                    // console.log( 'Rec is ' + JSON.stringify( rec ) );
+                    let valuesArray = Object.values( rec );
+                    // console.log( 'valuesArray is ' + JSON.stringify( valuesArray ) );
+                    for ( let val of valuesArray ) {
+                        // console.log( 'val is ' + val );
+                        let strVal = String( val );
+                        if ( strVal ) {
+                            if ( strVal.toLowerCase().includes( searchKey ) ) {
+                                recs.push( rec );
+                                break;
+                            }
+                        }
+                    }
+                }
+                console.log( 'Matched Accounts are ' + JSON.stringify( recs ) );
+                this.timelinePosts = recs;
+             }
+        }  else {
+            this.timelinePosts = this.lastSavedData;
+        }        
+    }     
 }

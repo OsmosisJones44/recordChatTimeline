@@ -1,11 +1,51 @@
 <template>
-    <lightning-card title={title}>
+    <lightning-card title={title} variant="narrow" icon-name="standard:feedback">
         <div slot="actions">
-            <!-- <lightning-button></lightning-button> -->
+            <template if:true={mainArea}>
+                <lightning-button-icon style="float:right" variant="border-filled" icon-name="utility:filterList"
+                    onclick={toggleListFilters}>
+                </lightning-button-icon>
+            </template>
+            <template if:false={mainArea}>
+                <lightning-button-icon variant="border-filled" icon-name="utility:back" onclick={connectedCallback}>
+                </lightning-button-icon>
+            </template>
+            <div class="slds-grid slds-wrap slds-border_right moveLeft">
+                <!-- <div class="slds-col slds-size_1-of-1">
+                    <div class="slds-grid slds-grid_align-end">
+                        <div class="slds-col slds-size_1-of-1">
+                            <template if:true={showFilters}>
+                                <div class="slds-grid slds-grid_align-end">
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning-checkbox-group label="Filters" options={typeOptions}
+                                            value={typeFilterArr} onchange={handleFilterType}>
+                                        </lightning-checkbox-group>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning-checkbox-group label="Ticket Status" options={statusOptions}
+                                            value={statusFilterArr} onchange={handleFilterStatus}>
+                                        </lightning-checkbox-group>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div> -->
+                <div class="slds-col slds-size_1-of-1">
+                    <div class="slds-grid slds-grid_align-end">
+                        <div class="slds-col slds-size_1-of-1 slds-p-right_small">
+                            <template if:true={showSearch}>
+                                <lightning-input type="search" label="Search Timeline" onchange={handleSearch}>
+                                </lightning-input>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="slds-p-horizontal_small">
             <div class="containerClass">
-                <template for:each={timelinePosts.data} for:item="timelinePost">
+                <template for:each={timelinePosts} for:item="timelinePost">
                     <c-chat-timeline-tile key={timelinePost.Id} timeline-post={timelinePost} onseen={openSeenModal}
                         current-name={curName}></c-chat-timeline-tile>
                 </template>
@@ -21,18 +61,20 @@
                         <div class="slds-col slds-size_1-of-1 slds-align_absolute-center">
                             <lightning-button-icon data-id="timelineSendButton" class="slds-m-top_small" name="save"
                                 variant="brand" onclick={createMessage} icon-name="utility:send" icon-position="right"
-                                disabled={msgSendDisable} tooltip="Send">
+                                disabled={disableButton} tooltip="Send">
                             </lightning-button-icon>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-align_absolute-center">
                             <template if:false={timelineFile}>
                                 <lightning-button-icon class="slds-m-top_small" name="save" icon-name="utility:add"
-                                    variant="border" onclick={openTimelineFile} icon-position="right" tooltip="Add/Attach">
+                                    variant="border" onclick={openTimelineFile} icon-position="right"
+                                    tooltip="Add/Attach">
                                 </lightning-button-icon>
                             </template>
                             <template if:true={timelineFile}>
-                                <lightning-button-icon class="slds-m-top_small" name="save" icon-name="utility:collapse_all"
-                                    variant="border" onclick={closeTimelineFile} icon-position="right" tooltip="Collapse">
+                                <lightning-button-icon class="slds-m-top_small" name="save"
+                                    icon-name="utility:collapse_all" variant="border" onclick={closeTimelineFile}
+                                    icon-position="right" tooltip="Collapse">
                                 </lightning-button-icon>
                             </template>
                         </div>
@@ -66,7 +108,8 @@
                                                 options={options} onchange={handlePriorityChange}> </lightning-combobox>
                                         </div>
                                         <div class="slds-col slds-size_1-of-1">
-                                            <lightning-textarea label="Comments" value={taskComments}></lightning-textarea>
+                                            <lightning-textarea label="Comments"
+                                                value={taskComments}></lightning-textarea>
                                         </div>
                                     </div>
                                     <!--TODO When Email Recipient Logic is Figured out Add to Task Recipient-->
@@ -86,7 +129,8 @@
                         <lightning-file-upload label="Attach file" name="fileUploader" record-id={recordId}
                             onuploadfinished={handleUploadFinished} multiple>
                         </lightning-file-upload>
-                        <lightning-spinner if:true={isLoading} alternative-text="Loading" size="small"></lightning-spinner>
+                        <lightning-spinner if:true={isLoading} alternative-text="Loading"
+                            size="small"></lightning-spinner>
                         <h3 class="userList">{fileTitle}</h3>
                         <div class="slds-m-horizontal_x-small attachmentContainer">
                             <ul>
@@ -94,7 +138,8 @@
                                     <template for:each={attachments} for:item="attachment">
                                         <li key={attachment.Id}
                                             class="forceContentVirtualRelatedListStencil forceRecordLayout">
-                                            <div class="slds-list_horizontal slds-media_center slds-var-p-bottom_xx-small">
+                                            <div
+                                                class="slds-list_horizontal slds-media_center slds-var-p-bottom_xx-small">
                                                 <div class="slds-show_inline-block slds-align-middle thumbnailImg">
                                                     <lightning-icon icon-name={attachment.icon}
                                                         alternative-text="Doctype file" data-id={attachment.Id}
@@ -139,58 +184,60 @@
                             </template>
                         </div>
                         <!-- <h3 class="userList">Ticket Members</h3>
-                        <lightning-record-edit-form object-api-name="User_Ticket_Relationship__c" onsubmit={handleUserSubmit}
-                            onsuccess={handleUserSuccess} data-id="userSubmit">
-                            <div class="slds-grid">
-                                <div class="slds-col slds-size_10-of-12 slds-align-bottom">
-                                    <lightning-input-field field-name="User__c" data-id="userUpdate" variant="label-hidden"
-                                        style="margin-bottom: 0;" onchange={handleUserChange}></lightning-input-field>
+                            <lightning-record-edit-form object-api-name="User_Ticket_Relationship__c" onsubmit={handleUserSubmit}
+                                onsuccess={handleUserSuccess} data-id="userSubmit">
+                                <div class="slds-grid">
+                                    <div class="slds-col slds-size_10-of-12 slds-align-bottom">
+                                        <lightning-input-field field-name="User__c" data-id="userUpdate" variant="label-hidden"
+                                            style="margin-bottom: 0;" onchange={handleUserChange}></lightning-input-field>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-12 slds-align-bottom slds-var-p-left_xx-small">
+                                        <lightning-button label="Add" variant="brand" onclick={handleUserSubmit}></lightning-button>
+                                    </div>
                                 </div>
-                                <div class="slds-col slds-size_1-of-12 slds-align-bottom slds-var-p-left_xx-small">
-                                    <lightning-button label="Add" variant="brand" onclick={handleUserSubmit}></lightning-button>
-                                </div>
-                            </div>
-        
-                        </lightning-record-edit-form>
-                        <div class="slds-p-around_x-small ticketUserContainer">
-                            <template if:true={ticketUsers}>
-                                <template for:each={ticketUsers.data} for:item="ticketUser">
-                                    <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser}>
-                                    </c-ticket-view-user-list>
+            
+                            </lightning-record-edit-form>
+                            <div class="slds-p-around_x-small ticketUserContainer">
+                                <template if:true={ticketUsers}>
+                                    <template for:each={ticketUsers.data} for:item="ticketUser">
+                                        <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser}>
+                                        </c-ticket-view-user-list>
+                                    </template>
                                 </template>
-                            </template>
-                        </div> -->
+                            </div> -->
                     </div>
                 </template>
             </div>
         </div>
     </lightning-card>
-        <template if:true={isModalOpen}>
-            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
-                aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
-                <div class="slds-modal__container modalExtender">
-                    <header class="slds-modal__header">
-                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close"
-                            onclick={closeModal}>
-                            <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small">
-                            </lightning-icon>
-                            <span class="slds-assistive-text">Close</span>
-                        </button>
-                        <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">{modalHeader}</h2>
-                    </header>
-        
-                    <div class="slds-modal__content slds-p-around_medium userContainer" id="modal-content-id-1">
-                        <template if:true={seenModal}>
-                            <template if:true={ticketSeenUsers}>
-                                <template for:each={ticketSeenUsers.data} for:item="ticketUser">
-                                    <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser} timeline-post-id={ticketMessageId} show-likes>
-                                    </c-ticket-view-user-list>
-                                </template>
+    <template if:true={isModalOpen}>
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+            aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container modalExtender">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse"
+                            size="small">
+                        </lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">{modalHeader}</h2>
+                </header>
+
+                <div class="slds-modal__content slds-p-around_medium userContainer" id="modal-content-id-1">
+                    <template if:true={seenModal}>
+                        <template if:true={ticketSeenUsers}>
+                            <template for:each={ticketSeenUsers.data} for:item="ticketUser">
+                                <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser}
+                                    timeline-post-id={ticketMessageId} show-likes>
+                                </c-ticket-view-user-list>
                             </template>
                         </template>
-                    </div>
+                    </template>
                 </div>
-            </section>
-            <div class="slds-backdrop slds-backdrop_open"></div>
-        </template>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
 </template>

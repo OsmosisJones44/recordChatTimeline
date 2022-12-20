@@ -13,3 +13,6 @@
     padding-bottom: 6px;
     padding-top: 6px;
 }
+.moveLeft{
+    transform: translateX(-.5rem);
+}
