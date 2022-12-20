@@ -30,25 +30,6 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
 
 
     connectedCallback() {
-        console.log(this.userId);
-        console.log(this.timelinePost.Id);
-        getUserMsgStatus({
-            userId: this.userId,
-            msgId: this.timelinePost.Id
-        })
-            .then(result => {
-                console.log(result);
-                this.showLikes = true;
-                this.userMsgStatus = result;
-                this.liked = this.userMsgStatus.Liked__c;
-                this.error = undefined;
-                console.log(this.userMsgStatus);
-            })
-            .catch(error => {
-                this.userMsgStatus = undefined;
-                this.error = error;
-                console.log(error);
-            })
         getCurrentUserPhoto({
             userId: this.timelinePost.OwnerId
         })
@@ -58,6 +39,21 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
             })
             .catch(error => {
                 this.smallPhotoUrl = undefined;
+                this.error = error;
+                console.log(error);
+            })
+        getUserMsgStatus({
+            userId: this.userId,
+            msgId: this.timelinePost.Id
+        })
+            .then(result => {
+                this.showLikes = true;
+                this.userMsgStatus = result;
+                this.liked = this.userMsgStatus.Liked__c;
+                this.error = undefined;
+            })
+            .catch(error => {
+                this.userMsgStatus = undefined;
                 this.error = error;
                 console.log(error);
             })
@@ -76,7 +72,8 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
             }
         })
     }
-    handleLiked() {
+    handleLiked(event) {
+        event.preventDefault();
         this.liked = !this.liked;
         const fields = {};
         fields[ID_FIELD.fieldApiName] = this.userMsgStatus.Id;
@@ -89,7 +86,7 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'Success',
-                        message: 'Message Liked',
+                        message: 'Message Updated',
                         variant: 'success'
                     })
                 );
@@ -107,11 +104,11 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
             });
     }
     handleHover(){
-        const eventElement = this.template.querySelector('div[data-id="hoverSelect"]');
+        const eventElement = this.template.querySelector('lightning-formatted-date-time[data-id="hoverSelect"]');
         eventElement.classList.remove('slds-hide');
     }
     handleNoHover(){
-        const eventElement = this.template.querySelector('div[data-id="hoverSelect"]');
+        const eventElement = this.template.querySelector('lightning-formatted-date-time[data-id="hoverSelect"]');
         eventElement.classList.add('slds-hide');
     }
     openSeenBy(event){

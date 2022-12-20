@@ -6,14 +6,26 @@
     background-color: rgba(226, 226, 226, 0.89);
     border-bottom: 2px solid #cccccc;
 }
+.rightClass:hover{
+    text-align: left;
+    background-color: rgb(209, 209, 209);
+    border-bottom: 2px solid #cccccc;
+}
 .leftClass{
     text-align: left;
     background-color: white;
     border-bottom: 2px solid #cccccc;
 }
+.leftClass:hover{
+    text-align: left;
+    background-color: rgb(243, 243, 243);
+    border-bottom: 2px solid #ededed;
+}
 .timeClass{
-    opacity: .4;
     font-size: smaller;
+}
+.opacityClass{
+    opacity: .4;
 }
 .animateFade{
     animation: fadeIn .25s;

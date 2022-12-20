@@ -1,6 +1,6 @@
 <template>
     <template if:true={timelinePost}>
-        <div class={timelinePost.timelineClassName__c} onmouseover={handleHover} onmouseout={handleNoHover}>
+        <div class={timelinePost.timelineClassName__c} onclick={handleSelect} onmouseover={handleHover} onmouseout={handleNoHover}>
             <lightning-tile label={timelinePost.OwnerName__c} type="media" href={timelinePost.Owner_URL__c}>
                 <div slot="media">
                     <lightning-avatar slot="media" src={smallPhotoUrl} fallback-icon-name="standard:user">
@@ -50,9 +50,9 @@
                             label="Close Ticket" icon-position="right" size="small"></lightning-button>
                     </div>
                 </template>
-                <div class="slds-grid timeClass slds-hide animateFade" data-id="hoverSelect">
+                <div class="slds-grid timeClass">
                     <div class="slds-col slds-size_9-of-12">
-                        <lightning-formatted-date-time value={timelinePost.CreatedDate} year="numeric" month="short"
+                        <lightning-formatted-date-time data-id="hoverSelect" class="animateFade slds-hide opacityClass" value={timelinePost.CreatedDate} year="numeric" month="short"
                             day="2-digit" weekday="long" hour="2-digit" minute="2-digit" hour12="true">
                         </lightning-formatted-date-time>
                     </div>
@@ -65,7 +65,7 @@
                     </div>
                     <div class="slds-col slds-size_2-of-12 slds-text-align_right slds-p-right_xxx-small slds-truncate"
                         data-id="seenSelect">
-                        <p><a onclick={openSeenBy}>Seen By / Likes</a></p>
+                        <p class="opacityClass slds-truncate"><a onclick={openSeenBy}>Seen By / Likes</a></p>
                     </div>
                 </div>
             </lightning-tile>
