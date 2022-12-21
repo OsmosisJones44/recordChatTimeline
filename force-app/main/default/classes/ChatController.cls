@@ -70,7 +70,7 @@ public with sharing class ChatController {
                     ticketMsgs.add(a.Ticket_Message__c);
                 }
             }
-            List<Ticket_Message__c> recentMsgs = [SELECT Id, SeenBy__c, CreatedDate, DocumentId__c,Record_Id_Form__c, Parent_Record_Id__c, Name, Message__c, OwnerId, OwnerName__c,Parent_Ticket__c,Owner_URL__c,timelineClassName__c 
+            List<Ticket_Message__c> recentMsgs = [SELECT Id, SeenBy__c, CreatedDate, DocumentId__c,Record_Id_Form__c, Parent_Record_Id__c, Name, Message__c, OwnerId, OwnerName__c,Parent_Ticket__c,Owner_URL__c,timelineClassName__c, Preview_Name__c
                 FROM Ticket_Message__c WHERE Record_Id_Form__c != '' AND Id IN :ticketMsgs ORDER BY CreatedDate DESC];
             return recentMsgs;
         } catch (Exception e) {
