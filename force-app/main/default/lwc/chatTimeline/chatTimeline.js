@@ -273,7 +273,7 @@ export default class ChatTimeline extends LightningElement {
                             variant: 'success',
                         }),
                     );
-                    refreshApex(this.timelinePosts)
+                    refreshApex(this.timelinePostKey)
                         .then(() => {
                             this.disableButton = false;
                             this.messageValue = '';

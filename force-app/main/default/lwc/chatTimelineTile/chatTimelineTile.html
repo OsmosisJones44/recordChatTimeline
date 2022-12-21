@@ -2,42 +2,23 @@
     <template if:true={timelinePost}>
         <div class={timelinePost.timelineClassName__c} onclick={handleSelect} onmouseover={handleHover} onmouseout={handleNoHover}>
             <lightning-tile label={timelinePost.OwnerName__c} type="media" href={timelinePost.Owner_URL__c}>
+                <lightning-button-icon style="float:right;" onclick={editMessage} icon-name="utility:edit"></lightning-button-icon>
                 <div slot="media">
                     <lightning-avatar slot="media" src={smallPhotoUrl} fallback-icon-name="standard:user">
                     </lightning-avatar>
                 </div>
-                <lightning-formatted-rich-text value={timelinePost.Message__c}>
-                </lightning-formatted-rich-text><br>
-                <template if:true={followUpTask}>
-                    <div class="slds-grid">
-                        <div class="slds-col slds-size_1-of-1 animateFade">
-                            <lightning-card title="Follow Up Task" class="slds-card_boundary">
-                                <div class="slds-grid slds-wrap">
-                                    <div class="slds-col slds-size_1-of-1">
-                                        <!-- subject -->
-                                        <p class="slds-truncate">{taskSubject}</p>
-                                    </div>
-                                    <div class="slds-col slds-size_1-of-3">
-                                    <!-- Status -->
-                                    {taskStatus}
-                                    </div>
-                                    <div class="slds-col slds-size_1-of-3">
-                                    <!-- DueDate -->
-                                    <lightning-formatted-date-time value={taskDate} ></lightning-formatted-date-time>
-                                    </div>
-                                    <div class="slds-col slds-size_1-of-3">
-                                        <!-- assigned to -->
-                                        <p class="slds-truncate">{taskOwner}</p>
-                                    </div>
-                                    <div class="slds-col slds-size_1-of-1">
-                                    <!-- comments -->
-                                    <p class="lineClamper">{taskComments}</p>
-                                    </div>
-                                </div>
-                            </lightning-card>
-                        </div>
-                    </div>
+                <template if:false={editMsg}>
+                    <lightning-formatted-rich-text value={timelinePost.Message__c}>
+                    </lightning-formatted-rich-text>
                 </template>
+                <template if:true={editMsg}>
+                    <lightning-record-edit-form record-id={timelinePost.Id} object-api-name="Ticket_Message__c">
+                        <lightning-input-field field-name="Message__c">
+                        </lightning-input-field>
+                        <lightning-button type="submit" label="Save"></lightning-button>
+                    </lightning-record-edit-form>
+                </template>
+                <br>
                 <template if:true={timelinePost.DocumentId__c}>
                     <div class="slds-p-vertical_x-small slds-p-left_x-small animateFade">
                         <lightning-button icon-name="utility:preview" variant="Neutral" onclick={openPreview}

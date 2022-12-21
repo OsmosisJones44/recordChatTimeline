@@ -27,6 +27,7 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
     liked;
     userMsgStatus;
     showLikes = false;
+    editMsg;
 
 
     connectedCallback() {
@@ -58,6 +59,7 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
                 console.log(error);
             })
         this.seenBy = this.timelinePost.SeenBy__c;
+        this.editMsg = false;
         this.setValues();
     }
     openPreview(){
@@ -118,6 +120,12 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
             detail: this.timelinePost.Id
         });
         this.dispatchEvent(selectEvent);  
+    }
+    editMessage() {
+        this.editMsg = true;
+    }
+    cancelEdit() {
+        this.editMsg = false;
     }
     closeTicket(event){
         event.preventDefault();
