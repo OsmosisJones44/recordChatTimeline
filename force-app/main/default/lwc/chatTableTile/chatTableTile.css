@@ -1,16 +1,23 @@
-.messageClass{
-    padding:none;
-}
 .rightClass{
-    text-align: left;
     background-color: rgba(241, 241, 241, 0.89);
     border-bottom: 2px solid #cccccc;
     cursor: pointer;
 }
 .rightClass:hover{
-    text-align: left;
     background-color: rgb(228, 228, 228);
-    border-bottom: 2px solid #cccccc;
+    
+}
+.messageClass{
+    text-align: left;
+    opacity: .75;
+}
+.messageClass:hover{
+    opacity: 1;
+}
+.previewClass{
+    opacity: 1;
+    font-size: .9rem;
+    font-weight: bold;
 }
 .timeClass{
     font-size: smaller;

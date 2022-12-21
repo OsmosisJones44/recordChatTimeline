@@ -62,7 +62,7 @@ export default class ChatTableContainer extends LightningElement {
         console.log( 'Search String is ' + searchKey );
         if ( searchKey ) {
             this.recentMsgs = this.lastSavedData;
-            console.log( 'Tickets Records are ' + JSON.stringify( this.recentMsgs ) );
+            // console.log( 'Tickets Records are ' + JSON.stringify( this.recentMsgs ) );
             if ( this.recentMsgs ) {
                 let recs = [];
                 for ( let rec of this.recentMsgs ) {
@@ -80,7 +80,7 @@ export default class ChatTableContainer extends LightningElement {
                         }
                     }
                 }
-                console.log( 'Matched Accounts are ' + JSON.stringify( recs ) );
+                // console.log( 'Matched Accounts are ' + JSON.stringify( recs ) );
                 this.recentMsgs = recs;
              }
         }  else {

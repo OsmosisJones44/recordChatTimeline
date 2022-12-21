@@ -1,28 +1,34 @@
 <template>
     <template if:true={timelinePost}>
-        <div class="rightClass slds-p-around_xx-small" onclick={handleSelect}>
-            <lightning-tile label={timelinePost.OwnerName__c} type="media" href={timelinePost.Owner_URL__c}>
-                <div slot="media">
-                    <lightning-avatar slot="media" src={smallPhotoUrl} fallback-icon-name="standard:user">
-                    </lightning-avatar>
-                </div>
-                <lightning-formatted-rich-text value={timelinePost.Message__c}>
-                </lightning-formatted-rich-text><br>
-                <template if:true={timelinePost.DocumentId__c}>
-                    <div class="slds-p-vertical_x-small slds-p-left_x-small animateFade">
-                        <lightning-button icon-name="utility:preview" variant="Neutral" onclick={openPreview}
-                            label="Preview File" icon-position="right" size="small"></lightning-button>
+        <div class="rightClass" onclick={handleSelect}>
+            <p class="previewClass">{timelinePost.Preview_Name__c}</p>
+            <div class="messageClass slds-p-around_xx-small">
+                <lightning-tile label={timelinePost.OwnerName__c} type="media" href={timelinePost.Owner_URL__c}>
+                    <div slot="media">
+                        <lightning-avatar slot="media" src={smallPhotoUrl} fallback-icon-name="standard:user">
+                        </lightning-avatar>
                     </div>
-                </template>
-                <div class="slds-grid timeClass">
-                    <div class="slds-col slds-size_9-of-12">
-                        <lightning-formatted-date-time class="animateFade slds-hide opacityClass"
-                            value={timelinePost.CreatedDate} year="numeric" month="short" day="2-digit" weekday="long"
-                            hour="2-digit" minute="2-digit" hour12="true">
-                        </lightning-formatted-date-time>
+                    <div class="slds-line-clamp_x-small">
+                        <lightning-formatted-rich-text value={timelinePost.Message__c}>
+                        </lightning-formatted-rich-text>
                     </div>
-                </div>
-            </lightning-tile>
+                    <br>
+                    <template if:true={timelinePost.DocumentId__c}>
+                        <div class="slds-p-vertical_x-small slds-p-left_x-small animateFade">
+                            <lightning-button icon-name="utility:preview" variant="Neutral" onclick={openPreview}
+                                label="Preview File" icon-position="right" size="small"></lightning-button>
+                        </div>
+                    </template>
+                    <div class="slds-grid timeClass">
+                        <div class="slds-col slds-size_9-of-12">
+                            <lightning-formatted-date-time class="animateFade slds-hide opacityClass"
+                                value={timelinePost.CreatedDate} year="numeric" month="short" day="2-digit" weekday="long"
+                                hour="2-digit" minute="2-digit" hour12="true">
+                            </lightning-formatted-date-time>
+                        </div>
+                    </div>
+                </lightning-tile>
+            </div>
         </div>
     </template>
 </template>
