@@ -1,6 +1,7 @@
 import { LightningElement, api, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { updateRecord } from 'lightning/uiRecordApi';
+import { refreshApex } from '@salesforce/apex';
 import getCurrentUserPhoto from '@salesforce/apex/BirthdayController.getCurrentUserPhoto';
 import getCurUser from '@salesforce/apex/BirthdayController.getCurUser';
 import createReadStatus from '@salesforce/apex/BirthdayController.createReadStatus';
@@ -15,7 +16,7 @@ import USER_ID from '@salesforce/user/Id';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class ChatTableTile extends NavigationMixin(LightningElement) {
-    @api timelinePost;
+    @api msgStatus;
     @api curName;
     @api curUser;
     userId = USER_ID;
@@ -28,38 +29,84 @@ export default class ChatTableTile extends NavigationMixin(LightningElement) {
     userMsgStatus;
     showLikes = false;
 
+    @wire(getCurrentUserPhoto, {
+        userId: '$msgStatus.Ticket_Message__r.OwnerId'
+    })
+    ticketSetup(result) {
+        this.smallPhotoUrlKey = result;
+        const { data, error } = result;
+        if (data) {
+            this.smallPhotoUrl = JSON.parse(JSON.stringify(data));
+            this.error = undefined;
+        } else if (error) {
+            this.smallPhotoUrl = undefined;
+            this.error = error;
+            console.error(error);
+        } else {
+            this.error = undefined;
+            this.smallPhotoUrl = undefined;
+        }
+        this.lastSavedData = this.smallPhotoUrl;
+        this.isLoading = false;
+    };   
+    @wire(getUserMsgStatus, {
+        userId: '$ticketUser.Id',
+        msgId: '$timelinePostId'
+    })
+    statusSetup(result) {
+        this.msgStatusKey = result;
+        const { data, error } = result;
+        if (data) {
+            this.userMsgStatus = JSON.parse(JSON.stringify(data));
+            this.liked = this.userMsgStatus.Liked__c;
+            this.error = undefined;
+        } else if (error) {
+            this.userMsgStatus = undefined;
+            this.error = error;
+            console.error(error);
+        } else {
+            this.error = undefined;
+            this.userMsgStatus = undefined;
+        }
+        this.lastSavedData = this.userMsgStatus;
+        this.isLoading = false;
+    };
 
     connectedCallback() {
-        getCurrentUserPhoto({
-            userId: this.timelinePost.OwnerId
-        })
-            .then(result => {
-                this.smallPhotoUrl = result;
-                this.error = undefined;
-            })
-            .catch(error => {
-                this.smallPhotoUrl = undefined;
-                this.error = error;
-                console.log(error);
-            })
-        getUserMsgStatus({
-            userId: this.userId,
-            msgId: this.timelinePost.Id
-        })
-            .then(result => {
-                this.showLikes = true;
-                this.userMsgStatus = result;
-                this.liked = this.userMsgStatus.Liked__c;
-                this.error = undefined;
-                console.log(this.userMsgStatus);
-            })
-            .catch(error => {
-                this.userMsgStatus = undefined;
-                this.error = error;
-                console.log(error);
-            })
-        this.seenBy = this.timelinePost.SeenBy__c;
+        this.showLikes = true;
+        // getCurrentUserPhoto({
+        //     userId: this.msgStatus.Ticket_Message__r.OwnerId
+        // })
+        //     .then(result => {
+        //         this.smallPhotoUrl = result;
+        //         this.error = undefined;
+        //     })
+        //     .catch(error => {
+        //         this.smallPhotoUrl = undefined;
+        //         this.error = error;
+        //         console.log(error);
+        //     })
+        // getUserMsgStatus({
+        //     userId: this.userId,
+        //     msgId: this.msgStatus.Ticket_Message__r.Id
+        // })
+        //     .then(result => {
+        //         this.userMsgStatus = result;
+        //         this.liked = this.userMsgStatus.Liked__c;
+        //         this.error = undefined;
+        //         console.log(this.userMsgStatus);
+        //     })
+        //     .catch(error => {
+        //         this.userMsgStatus = undefined;
+        //         this.error = error;
+        //         console.log(error);
+        //     })
+        this.seenBy = this.msgStatus.Ticket_Message__r.SeenBy__c;
         this.setValues();
+    }
+    renderedCallback(){
+        refreshApex(this.smallPhotoUrlKey);
+        refreshApex(this.msgStatusKey);
     }
     openPreview(){
         //let elementId = event.currentTarget.dataset.id;
@@ -69,7 +116,7 @@ export default class ChatTableTile extends NavigationMixin(LightningElement) {
                 pageName: 'filePreview'
             },
             state : {
-                selectedRecordId: this.timelinePost.DocumentId__c
+                selectedRecordId: this.msgStatus.Ticket_Message__r.DocumentId__c
             }
         })
     }
@@ -118,8 +165,8 @@ export default class ChatTableTile extends NavigationMixin(LightningElement) {
         const selectEvent = new CustomEvent('timeline', {
             bubbles: true,
             detail: {
-                msgId: this.timelinePost.Id,
-                id: this.timelinePost.Record_Id_Form__c,
+                msgId: this.msgStatus.Ticket_Message__r.Id,
+                id: this.msgStatus.Ticket_Message__r.Record_Id_Form__c,
             }
         });
         this.dispatchEvent(selectEvent);  
@@ -128,7 +175,7 @@ export default class ChatTableTile extends NavigationMixin(LightningElement) {
         event.preventDefault();
         event.stopPropagation();
         const selectEvent = new CustomEvent('seen', {
-            detail: this.timelinePost.Id
+            detail: this.msgStatus.Ticket_Message__r.Id
         });
         this.dispatchEvent(selectEvent);  
     }
@@ -137,8 +184,8 @@ export default class ChatTableTile extends NavigationMixin(LightningElement) {
         event.stopPropagation();
         const selectEvent = new CustomEvent('close', {
             detail: {
-                Id: this.timelinePost.Id,
-                parentId: this.timelinePost.Parent_Ticket__c
+                Id: this.msgStatus.Ticket_Message__r.Id,
+                parentId: this.msgStatus.Ticket_Message__r.Parent_Ticket__c
             }
         });
         this.dispatchEvent(selectEvent);  
@@ -152,7 +199,7 @@ export default class ChatTableTile extends NavigationMixin(LightningElement) {
             this.curName = result.Name;
             this.error = undefined;
             createReadStatus({
-                ticketMessageId: this.timelinePost.Id,
+                ticketMessageId: this.msgStatus.Ticket_Message__r.Id,
                 userId: this.userId
             })
             .then(result => {

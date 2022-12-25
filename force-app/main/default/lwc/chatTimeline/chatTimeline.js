@@ -37,7 +37,7 @@ export default class ChatTimeline extends LightningElement {
     @api previewMe;
     @api defaultNbFileDisplayed;
     @api limitRows;  
-    @api title;
+    @api title = 'Timeline';
     timelinePostKey;
     timelinePosts;
     mainArea;
@@ -217,8 +217,10 @@ export default class ChatTimeline extends LightningElement {
     @api
     refreshTimelinePosts(rowId) {
         this.recordId = rowId;
-        console.log('logMe');
-        refreshApex(this.timelinePosts);
+        refreshApex(this.timelinePostKey);
+    }
+    refreshPosts() {
+        return refreshApex(this.timelinePostKey);
     }
     handleMessageChange(event) {
         this.messageValue = event.target.value;
@@ -347,7 +349,7 @@ export default class ChatTimeline extends LightningElement {
                             variant: 'success',
                         }),
                     );
-                    refreshApex(this.timelinePosts)
+                    refreshApex(this.timelinePostKey)
                     .then(() => {
                         this.messageValue = '';
                         this.scrollToBottom();                
@@ -405,7 +407,7 @@ export default class ChatTimeline extends LightningElement {
                             variant: 'success',
                         }),
                     );
-                    refreshApex(this.timelinePosts)
+                    refreshApex(this.timelinePostKey)
                     .then(() => {
                         this.messageValue = '';
                         this.scrollToBottom();                
@@ -526,16 +528,11 @@ export default class ChatTimeline extends LightningElement {
         this.modalHeader = 'Help Desk Notice';
     }
     openSeenModal(event) {
-        console.log(JSON.stringify(event.detail));
-        refreshApex(this.ticketSeenUsers)
-        .then(result =>{
-            this.resultTemp = result;
-            //console.log(JSON.stringify(this.ticketSeenUsers));
-            this.modalHeader = 'Message Seen By...';
-            this.ticketMessageId = event.detail;
-            this.isModalOpen = true;
-            this.seenModal = true;
-        });
+        this.ticketMessageId = event.detail.id;
+        this.isModalOpen = true;
+        this.seenModal = true;
+        this.modalHeader = 'Message Seen By...';
+        return refreshApex(this.ticketSeenUsers);
     }
     closeModal() {
         this.isModalOpen = false;
@@ -677,7 +674,7 @@ export default class ChatTimeline extends LightningElement {
                             this.openIdeaTickets();
                             break;
                         case 'Timeline':
-                            this.refreshTimelinePosts();
+                            this.refreshPosts();
                             this.scrollToBottom();
                     }
                 }

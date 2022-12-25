@@ -3,13 +3,13 @@
         <div class="slds-grid slds-wrap slds-border_top slds-border_bottom slds-p-horizontal_xx-small gridClass">
             <div class="slds-col slds-size_1-of-3 slds-border_right leftGridClass">
                 <div class="slds-grid slds-wrap">
-                    <div class="slds-col slds-size_1-of-1 slds-p-around_xx-small">
+                    <div class="slds-col slds-size_1-of-1 slds-p-around_xx-small slds-border_bottom">
                         <lightning-input type="search" label="Search Timeline" onchange={handleSearch}>
                         </lightning-input>
                     </div>
                     <div class="slds-col slds-size_1-of-1">
                         <template if:true={recentMsgs} for:each={recentMsgs} for:item="post" for:index="index">
-                            <c-chat-table-tile timeline-post={post} key={post.Id} ontimeline={handleTimelineView}></c-chat-table-tile>
+                            <c-chat-table-tile msg-status={post} key={post.Id} ontimeline={handleTimelineView}></c-chat-table-tile>
                         </template>
                     </div>
                 </div>

@@ -51,6 +51,10 @@ export default class ChatTableContainer extends LightningElement {
         this.isLoading = false;
     }
 
+    renderedCallback() {
+        console.log(this.recentMsgs);
+    }
+
     handleTimelineView(event) {
         this.showTimeline = true;
         this.recordId = event.detail.id;

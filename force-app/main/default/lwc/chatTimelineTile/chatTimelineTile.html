@@ -1,8 +1,11 @@
 <template>
     <template if:true={timelinePost}>
-        <div class={timelinePost.timelineClassName__c} onclick={handleSelect} onmouseover={handleHover} onmouseout={handleNoHover}>
+        <div class={timelinePost.timelineClassName__c} onclick={handleSelect} onmouseover={handleHover}
+            onmouseout={handleNoHover}>
             <lightning-tile label={timelinePost.OwnerName__c} type="media" href={timelinePost.Owner_URL__c}>
-                <lightning-button-icon style="float:right;" onclick={editMessage} icon-name="utility:edit"></lightning-button-icon>
+                <template if:true={isLoading}>
+                    <lightning-spinner alternative-text="content loading"></lightning-spinner>
+                </template>
                 <div slot="media">
                     <lightning-avatar slot="media" src={smallPhotoUrl} fallback-icon-name="standard:user">
                     </lightning-avatar>
@@ -12,10 +15,16 @@
                     </lightning-formatted-rich-text>
                 </template>
                 <template if:true={editMsg}>
-                    <lightning-record-edit-form record-id={timelinePost.Id} object-api-name="Ticket_Message__c">
-                        <lightning-input-field field-name="Message__c">
+                    <lightning-record-edit-form record-id={timelinePost.Id} object-api-name="Ticket_Message__c"
+                        onsuccess={handleSuccess}>
+                        <lightning-input-field field-name="Message__c" onchange={handleMessageChange}>
                         </lightning-input-field>
-                        <lightning-button type="submit" label="Save"></lightning-button>
+                        <div class="slds-align_absolute-center">
+                            <lightning-button-group>
+                                <lightning-button type="submit" label="Cancel" onclick={cancelEdit}></lightning-button>
+                                <lightning-button type="submit" label="Save" variant="brand"></lightning-button>
+                            </lightning-button-group>
+                        </div>
                     </lightning-record-edit-form>
                 </template>
                 <br>
@@ -32,21 +41,29 @@
                     </div>
                 </template>
                 <div class="slds-grid timeClass">
-                    <div class="slds-col slds-size_9-of-12">
-                        <lightning-formatted-date-time data-id="hoverSelect" class="animateFade slds-hide opacityClass" value={timelinePost.CreatedDate} year="numeric" month="short"
-                            day="2-digit" weekday="long" hour="2-digit" minute="2-digit" hour12="true">
+                    <div class="slds-col slds-size_8-of-12">
+                        <lightning-formatted-date-time data-id="hoverSelect" class="animateFade slds-hide opacityClass"
+                            value={timelinePost.CreatedDate} year="numeric" month="short" day="2-digit" weekday="long"
+                            hour="2-digit" minute="2-digit" hour12="true">
                         </lightning-formatted-date-time>
                     </div>
-                    <div class="slds-col slds-size_1-of-12">
-                        <template if:true={showLikes}>
-                            <lightning-button-icon-stateful icon-name="utility:like" size="x-small" selected={liked} alternative-text="Like"
-                                onclick={handleLiked}>
-                            </lightning-button-icon-stateful>
-                        </template>
-                    </div>
-                    <div class="slds-col slds-size_2-of-12 slds-text-align_right slds-p-right_xxx-small slds-truncate"
-                        data-id="seenSelect">
-                        <p class="opacityClass slds-truncate"><a onclick={openSeenBy}>Seen By / Likes</a></p>
+                    <div class="slds-col slds-size_4-of-12 slds-text-align_right slds-p-right_xxx-small slds-truncate"
+                    data-id="seenSelect">
+                    <div class="slds-grid">
+                        <div class="slds-col">
+                            <template if:true={showLikes}>
+                                <lightning-button-icon-stateful variant="outline" icon-name="utility:like" size="x-small" selected={liked}
+                                    alternative-text="Like" onclick={handleLiked}>
+                                </lightning-button-icon-stateful>
+                            </template>
+                            </div>
+                            <div class="slds-col">
+                                <lightning-button-icon variant="container" onclick={editMessage} size="x-small"
+                                    icon-name="utility:edit"></lightning-button-icon>
+                            </div>
+                            <div class="slds-col opacityClass slds-truncate"><a onclick={openSeenBy}>Seen By / Likes</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </lightning-tile>

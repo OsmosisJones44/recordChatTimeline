@@ -28,7 +28,42 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
     userMsgStatus;
     showLikes = false;
     editMsg;
+    messageValue;
+    isLoading;
+    formats = [
+        'bold',
+        'italic',
+        'underline',
+        'strike',
+        'list',
+        'link',
+        'image',
+        'table',
+        'header',
+    ];
 
+    @wire(getUserMsgStatus, {
+        userId: '$ticketUser.Id',
+        msgId: '$timelinePostId'
+    })
+    ticketSetup(result) {
+        this.msgStatusKey = result;
+        const { data, error } = result;
+        if (data) {
+            this.userMsgStatus = JSON.parse(JSON.stringify(data));
+            this.liked = this.userMsgStatus.Liked__c;
+            this.error = undefined;
+        } else if (error) {
+            this.userMsgStatus = undefined;
+            this.error = error;
+            console.error(error);
+        } else {
+            this.error = undefined;
+            this.userMsgStatus = undefined;
+        }
+        this.lastSavedData = this.userMsgStatus;
+        this.isLoading = false;
+    };    
 
     connectedCallback() {
         getCurrentUserPhoto({
@@ -80,11 +115,11 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
         const fields = {};
         fields[ID_FIELD.fieldApiName] = this.userMsgStatus.Id;
         fields[LIKED_FIELD.fieldApiName] = this.liked;
-
+        
         const recordInput = { fields };
-
+        
         updateRecord(recordInput)
-            .then(() => {
+        .then(() => {
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'Success',
@@ -92,8 +127,6 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
                         variant: 'success'
                     })
                 );
-                // Display fresh data in the form
-                return refreshApex(this.contact);
             })
             .catch(error => {
                 this.dispatchEvent(
@@ -117,12 +150,33 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
         event.preventDefault();
         event.stopPropagation();
         const selectEvent = new CustomEvent('seen', {
-            detail: this.timelinePost.Id
+            detail: {
+                id: this.timelinePost.Id
+            }
         });
         this.dispatchEvent(selectEvent);  
     }
     editMessage() {
         this.editMsg = true;
+    }
+    handleMessageChange(event) {
+        this.messageValue = event.target.value;
+    }    
+    handleSubmit() {
+        this.isLoading = true;
+    }
+    handleSuccess(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.isLoading = false;
+        const selectEvent = new CustomEvent('refresh', {
+            detail: {
+                Id: this.timelinePost.Id,
+                parentId: this.timelinePost.Parent_Ticket__c
+            }
+        });
+        this.dispatchEvent(selectEvent);  
+        this.cancelEdit();
     }
     cancelEdit() {
         this.editMsg = false;
