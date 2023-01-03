@@ -4,7 +4,7 @@ import { updateRecord } from 'lightning/uiRecordApi';
 import { refreshApex } from '@salesforce/apex';
 import getCurrentUserPhoto from '@salesforce/apex/BirthdayController.getCurrentUserPhoto';
 import getCurUser from '@salesforce/apex/BirthdayController.getCurUser';
-import createReadStatus from '@salesforce/apex/BirthdayController.createReadStatus';
+import createReadStatus from '@salesforce/apex/ChatController.createReadStatus';
 import getUserMsgStatus from '@salesforce/apex/ChatController.getUserMsgStatus';
 // import MESSAGE_OBJECT from '@salesforce/schema/Help_Desk_Message_Status__c';
 // import TICKET_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Ticket_Message__c';
@@ -15,7 +15,7 @@ import LIKED_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Liked__c
 import USER_ID from '@salesforce/user/Id';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
-export default class ChatTableTile extends NavigationMixin(LightningElement) {
+export default class NotificationListTile extends LightningElement {
     @api msgStatus;
     @api curName;
     @api curUser;
@@ -216,5 +216,5 @@ export default class ChatTableTile extends NavigationMixin(LightningElement) {
             this.error = error;
             this.curUser = undefined;
         });
-    }
+    }    
 }

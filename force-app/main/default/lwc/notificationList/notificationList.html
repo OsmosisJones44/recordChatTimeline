@@ -1,0 +1,56 @@
+<template>
+    <lightning-card title="Timeline Messages" icon-name="standard:past_chat">
+        <div slot="actions">
+            <template if:true={mainArea}>
+                <lightning-button-icon icon-name="utility:search" onclick={toggleSearch} alternative-text="Toggle Search"></lightning-button-icon>
+            </template>
+            <template if:false={mainArea}>
+                <lightning-button-icon icon-name="utility:back" onclick={goBack}></lightning-button-icon>
+            </template>
+        </div>
+        <template if:true={mainArea}>
+            <template if:true={showSearch}>
+                <lightning-input type="search" label="Search Timeline" onchange={handleSearch}>
+                </lightning-input>
+            </template>
+            <template if:true={showAll}>
+                <div class="slds-grid slds-wrap leftGridClass">
+                    <div class="slds-col slds-size_1-of-1">
+                        <template if:true={recentMsgs}>
+                            <template for:each={recentMsgs} for:item="post" for:index="index">
+                                <c-notification-list-tile msg-status={post} key={post.Id}
+                                    ontimeline={openTimelineView}></c-notification-list-tile>
+                            </template>
+                        </template>
+                    </div>
+                </div>
+            </template>
+            <template if:false={showAll}>
+                <div class="slds-grid slds-wrap leftGridClass">
+                    <div class="slds-col slds-size_1-of-1">
+                        <template if:true={recentOpenMsgs}>
+                            <template for:each={recentOpenMsgs} for:item="openPost">
+                                <c-notification-list-tile msg-status={openPost} key={openPost.Id} ontimeline={openTimelineView}></c-notification-list-tile>
+                            </template>
+                        </template>
+                    </div>
+                </div>
+            </template>
+        </template>
+        <template if:false={mainArea}>
+            <c-chat-timeline record-id={recordId}></c-chat-timeline>
+        </template>
+        <div slot="footer">
+            <template if:true={mainArea}>
+                <template if:false={showAll}>
+                    <lightning-button label="Show All" icon-name="utility:preview" icon-position="right" onclick={showAllMsgs}
+                        variant="outline"></lightning-button>
+                </template>
+                <template if:true={showAll}>
+                    <lightning-button label="Open Only" icon-name="utility:preview" icon-position="right" onclick={showOpenMsgs}
+                        variant="outline"></lightning-button>
+                </template>
+            </template>
+        </div>
+    </lightning-card>
+</template>

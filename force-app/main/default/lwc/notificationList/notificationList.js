@@ -1,5 +1,6 @@
-import { LightningElement, wire } from 'lwc';
+import { LightningElement, wire, api } from 'lwc';
 import findRecentTicketMessages from '@salesforce/apex/ChatController.findRecentTicketMessages';
+import findRecentOpenTicketMessages from '@salesforce/apex/ChatController.findRecentOpenTicketMessages';
 import USER_ID from '@salesforce/user/Id';
 import OFFICE_SPACE from '@salesforce/resourceUrl/Office_Space';
 import { refreshApex } from '@salesforce/apex';
@@ -26,7 +27,7 @@ const columns = [
     }
 ];
 
-export default class ChatTableContainer extends LightningElement {
+export default class NotificationList extends LightningElement {
     columns = columns;
     userId = USER_ID;
     officeSpacePic = OFFICE_SPACE;
@@ -34,8 +35,16 @@ export default class ChatTableContainer extends LightningElement {
     trueValue = true;
     isLoading = true;
     lastSavedData;
+    lastSavedOpenData;
     recentMsgs;
     recentMsgKey;
+    recentOpenMsgs;
+    recentOpenMsgKey;
+    showAll;
+    recordId;
+    mainArea;
+    showSearch;
+    error;
 
 
     // @wire(findRecentTicketMessages, { userId: '$userId' }) recentMsgs;
@@ -46,7 +55,6 @@ export default class ChatTableContainer extends LightningElement {
         if (data) {
             this.recentMsgs = JSON.parse(JSON.stringify(data));
             this.error = undefined;
-            this.noData = false
         } else if (error) {
             this.recentMsgs = undefined;
             this.error = error;
@@ -58,10 +66,51 @@ export default class ChatTableContainer extends LightningElement {
         this.lastSavedData = this.recentMsgs;
         this.isLoading = false;
     }
+    @wire(findRecentOpenTicketMessages, { userId: '$userId' })
+    notificationSetup(result) {
+        this.recentOpenMsgKey = result;
+        const { data, error } = result;
+        if (data) {
+            this.recentOpenMsgs = JSON.parse(JSON.stringify(data));
+            this.error = undefined;
+        } else if (error) {
+            this.recentOpenMsgs = undefined;
+            this.error = error;
+            console.error(error);
+        } else {
+            this.error = undefined;
+            this.recentOpenMsgs = undefined;
+        }
+        this.lastSavedOpenData = this.recentOpenMsgs;
+        this.isLoading = false;
+    }
 
     connectedCallback() {
+        this.showAll = false;
+        this.mainArea = true;
         this.registerErrorListener();
         this.handleSubscribe();
+    }
+
+    showAllMsgs() {
+        this.showAll = true;
+    }
+    showOpenMsgs() {
+        this.showAll = false;
+    }
+    toggleSearch() {
+        this.showSearch = !this.showSearch;
+    }
+
+    openTimelineView(event) {
+        this.mainArea = false;
+        this.recordId = event.detail.id;
+    }
+
+    goBack() {
+        refreshApex(this.recentMsgKey);
+        refreshApex(this.recentOpenMsgKey);
+        this.connectedCallback();
     }
 
     handleTimelineView(event) {
@@ -75,7 +124,7 @@ export default class ChatTableContainer extends LightningElement {
         console.log( 'Search String is ' + searchKey );
         if ( searchKey ) {
             this.recentMsgs = this.lastSavedData;
-            console.log( 'Tickets Records are ' + JSON.stringify( this.recentMsgs ) );
+            // console.log( 'Tickets Records are ' + JSON.stringify( this.recentMsgs ) );
             if ( this.recentMsgs ) {
                 let recs = [];
                 for ( let rec of this.recentMsgs ) {
@@ -93,18 +142,49 @@ export default class ChatTableContainer extends LightningElement {
                         }
                     }
                 }
-                console.log( 'Matched Accounts are ' + JSON.stringify( recs ) );
+                // console.log( 'Matched Accounts are ' + JSON.stringify( recs ) );
                 this.recentMsgs = recs;
              }
         }  else {
             this.recentMsgs = this.lastSavedData;
         }        
-    }     
+    }  
+    handleOpenSearch(event) {
+        const searchKey = event.target.value.toLowerCase();
+        console.log( 'Search String is ' + searchKey );
+        if ( searchKey ) {
+            this.recentOpenMsgs = this.lastSavedOpenData;
+            // console.log( 'Tickets Records are ' + JSON.stringify( this.recentMsgs ) );
+            if ( this.recentOpenMsgs ) {
+                let recs = [];
+                for ( let rec of this.recentOpenMsgs ) {
+                    // console.log( 'Rec is ' + JSON.stringify( rec ) );
+                    let valuesArray = Object.values( rec );
+                    // console.log( 'valuesArray is ' + JSON.stringify( valuesArray ) );
+                    for ( let val of valuesArray ) {
+                        // console.log( 'val is ' + val );
+                        let strVal = String( val );
+                        if ( strVal ) {
+                            if ( strVal.toLowerCase().includes( searchKey ) ) {
+                                recs.push( rec );
+                                break;
+                            }
+                        }
+                    }
+                }
+                // console.log( 'Matched Accounts are ' + JSON.stringify( recs ) );
+                this.recentOpenMsgs = recs;
+             }
+        }  else {
+            this.recentOpenMsgs = this.lastSavedOpenData;
+        }        
+    }  
     handleSubscribe() {
         // Callback invoked whenever a new event message is received
         const messageCallback = (response) => {
             console.log('New message received: ', JSON.stringify(response));
             refreshApex(this.recentMsgKey);
+            refreshApex(this.recentOpenMsgKey);
             // let updatedTicketId = response.data.payload.TicketId__c;
         };
 
@@ -125,5 +205,5 @@ export default class ChatTableContainer extends LightningElement {
             console.log('Received error from server: ', JSON.stringify(error));
             // Error contains the server-side error
         });
-    }   
+    }     
 }

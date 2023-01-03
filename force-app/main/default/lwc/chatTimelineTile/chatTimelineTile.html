@@ -33,6 +33,27 @@
                         <lightning-button icon-name="utility:preview" variant="Neutral" onclick={openPreview}
                             label="Preview File" icon-position="right" size="small"></lightning-button>
                     </div>
+                    <!-- <li key={attachment.Id} class="forceContentVirtualRelatedListStencil forceRecordLayout">
+                        <div class="slds-list_horizontal slds-media_center slds-var-p-bottom_xx-small">
+                            <div class="slds-show_inline-block slds-align-middle thumbnailImg">
+                                <lightning-icon icon-name={attachment.icon} alternative-text="Doctype file" data-id={attachment.Id}
+                                    title="Doctype"></lightning-icon>
+                                <img src={attachment.src} class="thumbnailImg slds-hide" data-id={attachment.Id} onload={handleLoad} />
+                            </div>
+                            <div class="slds-show_inline-block slds-var-p-left_x-small slds-truncate slds-var-m-right_x-small">
+                                <a class="itemTitle uiOutputText" onclick={openPreview}
+                                    data-id={attachment.ContentDocumentId}>{attachment.ContentDocument.Title}</a>
+                                <p class="slds-m-around_none secondaryFields slds-text-body_small slds-truncate">
+                                    <span>
+                                        <lightning-formatted-date-time value={attachment.ContentDocument.CreatedDate}>
+                                        </lightning-formatted-date-time>
+                                    </span>
+                                    <span>{attachment.size}</span>
+                                    <span>{attachment.ContentDocument.FileExtension}</span>
+                                </p>
+                            </div>
+                        </div>
+                    </li> -->
                 </template>
                 <template if:true={timelinePost.CloseMsg__c}>
                     <div class="slds-p-vertical_x-small slds-p-left_x-small animateFade">
@@ -41,21 +62,26 @@
                     </div>
                 </template>
                 <div class="slds-grid timeClass">
-                    <div class="slds-col slds-size_8-of-12">
+                    <div class="slds-col slds-size_7-of-12">
                         <lightning-formatted-date-time data-id="hoverSelect" class="animateFade slds-hide opacityClass"
                             value={timelinePost.CreatedDate} year="numeric" month="short" day="2-digit" weekday="long"
                             hour="2-digit" minute="2-digit" hour12="true">
                         </lightning-formatted-date-time>
                     </div>
-                    <div class="slds-col slds-size_4-of-12 slds-text-align_right slds-p-right_xxx-small slds-truncate"
-                    data-id="seenSelect">
-                    <div class="slds-grid">
-                        <div class="slds-col">
-                            <template if:true={showLikes}>
-                                <lightning-button-icon-stateful variant="outline" icon-name="utility:like" size="x-small" selected={liked}
-                                    alternative-text="Like" onclick={handleLiked}>
+                    <div class="slds-col slds-size_5-of-12 slds-text-align_right slds-p-right_xxx-small slds-truncate"
+                        data-id="seenSelect">
+                        <div class="slds-grid">
+                            <div class="slds-col">
+                                <template if:true={showLikes}>
+                                    <lightning-button-icon-stateful variant="outline" icon-name="utility:like"
+                                        size="x-small" selected={liked} alternative-text="Like" onclick={handleLiked}>
+                                    </lightning-button-icon-stateful>
+                                </template>
+                            </div>
+                            <div class="slds-col">
+                                <lightning-button-icon-stateful variant="outline" icon-name={pinIcon} size="x-small" selected={pinned}
+                                    alternative-text="Pin" onclick={handlePinned}>
                                 </lightning-button-icon-stateful>
-                            </template>
                             </div>
                             <div class="slds-col">
                                 <lightning-button-icon variant="container" onclick={editMessage} size="x-small"

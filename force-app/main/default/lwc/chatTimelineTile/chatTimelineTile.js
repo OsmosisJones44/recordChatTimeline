@@ -3,13 +3,15 @@ import { NavigationMixin } from 'lightning/navigation';
 import { updateRecord } from 'lightning/uiRecordApi';
 import getCurrentUserPhoto from '@salesforce/apex/BirthdayController.getCurrentUserPhoto';
 import getCurUser from '@salesforce/apex/BirthdayController.getCurUser';
-import createReadStatus from '@salesforce/apex/BirthdayController.createReadStatus';
+import createReadStatus from '@salesforce/apex/ChatController.createReadStatus';
 import getUserMsgStatus from '@salesforce/apex/ChatController.getUserMsgStatus';
 // import MESSAGE_OBJECT from '@salesforce/schema/Help_Desk_Message_Status__c';
 // import TICKET_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Ticket_Message__c';
 // import READ_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Read__c';
 import ID_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Id';
 import LIKED_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Liked__c';
+import MSGID_FIELD from '@salesforce/schema/Ticket_Message__c.Id';
+import PINNED_FIELD from '@salesforce/schema/Ticket_Message__c.Pinned__c';
 // import OWNER_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.OwnerId';
 import USER_ID from '@salesforce/user/Id';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -25,6 +27,8 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
     statusId;
     error;
     liked;
+    pinned;
+    pinIcon;
     userMsgStatus;
     showLikes = false;
     editMsg;
@@ -66,6 +70,13 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
     };    
 
     connectedCallback() {
+        console.log(this.timelinePost.Pinned__c);
+        this.pinned = this.timelinePost.Pinned__c;
+        if (this.pinned) {
+            this.pinIcon = 'utility:pinned';
+        } else {
+            this.pinIcon = 'utility:pin';
+        }
         getCurrentUserPhoto({
             userId: this.timelinePost.OwnerId
         })
@@ -92,6 +103,19 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
                 this.userMsgStatus = undefined;
                 this.error = error;
                 console.log(error);
+            })
+        createReadStatus({
+            ticketMessageId: this.timelinePost.Id,
+            userId: this.userId
+        })
+            .then(result => {
+                //console.log(JSON.stringify(result));
+                this.statusId = result;
+                this.error = undefined;
+            })
+            .catch(error => {
+                this.statusId = undefined;
+                this.error = error;
             })
         this.seenBy = this.timelinePost.SeenBy__c;
         this.editMsg = false;
@@ -123,7 +147,7 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'Success',
-                        message: 'Message Updated',
+                        message: 'Message Status Updated',
                         variant: 'success'
                     })
                 );
@@ -138,6 +162,41 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
                 );
             });
     }
+    handlePinned(event) {
+        event.preventDefault();
+        this.pinned = !this.pinned;
+        if (this.pinned) {
+            this.pinIcon = 'utility:pinned';
+        } else {
+            this.handleSuccess(event);
+            this.pinIcon = 'utility:pin';
+        }
+        const fields = {};
+        fields[MSGID_FIELD.fieldApiName] = this.timelinePost.Id;
+        fields[PINNED_FIELD.fieldApiName] = this.pinned;
+        
+        const recordInput = { fields };
+        
+        updateRecord(recordInput)
+        .then(() => {
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Success',
+                        message: 'Message Updated',
+                        variant: 'success'
+                    })
+                );
+            })
+            .catch(error => {
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Error Liking Message - Screenshot Me and send to your Salesoforce Administrator',
+                        message: error.body.message,
+                        variant: 'error'
+                    })
+                );
+            });
+    }    
     handleHover(){
         const eventElement = this.template.querySelector('lightning-formatted-date-time[data-id="hoverSelect"]');
         eventElement.classList.remove('slds-hide');
@@ -200,19 +259,6 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
             this.curUser = result;
             this.curName = result.Name;
             this.error = undefined;
-            createReadStatus({
-                ticketMessageId: this.timelinePost.Id,
-                userId: this.userId
-            })
-            .then(result => {
-                //console.log(JSON.stringify(result));
-                this.statusId = result;
-                this.error = undefined;
-            })
-            .catch(error => {
-                this.statusId = undefined;
-                this.error = error;
-            })
         })
         .catch((error) => {
             this.error = error;

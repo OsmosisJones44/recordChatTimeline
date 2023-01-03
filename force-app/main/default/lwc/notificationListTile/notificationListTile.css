@@ -1,0 +1,42 @@
+.containerClass{
+    background-color: rgba(241, 241, 241, 0.89);
+    cursor: pointer;
+}
+.containerClass:hover{
+    background-color: rgb(228, 228, 228);
+    
+}
+.unseenClass{
+    text-align: left;
+    opacity: 1;
+}
+.seenClass{
+    text-align: left;
+    opacity: 1;
+}
+.seenClass:hover{
+    opacity: 1;
+}
+.previewClass{
+    opacity: 1;
+    font-size: .9rem;
+    font-weight: bold;
+}
+.timeClass{
+    font-size: smaller;
+}
+.opacityClass{
+    opacity: 1;
+}
+.animateFade{
+    animation: fadeIn .25s;
+}
+
+@keyframes fadeIn {
+    from {
+        transform: scale(.99) translateY(-.05rem);
+    }
+    to {
+        transform: scale(1.0) translateY(0);
+    }
+}

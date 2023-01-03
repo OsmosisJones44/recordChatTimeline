@@ -1,7 +1,7 @@
-import { LightningElement, api, wire } from 'lwc';
+import { LightningElement, api, wire, track } from 'lwc';
 import getReadUsers from '@salesforce/apex/BirthdayController.getReadUsers';
 import getCurUser from '@salesforce/apex/BirthdayController.getCurUser';
-import getMessages from '@salesforce/apex/ChatController.getMessages';
+import getPinnedMessages from '@salesforce/apex/ChatController.getPinnedMessages';
 import initFiles from "@salesforce/apex/contentManager.initFiles";
 import queryFiles from "@salesforce/apex/contentManager.queryFiles";
 import loadFiles from "@salesforce/apex/contentManager.loadFiles";
@@ -26,28 +26,19 @@ import PARENT_FIELD from '@salesforce/schema/Ticket_Message__c.Parent_Record_Id_
 import DOC_FIELD from '@salesforce/schema/Ticket_Message__c.DocumentId__c';
 import SOURCE_FIELD from '@salesforce/schema/Ticket_Message__c.Message_Source__c';
 import PREVIEW_FIELD from '@salesforce/schema/Ticket_Message__c.Preview_Name__c';
-import STATUS_OBJECT from '@salesforce/schema/Help_Desk_Message_Status__c';
-import HDOWNER_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.OwnerId';
-// import READ_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Read__c';
-import HDMESSAGE_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Ticket_Message__c';
 import USER_ID from '@salesforce/user/Id';
 
 const MAX_FILE_SIZE = 4500000;
 const CHUNK_SIZE = 750000;
 
-export default class ChatTimeline extends LightningElement { 
+export default class PinnedChatTimeline extends LightningElement {
     @api recordId;
     @api source;
     @api previewMe;
     @api defaultNbFileDisplayed;
     @api limitRows;  
-    @api title = 'Timeline';
-    @api ticketUser;
-    @api showCustom = false;
-    @api notifications = []; 
-    @api recipients = [];
-    customRecipients = [];
-    customNotifications = [];
+    @api title = 'Pinned Timeline Posts';
+    noData;
     timelinePostKey;
     timelinePosts;
     mainArea;
@@ -71,9 +62,6 @@ export default class ChatTimeline extends LightningElement {
     tempIds = [];
     uploadedFiles = []; 
     tempTicketUsers = [];
-    userNameValue;
-    curUser;
-    curName;
     file; 
     fids = '';
     fileContents; 
@@ -143,20 +131,23 @@ export default class ChatTimeline extends LightningElement {
 
 
     // @wire(getMessages, {parentId: '$recordId'}) timelinePosts;
-    @wire(getMessages, {parentId: '$recordId'})
-    ticketSetup(result) {
+    @wire(getPinnedMessages, {parentId: '$recordId'})
+    messageSetup(result) {
         this.timelinePostKey = result;
         const { data, error } = result;
         if (data) {
             this.timelinePosts = JSON.parse(JSON.stringify(data));
             this.error = undefined;
+            this.noDataHere = false;
         } else if (error) {
             this.timelinePosts = undefined;
             this.error = error;
             console.error(error);
+            this.noDataHere = true;
         } else {
             this.error = undefined;
             this.timelinePosts = undefined;
+            this.noDataHere = true;
         }
         this.lastSavedData = this.timelinePosts;
         this.isLoading = false;
@@ -165,6 +156,7 @@ export default class ChatTimeline extends LightningElement {
 
     
     connectedCallback() {
+        this.noDataHere = true;
         this.disableButton = false;
         this.mainArea = true;
         this.registerErrorListener();
@@ -198,6 +190,15 @@ export default class ChatTimeline extends LightningElement {
             });
         this.runGetUser();
     }
+
+    renderedCallback() {
+        if (!this.timelinePosts || this.timelinePosts === "" || this.timelinePosts === [] || this.timelinePosts === {} || this.timelinePosts === undefined || this.timelinePosts === null || this.timelinePosts === '') {
+            this.noData = true;
+        } else {
+            this.noData = false;
+        }
+    }
+
     runGetUser(){
         getCurUser({userId:this.userId})
         .then((result) => {
@@ -271,61 +272,6 @@ export default class ChatTimeline extends LightningElement {
         this.offset += recordCount;
         this.moreRecords = this.offset < this.totalFiles;
     }
-    handleUserChange(event) {
-        this.userNameValue = event.target.value;
-        console.log(this.userNameValue);
-    }
-    handleAddUser() {
-        // event.preventDefault();
-        // event.stopPropagation();
-        this.isLoading = true;
-        this.customRecipients.push(this.userNameValue);
-        console.log('UserVal: '+this.userNameValue);
-        console.log('RecipientArrayVal: '+this.customRecipients);
-        getCurUser({userId:this.userNameValue})
-        .then((result) => {
-            console.log(JSON.stringify(result));
-            
-            // this.curUser = result;
-            this.customNotifications.push(result);
-            console.log('NotificationArrayVal: '+JSON.stringify(this.customNotifications));
-            this.isLoading = false;
-            // this.curName = result.Name;
-            this.error = undefined;
-        })
-            .catch((error) => {
-                console.log(error);
-                this.error = error;
-                this.isLoading = false;
-                // this.curUser = undefined;
-        });
-    }
-    sendCustomNotifications(result) {
-        console.log(result);
-        console.log(this.customRecipients);
-        if (this.customRecipients.length != 0) {
-            this.customRecipients.forEach(rec => {
-                const fields = {};
-                fields[HDMESSAGE_FIELD.fieldApiName] = this.messageValue;
-                fields[HDOWNER_FIELD.fieldApiName] = rec;
-                const recordInput = { apiName: STATUS_OBJECT.objectApiName, fields };
-                createRecord(recordInput)
-                    .then(result => {
-                        console.log('Notification Sent');
-                    })
-                    .catch(error => {
-                        console.log(JSON.stringify(error));
-                        this.dispatchEvent(
-                            new ShowToastEvent({
-                                title: 'Error Creating Record',
-                                message: 'Contact your Salesforce Admin',
-                                variant: 'error',
-                            }),
-                        );
-                    });
-            })
-        }
-    }
     createMessage() {
         this.disableButton = true;
         if(this.messageValue){
@@ -345,7 +291,6 @@ export default class ChatTimeline extends LightningElement {
                             variant: 'success',
                         }),
                     );
-                    // this.sendCustomNotifications(result);
                     refreshApex(this.timelinePostKey)
                         .then(() => {
                             this.disableButton = false;
@@ -826,5 +771,5 @@ export default class ChatTimeline extends LightningElement {
             console.log('Received error from server: ', JSON.stringify(error));
             // Error contains the server-side error
         });
-    }    
+    }  
 }
