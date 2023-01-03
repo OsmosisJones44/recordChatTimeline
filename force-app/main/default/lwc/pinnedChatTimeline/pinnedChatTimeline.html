@@ -212,7 +212,7 @@
                         <template if:true={ticketSeenUsers}>
                             <template for:each={ticketSeenUsers.data} for:item="ticketUser">
                                 <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser}
-                                    timeline-post-id={ticketMessageId} show-likes>
+                                    timeline-post-id={ticketMessageId} show-likes show-seen>
                                 </c-ticket-view-user-list>
                             </template>
                         </template>
