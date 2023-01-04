@@ -228,6 +228,13 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
         event.preventDefault();
         event.stopPropagation();
         this.isLoading = false;
+        this.dispatchEvent(
+            new ShowToastEvent({
+                title: 'Success',
+                message: 'Message Updated',
+                variant: 'success'
+            })
+        );
         const selectEvent = new CustomEvent('refresh', {
             detail: {
                 Id: this.timelinePost.Id,

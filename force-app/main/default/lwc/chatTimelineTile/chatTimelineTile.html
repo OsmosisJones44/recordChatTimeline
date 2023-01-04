@@ -15,7 +15,7 @@
                     </lightning-formatted-rich-text>
                 </template>
                 <template if:true={editMsg}>
-                    <lightning-record-edit-form record-id={timelinePost.Id} object-api-name="Ticket_Message__c"
+                    <lightning-record-edit-form record-id={timelinePost.Id} object-api-name="Ticket_Message__c" onsubmit={handleSubmit}
                         onsuccess={handleSuccess}>
                         <lightning-input-field field-name="Message__c" onchange={handleMessageChange}>
                         </lightning-input-field>
