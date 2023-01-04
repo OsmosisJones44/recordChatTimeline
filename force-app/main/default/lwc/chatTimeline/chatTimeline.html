@@ -47,9 +47,13 @@
             <div class="containerClass">
                 <template for:each={timelinePosts} for:item="timelinePost">
                     <c-chat-timeline-tile key={timelinePost.Id} timeline-post={timelinePost} onrefresh={refreshPosts}
-                        onseen={openSeenModal} current-name={curName}></c-chat-timeline-tile>
+                    onseen={openSeenModal} current-name={curName}></c-chat-timeline-tile>
                 </template>
             </div>
+            <template if:true={isLoading}>
+                    <lightning-spinner alternative-text="Loading">
+                    </lightning-spinner>
+            </template>
             <div class="slds-grid slds-wrap slds-p-top_small">
                 <div class="slds-col slds-size_11-of-12">
                     <lightning-input-rich-text variant="bottom-toolbar" value={messageValue}

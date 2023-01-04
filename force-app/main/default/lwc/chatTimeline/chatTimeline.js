@@ -328,6 +328,7 @@ export default class ChatTimeline extends LightningElement {
     }
     createMessage() {
         this.disableButton = true;
+        this.isLoading = true;
         if(this.messageValue){
             const fields = {};
             fields[MESSAGE_FIELD.fieldApiName] = this.messageValue;
@@ -344,10 +345,11 @@ export default class ChatTimeline extends LightningElement {
                             message: 'Timeline Updated',
                             variant: 'success',
                         }),
-                    );
-                    // this.sendCustomNotifications(result);
-                    refreshApex(this.timelinePostKey)
+                        );
+                        // this.sendCustomNotifications(result);
+                        refreshApex(this.timelinePostKey)
                         .then(() => {
+                            this.isLoading = false;
                             this.disableButton = false;
                             this.messageValue = '';
                             this.scrollToBottom();                
@@ -373,9 +375,10 @@ export default class ChatTimeline extends LightningElement {
                     message: 'Please Add Something to the Message in order to Send into the Timeline. Contact your Salesforce Administrator w/ any questions.',
                     variant: 'error',
                 }),
-                );
+            );
+            this.disableButton = false;
+            this.isLoading = false;
             }
-            this.msgSendDisable = false;
     }
     handleFilesChange(event) {
         if(event.target.files.length > 0) {
