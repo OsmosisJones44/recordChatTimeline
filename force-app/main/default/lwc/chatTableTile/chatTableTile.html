@@ -2,9 +2,9 @@
     <template if:true={msgStatus}>
         <div class="containerClass slds-border_bottom slds-p-around_xxx-small" onclick={handleSelect}>
             <p class="previewClass">{msgStatus.Ticket_Message__r.Preview__c}</p>
-            <div class={msgStatus.tableTimelineClass__c}>
+            <!-- <div class={msgStatus.tableTimelineClass__c}> -->
                 <lightning-tile label={msgStatus.Ticket_Message__r.OwnerName__c} type="media" href={msgStatus.Ticket_Message__r.Owner_URL__c}>
-                    <div slot="media">
+                    <div class={msgStatus.tableTimelineClass__c} slot="media">
                         <lightning-avatar slot="media" src={smallPhotoUrl} fallback-icon-name="standard:user">
                         </lightning-avatar>
                     </div>
@@ -28,7 +28,7 @@
                         </div>
                     </div>
                 </lightning-tile>
-            </div>
+            <!-- </div> -->
         </div>
     </template>
 </template>

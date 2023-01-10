@@ -72,6 +72,14 @@
                         data-id="seenSelect">
                         <div class="slds-grid">
                             <div class="slds-col">
+                                <lightning-button-icon variant="container" onclick={editMessage} size="x-small"
+                                    icon-name="utility:edit"></lightning-button-icon>
+                            </div>
+                            <div class="slds-col">
+                                <lightning-button-icon variant="container" onclick={openSeenBy} size="x-small"
+                                    icon-name="utility:info"></lightning-button-icon>
+                            </div>
+                            <div class="slds-col">
                                 <template if:true={showLikes}>
                                     <lightning-button-icon-stateful variant="outline" icon-name="utility:like"
                                         size="x-small" selected={liked} alternative-text="Like" onclick={handleLiked}>
@@ -82,12 +90,6 @@
                                 <lightning-button-icon-stateful variant="outline" icon-name={pinIcon} size="x-small" selected={pinned}
                                     alternative-text="Pin" onclick={handlePinned}>
                                 </lightning-button-icon-stateful>
-                            </div>
-                            <div class="slds-col">
-                                <lightning-button-icon variant="container" onclick={editMessage} size="x-small"
-                                    icon-name="utility:edit"></lightning-button-icon>
-                            </div>
-                            <div class="slds-col opacityClass slds-truncate"><a onclick={openSeenBy}>Seen By / Likes</a>
                             </div>
                         </div>
                     </div>

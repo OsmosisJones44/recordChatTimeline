@@ -18,7 +18,7 @@
                     <div class="slds-col slds-size_1-of-1">
                         <template if:true={recentMsgs}>
                             <template for:each={recentMsgs} for:item="post" for:index="index">
-                                <c-notification-list-tile msg-status={post} key={post.Id}
+                                <c-notification-list-tile key={post.Id} msg-status={post}
                                     ontimeline={openTimelineView}></c-notification-list-tile>
                             </template>
                         </template>
@@ -30,7 +30,7 @@
                     <div class="slds-col slds-size_1-of-1">
                         <template if:true={recentOpenMsgs}>
                             <template for:each={recentOpenMsgs} for:item="openPost">
-                                <c-notification-list-tile msg-status={openPost} key={openPost.Id} ontimeline={openTimelineView}></c-notification-list-tile>
+                                <c-notification-list-tile key={openPost.Id} msg-status={openPost} ontimeline={openTimelineView}></c-notification-list-tile>
                             </template>
                         </template>
                     </div>
@@ -43,12 +43,12 @@
         <div slot="footer">
             <template if:true={mainArea}>
                 <template if:false={showAll}>
-                    <lightning-button label="Show All" icon-name="utility:preview" icon-position="right" onclick={showAllMsgs}
-                        variant="outline"></lightning-button>
+                    <lightning-button label="Show All Timelines" onclick={showAllMsgs}
+                        variant="base"></lightning-button>
                 </template>
                 <template if:true={showAll}>
                     <lightning-button label="Open Only" icon-name="utility:preview" icon-position="right" onclick={showOpenMsgs}
-                        variant="outline"></lightning-button>
+                        variant="base"></lightning-button>
                 </template>
             </template>
         </div>

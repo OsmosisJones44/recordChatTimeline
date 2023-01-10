@@ -1,21 +1,17 @@
 .containerClass{
-    background-color: rgba(241, 241, 241, 0.89);
     cursor: pointer;
 }
 .containerClass:hover{
     background-color: rgb(228, 228, 228);
-    
 }
 .unseenClass{
-    text-align: left;
-    opacity: 1;
+    background-color: #3C648D;
+    padding: .5rem;
+    /* color: white; */
 }
+
 .seenClass{
-    text-align: left;
-    opacity: 1;
-}
-.seenClass:hover{
-    opacity: 1;
+    padding: .5rem;
 }
 .previewClass{
     opacity: 1;
@@ -26,11 +22,12 @@
     font-size: smaller;
 }
 .opacityClass{
-    opacity: 1;
+    opacity: .4;
 }
 .animateFade{
-    animation: fadeIn .25s;
+    animation: pulseIt .25s infinite;
 }
+
 
 @keyframes fadeIn {
     from {
@@ -38,5 +35,20 @@
     }
     to {
         transform: scale(1.0) translateY(0);
+    }
+}
+@keyframes pulseIt {
+    0% {
+        transform: scale(1.0);
+        opacity: 1;
+    }
+    50%{
+        transform: scale(.97);
+        opacity: .75;
+        border-radius: .25rem;
+    }
+    100% {
+        transform: scale(1.0);
+        opacity: 1;
     }
 }
