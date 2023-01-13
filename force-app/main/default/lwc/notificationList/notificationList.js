@@ -45,6 +45,8 @@ export default class NotificationList extends LightningElement {
     mainArea;
     showSearch;
     error;
+    timelineTitle;
+    pageTitle = 'Open Timeline Messages';
 
 
     // @wire(findRecentTicketMessages, { userId: '$userId' }) recentMsgs;
@@ -88,15 +90,18 @@ export default class NotificationList extends LightningElement {
     connectedCallback() {
         this.showAll = false;
         this.mainArea = true;
+        this.pageTitle = 'Open Timeline Messages';
         this.registerErrorListener();
         this.handleSubscribe();
-    }
+    } 
 
     showAllMsgs() {
         this.showAll = true;
+        this.pageTitle = 'All Timeline Messages';
     }
     showOpenMsgs() {
         this.showAll = false;
+        this.pageTitle = 'Open Timeline Messages';
     }
     toggleSearch() {
         this.showSearch = !this.showSearch;
@@ -105,6 +110,7 @@ export default class NotificationList extends LightningElement {
     openTimelineView(event) {
         this.mainArea = false;
         this.recordId = event.detail.id;
+        this.timelineTitle = event.detail.preview;
     }
 
     goBack() {

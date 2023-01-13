@@ -6,5 +6,13 @@
 
     <targets>
         <target>lightning__RecordPage</target>
+        <target>lightning__FlowScreen</target>
     </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__FlowScreen">
+            <property name="recordId" label="recordId" type="String" />
+            <property name="leadRecord" type="@salesforce/schema/User" label="Lead Record"
+                role="outputOnly"></property>
+        </targetConfig>
+    </targetConfigs>
 </LightningComponentBundle>

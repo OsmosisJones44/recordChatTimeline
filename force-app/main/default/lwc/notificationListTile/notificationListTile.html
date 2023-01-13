@@ -1,6 +1,6 @@
 <template>
     <template if:true={msgStatus}>
-        <div class="containerClass slds-box slds-box_x-small slds-m-around_xx-small" onclick={handleSelect}>
+        <div class="containerClass borderClass slds-m-around_xx-small slds-p-around_x-small" onclick={handleSelect}>
             <p class="previewClass">{msgStatus.Ticket_Message__r.Preview__c}</p>
             <!-- <div class={msgStatus.tableTimelineClass__c}> -->
                 <lightning-tile label={msgStatus.Ticket_Message__r.OwnerName__c} type="media"

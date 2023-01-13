@@ -1,5 +1,5 @@
 <template>
-    <lightning-card title="Timeline Messages" icon-name="standard:past_chat">
+    <lightning-card title={pageTitle} icon-name="standard:past_chat">
         <div slot="actions">
             <template if:true={mainArea}>
                 <lightning-button-icon icon-name="utility:search" onclick={toggleSearch} alternative-text="Toggle Search"></lightning-button-icon>
@@ -38,7 +38,7 @@
             </template>
         </template>
         <template if:false={mainArea}>
-            <c-chat-timeline record-id={recordId}></c-chat-timeline>
+            <c-chat-timeline record-id={recordId} title={timelineTitle}></c-chat-timeline>
         </template>
         <div slot="footer">
             <template if:true={mainArea}>

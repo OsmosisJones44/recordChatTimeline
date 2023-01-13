@@ -1,0 +1,19 @@
+.userList{
+    font-weight: bold; 
+    font-size: max(.65vw, 14px);
+    color: #3C648D;
+    text-align: left;
+    padding-bottom: 6px;
+    padding-top: 6px;
+}
+.ticketUserContainer{
+    overflow:auto;
+    max-height:10.5rem;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+    border-bottom: 1px solid rgba(60, 100, 141, .5);
+}
+/* Hide scrollbar for Chrome, Safari and Opera */
+.ticketUserContainer::-webkit-scrollbar {
+    display: none;
+}

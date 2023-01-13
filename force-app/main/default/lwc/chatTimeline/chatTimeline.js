@@ -2,9 +2,9 @@ import { LightningElement, api, wire } from 'lwc';
 import getReadUsers from '@salesforce/apex/BirthdayController.getReadUsers';
 import getCurUser from '@salesforce/apex/BirthdayController.getCurUser';
 import getMessages from '@salesforce/apex/ChatController.getMessages';
-import initFiles from "@salesforce/apex/contentManager.initFiles";
-import queryFiles from "@salesforce/apex/contentManager.queryFiles";
-import loadFiles from "@salesforce/apex/contentManager.loadFiles";
+// import initFiles from "@salesforce/apex/contentManager.initFiles";
+// import queryFiles from "@salesforce/apex/contentManager.queryFiles";
+// import loadFiles from "@salesforce/apex/contentManager.loadFiles";
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { createRecord } from 'lightning/uiRecordApi';
 import { refreshApex } from '@salesforce/apex';
@@ -23,7 +23,7 @@ import MESSAGE_OBJECT from '@salesforce/schema/Ticket_Message__c';
 import MESSAGE_FIELD from '@salesforce/schema/Ticket_Message__c.Message__c';
 import OWNER_FIELD from '@salesforce/schema/Ticket_Message__c.OwnerId';
 import PARENT_FIELD from '@salesforce/schema/Ticket_Message__c.Parent_Record_Id__c';
-import DOC_FIELD from '@salesforce/schema/Ticket_Message__c.DocumentId__c';
+// import DOC_FIELD from '@salesforce/schema/Ticket_Message__c.DocumentId__c';
 import SOURCE_FIELD from '@salesforce/schema/Ticket_Message__c.Message_Source__c';
 import PREVIEW_FIELD from '@salesforce/schema/Ticket_Message__c.Preview_Name__c';
 import STATUS_OBJECT from '@salesforce/schema/Help_Desk_Message_Status__c';
@@ -42,6 +42,8 @@ export default class ChatTimeline extends LightningElement {
     @api defaultNbFileDisplayed;
     @api limitRows;  
     @api title = 'Timeline';
+    @api ticketUsers;
+    @api userTitle;
     @api ticketUser;
     @api showCustom = false;
     @api notifications = []; 
@@ -380,221 +382,221 @@ export default class ChatTimeline extends LightningElement {
             this.isLoading = false;
             }
     }
-    handleFilesChange(event) {
-        if(event.target.files.length > 0) {
-            this.filesUploaded = event.target.files;
+    // handleFilesChange(event) {
+    //     if(event.target.files.length > 0) {
+    //         this.filesUploaded = event.target.files;
 
-            for(let item in filesUploaded){
-                attachments.push(item);
-            }
-            for(let i = 0; filesUploaded.length; i++){
-                this.fileName = event.target.files[i].name;
-                this.fileSize = this.formatBytes(event.target.files[i].size,2);                
-            }
-        }
-    }
-    getBaseUrl(){
-        let baseUrl = 'https://'+location.host+'/';
-        return baseUrl;
-    }
-    handleUploadFinished(event) {
-        var self = this;
-        //let baseUrl = this.getBaseUrl();
-        // Get the list of uploaded files
-        const uploadedFiles = event.detail.files;
-        var contentDocumentIds = new Array();
-        for(var file of uploadedFiles){
-            console.log(JSON.stringify(file));
-            contentDocumentIds.push(file.documentId);
-            const fields = {};
-            //this.messageValue = this.curName + ' just posted a New File<a href="' + baseUrl+'sfc/servlet.shepherd/version/renditionDownload?rendition=THUMB720BY480&versionId='+file.contentVersionId + '">file</a>';
-            this.messageValue = this.curName + ' has just attached a New File to this ticket';
-            fields[MESSAGE_FIELD.fieldApiName] = this.messageValue;
-            fields[OWNER_FIELD.fieldApiName] = this.userId;
-            fields[PARENT_FIELD.fieldApiName] = this.recordId;
-            fields[DOC_FIELD.fieldApiName] = file.documentId;
-            const recordInput = { apiName: MESSAGE_OBJECT.objectApiName, fields };
-            createRecord(recordInput)
-                .then(() => {
-                    this.dispatchEvent(
-                        new ShowToastEvent({
-                            title: 'Success',
-                            message: 'Timeline Updated',
-                            variant: 'success',
-                        }),
-                    );
-                    refreshApex(this.timelinePostKey)
-                    .then(() => {
-                        this.messageValue = '';
-                        this.scrollToBottom();                
-                    })
-                })
-                .catch(error => {
-                    //console.log(JSON.stringify(error));
-                    this.dispatchEvent(
-                        new ShowToastEvent({
-                            title: 'Error Creating Record',
-                            message: 'Screenshot this and Contact your Salesforce Admin: ' + error.body.message ,
-                            variant: 'error',
-                        }),
-                    );
-                });
-        }
-        queryFiles({ 
-            recordId: this.recordId, 
-            contentDocumentIds: contentDocumentIds 
-        })
-        .then(result => {
-            for(var cdl of result){
-                self.attachments.unshift(self.calculateFileAttributes(cdl));
-                self.fileCreated = true;
-                this.fids = cdl.ContentDocumentId + (this.fids=='' ? '' : ',' + this.fids);
-            }
-            self.updateCounters(result.length);
-            this.totalFiles += result.length;
-            this.initRecords();
-        });
-    }
-    handleUploadFinishedStmt(event) {
-        var self = this;
-        //let baseUrl = this.getBaseUrl();
-        // Get the list of uploaded files
-        const uploadedFiles = event.detail.files;
-        var contentDocumentIds = new Array();
-        for(var file of uploadedFiles){
-            console.log(JSON.stringify(file));
-            contentDocumentIds.push(file.documentId);
-            const fields = {};
-            //this.messageValue = this.curName + ' just posted a New File<a href="' + baseUrl+'sfc/servlet.shepherd/version/renditionDownload?rendition=THUMB720BY480&versionId='+file.contentVersionId + '">file</a>';
-            this.messageValue = this.curName + ' has just attached a New File to this ticket';
-            fields[MESSAGE_FIELD.fieldApiName] = this.messageValue;
-            fields[OWNER_FIELD.fieldApiName] = this.userId;
-            fields[PARENT_FIELD.fieldApiName] = this.recordId;
-            fields[DOC_FIELD.fieldApiName] = file.documentId;
-            const recordInput = { apiName: MESSAGE_OBJECT.objectApiName, fields };
-            createRecord(recordInput)
-                .then(() => {
-                    this.dispatchEvent(
-                        new ShowToastEvent({
-                            title: 'Success',
-                            message: 'Timeline Updated',
-                            variant: 'success',
-                        }),
-                    );
-                    refreshApex(this.timelinePostKey)
-                    .then(() => {
-                        this.messageValue = '';
-                        this.scrollToBottom();                
-                    })
-                })
-                .catch(error => {
-                    //console.log(JSON.stringify(error));
-                    this.dispatchEvent(
-                        new ShowToastEvent({
-                            title: 'Error Creating Record',
-                            message: 'Screenshot this and Contact your Salesforce Admin: ' + error.body.message ,
-                            variant: 'error',
-                        }),
-                    );
-                });
-        }
-        queryFiles({ 
-            recordId: this.recordId, 
-            contentDocumentIds: contentDocumentIds 
-        })
-        .then(result => {
-            for(var cdl of result){
-                self.attachments.unshift(self.calculateFileAttributes(cdl));
-                self.fileCreated = true;
-                this.fids = cdl.ContentDocumentId + (this.fids=='' ? '' : ',' + this.fids);
-            }
-            self.updateCounters(result.length);
-            this.totalFiles += result.length;
-            this.initRecords();
-        });
-    }
-    handleLoad(event){
-        let elementId = event.currentTarget.dataset.id;
-        const eventElement = event.currentTarget;
-        eventElement.classList.remove('slds-hide');
-        let dataId = 'lightning-icon[data-id="' + elementId + '"]';
-        this.template.querySelector(dataId).classList.add('slds-hide');
-    }
-    calculateFileAttributes(item){
-        let imageExtensions = ['png','jpg','gif'];
-        let supportedIconExtensions = ['ai','attachment','audio','box_notes','csv','eps','excel','exe','flash','folder','gdoc','gdocs','gform','gpres','gsheet','html','image','keynote','library_folder','link','mp4','overlay','pack','pages','pdf','ppt','psd','quip_doc','quip_sheet','quip_slide','rtf','slide','stypi','txt','unknown','video','visio','webex','word','xml','zip'];
-        item.src = this.documentForceUrl + '/sfc/servlet.shepherd/version/renditionDownload?rendition=THUMB120BY90&versionId=' + item.ContentDocument.LatestPublishedVersionId;
-        item.size = this.formatBytes(item.ContentDocument.ContentSize, 2);
-        item.icon = 'doctype:attachment';
-        let fileType = item.ContentDocument.FileType.toLowerCase();
-        if(imageExtensions.includes(fileType)){
-            item.icon = 'doctype:image';
-        }else{
-            if(supportedIconExtensions.includes(fileType)){
-                item.icon = 'doctype:' + fileType;
-            }
-        }
-        return item;
-    }
-    initRecords() {
-        this.isLoading = true;
-        initFiles({ 
-            recordId: this.recordId, 
-            filters: this.conditions, 
-            defaultLimit: this.defaultNbFileDisplayed, 
-            sortField: this.sortField, 
-            sortOrder: this.sortOrder 
-        })
-        .then(result => {
-            this.fids = '';
-            let listAttachments = new Array();
-            let contentDocumentLinks = result.contentDocumentLinks;
-            this.documentForceUrl = result.documentForceUrl;
-            for(var item of contentDocumentLinks){
-                listAttachments.push(this.calculateFileAttributes(item));
-                if (this.fids != '') this.fids += ',';
-                this.fids += item.ContentDocumentId;
-            }
-            this.attachments = listAttachments;
-            this.totalFiles = result.totalCount;
-            this.moreRecords = result.totalCount > 3 ? true : false;
-            let nbFiles = listAttachments.length;
-            if (this.defaultNbFileDisplayed === undefined){
-                this.defaultNbFileDisplayed = 6;
-            }
-            if (this.limitRows === undefined){
-                this.limitRows = 3;
-            }
-            this.offset = this.defaultNbFileDisplayed;
-            if(result.totalCount > this.defaultNbFileDisplayed){
-                nbFiles = this.defaultNbFileDisplayed + '+';
-            }
-            this.fileTitle = 'Files (' + nbFiles + ')';
-            this.disabled = false;
-            this.loaded = true;
-        }).catch(error => {
-            console.log(error);
-            this.showNotification("Error Loading Files", JSON.stringify(error.message), "error");
-        }).finally(() => {
-            this.isLoading = false;
-        });
-    }
-    showNotification(title, message, variant) {
-        const event = new ShowToastEvent({
-            title: title,
-            message: message,
-            variant: variant
-        });
-        this.dispatchEvent(event);
-    }
-    formatBytes(bytes,decimals) {
-        if(bytes == 0) return '0 Bytes';
-        var k = 1024,
-            dm = decimals || 2,
-            sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
-            i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-    }
+    //         for(let item in filesUploaded){
+    //             attachments.push(item);
+    //         }
+    //         for(let i = 0; filesUploaded.length; i++){
+    //             this.fileName = event.target.files[i].name;
+    //             this.fileSize = this.formatBytes(event.target.files[i].size,2);                
+    //         }
+    //     }
+    // }
+    // getBaseUrl(){
+    //     let baseUrl = 'https://'+location.host+'/';
+    //     return baseUrl;
+    // }
+    // handleUploadFinished(event) {
+    //     var self = this;
+    //     //let baseUrl = this.getBaseUrl();
+    //     // Get the list of uploaded files
+    //     const uploadedFiles = event.detail.files;
+    //     var contentDocumentIds = new Array();
+    //     for(var file of uploadedFiles){
+    //         console.log(JSON.stringify(file));
+    //         contentDocumentIds.push(file.documentId);
+    //         const fields = {};
+    //         //this.messageValue = this.curName + ' just posted a New File<a href="' + baseUrl+'sfc/servlet.shepherd/version/renditionDownload?rendition=THUMB720BY480&versionId='+file.contentVersionId + '">file</a>';
+    //         this.messageValue = this.curName + ' has just attached a New File to this ticket';
+    //         fields[MESSAGE_FIELD.fieldApiName] = this.messageValue;
+    //         fields[OWNER_FIELD.fieldApiName] = this.userId;
+    //         fields[PARENT_FIELD.fieldApiName] = this.recordId;
+    //         fields[DOC_FIELD.fieldApiName] = file.documentId;
+    //         const recordInput = { apiName: MESSAGE_OBJECT.objectApiName, fields };
+    //         createRecord(recordInput)
+    //             .then(() => {
+    //                 this.dispatchEvent(
+    //                     new ShowToastEvent({
+    //                         title: 'Success',
+    //                         message: 'Timeline Updated',
+    //                         variant: 'success',
+    //                     }),
+    //                 );
+    //                 refreshApex(this.timelinePostKey)
+    //                 .then(() => {
+    //                     this.messageValue = '';
+    //                     this.scrollToBottom();                
+    //                 })
+    //             })
+    //             .catch(error => {
+    //                 //console.log(JSON.stringify(error));
+    //                 this.dispatchEvent(
+    //                     new ShowToastEvent({
+    //                         title: 'Error Creating Record',
+    //                         message: 'Screenshot this and Contact your Salesforce Admin: ' + error.body.message ,
+    //                         variant: 'error',
+    //                     }),
+    //                 );
+    //             });
+    //     }
+    //     queryFiles({ 
+    //         recordId: this.recordId, 
+    //         contentDocumentIds: contentDocumentIds 
+    //     })
+    //     .then(result => {
+    //         for(var cdl of result){
+    //             self.attachments.unshift(self.calculateFileAttributes(cdl));
+    //             self.fileCreated = true;
+    //             this.fids = cdl.ContentDocumentId + (this.fids=='' ? '' : ',' + this.fids);
+    //         }
+    //         self.updateCounters(result.length);
+    //         this.totalFiles += result.length;
+    //         this.initRecords();
+    //     });
+    // }
+    // handleUploadFinishedStmt(event) {
+    //     var self = this;
+    //     //let baseUrl = this.getBaseUrl();
+    //     // Get the list of uploaded files
+    //     const uploadedFiles = event.detail.files;
+    //     var contentDocumentIds = new Array();
+    //     for(var file of uploadedFiles){
+    //         console.log(JSON.stringify(file));
+    //         contentDocumentIds.push(file.documentId);
+    //         const fields = {};
+    //         //this.messageValue = this.curName + ' just posted a New File<a href="' + baseUrl+'sfc/servlet.shepherd/version/renditionDownload?rendition=THUMB720BY480&versionId='+file.contentVersionId + '">file</a>';
+    //         this.messageValue = this.curName + ' has just attached a New File to this ticket';
+    //         fields[MESSAGE_FIELD.fieldApiName] = this.messageValue;
+    //         fields[OWNER_FIELD.fieldApiName] = this.userId;
+    //         fields[PARENT_FIELD.fieldApiName] = this.recordId;
+    //         fields[DOC_FIELD.fieldApiName] = file.documentId;
+    //         const recordInput = { apiName: MESSAGE_OBJECT.objectApiName, fields };
+    //         createRecord(recordInput)
+    //             .then(() => {
+    //                 this.dispatchEvent(
+    //                     new ShowToastEvent({
+    //                         title: 'Success',
+    //                         message: 'Timeline Updated',
+    //                         variant: 'success',
+    //                     }),
+    //                 );
+    //                 refreshApex(this.timelinePostKey)
+    //                 .then(() => {
+    //                     this.messageValue = '';
+    //                     this.scrollToBottom();                
+    //                 })
+    //             })
+    //             .catch(error => {
+    //                 //console.log(JSON.stringify(error));
+    //                 this.dispatchEvent(
+    //                     new ShowToastEvent({
+    //                         title: 'Error Creating Record',
+    //                         message: 'Screenshot this and Contact your Salesforce Admin: ' + error.body.message ,
+    //                         variant: 'error',
+    //                     }),
+    //                 );
+    //             });
+    //     }
+    //     queryFiles({ 
+    //         recordId: this.recordId, 
+    //         contentDocumentIds: contentDocumentIds 
+    //     })
+    //     .then(result => {
+    //         for(var cdl of result){
+    //             self.attachments.unshift(self.calculateFileAttributes(cdl));
+    //             self.fileCreated = true;
+    //             this.fids = cdl.ContentDocumentId + (this.fids=='' ? '' : ',' + this.fids);
+    //         }
+    //         self.updateCounters(result.length);
+    //         this.totalFiles += result.length;
+    //         this.initRecords();
+    //     });
+    // }
+    // handleLoad(event){
+    //     let elementId = event.currentTarget.dataset.id;
+    //     const eventElement = event.currentTarget;
+    //     eventElement.classList.remove('slds-hide');
+    //     let dataId = 'lightning-icon[data-id="' + elementId + '"]';
+    //     this.template.querySelector(dataId).classList.add('slds-hide');
+    // }
+    // calculateFileAttributes(item){
+    //     let imageExtensions = ['png','jpg','gif'];
+    //     let supportedIconExtensions = ['ai','attachment','audio','box_notes','csv','eps','excel','exe','flash','folder','gdoc','gdocs','gform','gpres','gsheet','html','image','keynote','library_folder','link','mp4','overlay','pack','pages','pdf','ppt','psd','quip_doc','quip_sheet','quip_slide','rtf','slide','stypi','txt','unknown','video','visio','webex','word','xml','zip'];
+    //     item.src = this.documentForceUrl + '/sfc/servlet.shepherd/version/renditionDownload?rendition=THUMB120BY90&versionId=' + item.ContentDocument.LatestPublishedVersionId;
+    //     item.size = this.formatBytes(item.ContentDocument.ContentSize, 2);
+    //     item.icon = 'doctype:attachment';
+    //     let fileType = item.ContentDocument.FileType.toLowerCase();
+    //     if(imageExtensions.includes(fileType)){
+    //         item.icon = 'doctype:image';
+    //     }else{
+    //         if(supportedIconExtensions.includes(fileType)){
+    //             item.icon = 'doctype:' + fileType;
+    //         }
+    //     }
+    //     return item;
+    // }
+    // initRecords() {
+    //     this.isLoading = true;
+    //     initFiles({ 
+    //         recordId: this.recordId, 
+    //         filters: this.conditions, 
+    //         defaultLimit: this.defaultNbFileDisplayed, 
+    //         sortField: this.sortField, 
+    //         sortOrder: this.sortOrder 
+    //     })
+    //     .then(result => {
+    //         this.fids = '';
+    //         let listAttachments = new Array();
+    //         let contentDocumentLinks = result.contentDocumentLinks;
+    //         this.documentForceUrl = result.documentForceUrl;
+    //         for(var item of contentDocumentLinks){
+    //             listAttachments.push(this.calculateFileAttributes(item));
+    //             if (this.fids != '') this.fids += ',';
+    //             this.fids += item.ContentDocumentId;
+    //         }
+    //         this.attachments = listAttachments;
+    //         this.totalFiles = result.totalCount;
+    //         this.moreRecords = result.totalCount > 3 ? true : false;
+    //         let nbFiles = listAttachments.length;
+    //         if (this.defaultNbFileDisplayed === undefined){
+    //             this.defaultNbFileDisplayed = 6;
+    //         }
+    //         if (this.limitRows === undefined){
+    //             this.limitRows = 3;
+    //         }
+    //         this.offset = this.defaultNbFileDisplayed;
+    //         if(result.totalCount > this.defaultNbFileDisplayed){
+    //             nbFiles = this.defaultNbFileDisplayed + '+';
+    //         }
+    //         this.fileTitle = 'Files (' + nbFiles + ')';
+    //         this.disabled = false;
+    //         this.loaded = true;
+    //     }).catch(error => {
+    //         console.log(error);
+    //         this.showNotification("Error Loading Files", JSON.stringify(error.message), "error");
+    //     }).finally(() => {
+    //         this.isLoading = false;
+    //     });
+    // }
+    // showNotification(title, message, variant) {
+    //     const event = new ShowToastEvent({
+    //         title: title,
+    //         message: message,
+    //         variant: variant
+    //     });
+    //     this.dispatchEvent(event);
+    // }
+    // formatBytes(bytes,decimals) {
+    //     if(bytes == 0) return '0 Bytes';
+    //     var k = 1024,
+    //         dm = decimals || 2,
+    //         sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
+    //         i = Math.floor(Math.log(bytes) / Math.log(k));
+    //     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    // }
     openInfoModal() {
         this.isModalOpen = true;
         this.infoModal = true;
@@ -611,50 +613,50 @@ export default class ChatTimeline extends LightningElement {
     closeModal() {
         this.isModalOpen = false;
     } 
-    openPreview(event){
-        let elementId = event.currentTarget.dataset.id;
-        this[NavigationMixin.Navigate]({
-            type: 'standard__namedPage',
-            attributes: {
-                pageName: 'filePreview'
-            },
-            state : {
-                selectedRecordId: elementId,
-                recordIds: this.fids
-            }
-        })
-    }
-    loadMore(){
-        this.moreLoaded = false;
-        var self = this;
-        loadFiles({ 
-            recordId: this.recordId, 
-            filters: this.conditions, 
-            defaultLimit: this.defaultNbFileDisplayed, 
-            offset: this.offset, 
-            sortField: this.sortField, 
-            sortOrder: this.sortOrder 
-        })
-        .then(result => {
-            for(var cdl of result){
-                self.attachments.push(self.calculateFileAttributes(cdl));
-                self.fileCreated = true;
-                if (this.fids != '') this.fids += ',';
-                this.fids += cdl.ContentDocumentId;
-            }
-            self.updateCounters(result.length);
-            self.moreLoaded = true;
-        });
-    }
-    openTimelineFile(){
-        this.timelineFile = true;
-        this.initRecords();
-        // refreshApex(this.ticketUsers);
-        // refreshApex(wiredFiles);
-    }    
-    closeTimelineFile(){
-        this.timelineFile = false;
-    }
+    // openPreview(event){
+    //     let elementId = event.currentTarget.dataset.id;
+    //     this[NavigationMixin.Navigate]({
+    //         type: 'standard__namedPage',
+    //         attributes: {
+    //             pageName: 'filePreview'
+    //         },
+    //         state : {
+    //             selectedRecordId: elementId,
+    //             recordIds: this.fids
+    //         }
+    //     })
+    // }
+    // loadMore(){
+    //     this.moreLoaded = false;
+    //     var self = this;
+    //     loadFiles({ 
+    //         recordId: this.recordId, 
+    //         filters: this.conditions, 
+    //         defaultLimit: this.defaultNbFileDisplayed, 
+    //         offset: this.offset, 
+    //         sortField: this.sortField, 
+    //         sortOrder: this.sortOrder 
+    //     })
+    //     .then(result => {
+    //         for(var cdl of result){
+    //             self.attachments.push(self.calculateFileAttributes(cdl));
+    //             self.fileCreated = true;
+    //             if (this.fids != '') this.fids += ',';
+    //             this.fids += cdl.ContentDocumentId;
+    //         }
+    //         self.updateCounters(result.length);
+    //         self.moreLoaded = true;
+    //     });
+    // }
+    // openTimelineFile(){
+    //     this.timelineFile = true;
+    //     this.initRecords();
+    //     // refreshApex(this.ticketUsers);
+    //     // refreshApex(wiredFiles);
+    // }    
+    // closeTimelineFile(){
+    //     this.timelineFile = false;
+    // }
     displaySweetAlert(titleValue, textValue, iconValue, buttonValue) {
         swal({
             title: titleValue,
@@ -804,30 +806,4 @@ export default class ChatTimeline extends LightningElement {
             this.timelinePosts = this.lastSavedData;
         }        
     }     
-    handleSubscribe() {
-        // Callback invoked whenever a new event message is received
-        const messageCallback = (response) => {
-            console.log('New message received: ', JSON.stringify(response));
-            refreshApex(this.timelinePostKey);
-            // let updatedTicketId = response.data.payload.TicketId__c;
-        };
-
-        // Invoke subscribe method of empApi. Pass reference to messageCallback
-        subscribe('/event/Help_Desk_Message__e', -1, messageCallback).then((response) => {
-            // Response contains the subscription information on subscribe call
-            console.log(
-                'Subscription request sent to: ',
-                JSON.stringify(response)
-            );
-            this.subscription = response;
-            //this.toggleSubscribeButton(true);
-        });
-    }
-    registerErrorListener() {
-        // Invoke onError empApi method
-        onError((error) => {
-            console.log('Received error from server: ', JSON.stringify(error));
-            // Error contains the server-side error
-        });
-    }    
 }

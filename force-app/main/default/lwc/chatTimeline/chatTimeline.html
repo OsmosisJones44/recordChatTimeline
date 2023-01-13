@@ -47,12 +47,12 @@
             <div class="containerClass">
                 <template for:each={timelinePosts} for:item="timelinePost">
                     <c-chat-timeline-tile key={timelinePost.Id} timeline-post={timelinePost} onrefresh={refreshPosts}
-                    onseen={openSeenModal} current-name={curName}></c-chat-timeline-tile>
+                        onseen={openSeenModal} current-name={curName}></c-chat-timeline-tile>
                 </template>
             </div>
             <template if:true={isLoading}>
-                    <lightning-spinner alternative-text="Loading">
-                    </lightning-spinner>
+                <lightning-spinner alternative-text="Loading">
+                </lightning-spinner>
             </template>
             <div class="slds-grid slds-wrap slds-p-top_small">
                 <div class="slds-col slds-size_11-of-12">
@@ -68,7 +68,7 @@
                                 disabled={disableButton} tooltip="Send">
                             </lightning-button-icon>
                         </div>
-                        <div class="slds-col slds-size_1-of-1 slds-align_absolute-center">
+                        <!-- <div class="slds-col slds-size_1-of-1 slds-align_absolute-center">
                             <template if:false={timelineFile}>
                                 <lightning-button-icon class="slds-m-top_small" name="save" icon-name="utility:add"
                                     variant="border" onclick={openTimelineFile} icon-position="right"
@@ -81,46 +81,46 @@
                                     icon-position="right" tooltip="Collapse">
                                 </lightning-button-icon>
                             </template>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
-                <template if:true={timelineFile}>
+                </div>
+                    <template if:false={showCustom}>
+                        <c-chat-user-list ticket-users={ticketUsers} title={userTitle}></c-chat-user-list>
+                    </template>
                     <template if:true={showCustom}>
-                        <div class="slds-col slds-size_1-of-1 slds-p-around_x-small">
-                            <h3 class="userList">Notifications</h3>
-                            <div class="slds-grid">
-                                <div class="slds-col slds-size_10-of-12 slds-align-bottom">
-                                    <lightning-record-edit-form object-api-name="User_Ticket_Relationship__c"
-                                        data-id="userSubmit">
-                                        <lightning-input-field field-name="User__c" data-id="userUpdate"
-                                            variant="label-hidden" style="margin-bottom: 0;"
-                                            onchange={handleUserChange}></lightning-input-field>
-
-                                    </lightning-record-edit-form>
-                                </div>
-                                <div class="slds-col slds-size_1-of-12 slds-align-bottom slds-var-p-left_xx-small">
-                                    <lightning-button label="Add" variant="brand"
-                                        onclick={handleAddUser}></lightning-button>
-                                </div>
+                        <h3 class="userList">Notifications</h3>
+                        <div class="slds-grid">
+                            <div class="slds-col slds-size_10-of-12 slds-align-bottom">
+                                <lightning-record-edit-form object-api-name="User_Ticket_Relationship__c"
+                                    data-id="userSubmit">
+                                    <lightning-input-field field-name="User__c" data-id="userUpdate" variant="label-hidden"
+                                        style="margin-bottom: 0;" onchange={handleUserChange}></lightning-input-field>
+    
+                                </lightning-record-edit-form>
                             </div>
-                            <div class="slds-p-horizontal_x-small slds-p-top_x-small ticketUserContainer">
-                                <template if:true={notifications}>
-                                    <template for:each={notifications} for:item="ticketUser">
-                                        <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser}>
-                                        </c-ticket-view-user-list>
-                                    </template>
-                                </template>
-                            </div>
-                            <div class="slds-p-horizontal_x-small slds-p-bottom_x-small ticketUserContainer">
-                                <template if:true={customNotifications}>
-                                    <template for:each={customNotifications} for:item="ticketUser">
-                                        <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser}>
-                                        </c-ticket-view-user-list>
-                                    </template>
-                                </template>
+                            <div class="slds-col slds-size_1-of-12 slds-align-bottom slds-var-p-left_xx-small">
+                                <lightning-button label="Add" variant="brand" onclick={handleAddUser}></lightning-button>
                             </div>
                         </div>
+                        <div class="slds-p-horizontal_x-small slds-p-top_x-small ticketUserContainer">
+                            <template if:true={notifications}>
+                                <template for:each={notifications} for:item="ticketUser">
+                                    <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser}>
+                                    </c-ticket-view-user-list>
+                                </template>
+                            </template>
+                        </div>
+                        <div class="slds-p-horizontal_x-small slds-p-bottom_x-small ticketUserContainer">
+                            <template if:true={customNotifications}>
+                                <template for:each={customNotifications} for:item="ticketUser">
+                                    <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser}>
+                                    </c-ticket-view-user-list>
+                                </template>
+                            </template>
+                        </div>
                     </template>
+                <!-- <template if:true={timelineFile}>
                     <div class="slds-col slds-size_1-of-1 slds-p-around_x-small">
                         <lightning-file-upload label="Attach file" name="fileUploader" record-id={recordId}
                             onuploadfinished={handleUploadFinished} multiple>
@@ -179,32 +179,9 @@
                                 </a>
                             </template>
                         </div>
-                        <!-- <h3 class="userList">Ticket Members</h3>
-                            <lightning-record-edit-form object-api-name="User_Ticket_Relationship__c" onsubmit={handleUserSubmit}
-                                onsuccess={handleUserSuccess} data-id="userSubmit">
-                                <div class="slds-grid">
-                                    <div class="slds-col slds-size_10-of-12 slds-align-bottom">
-                                        <lightning-input-field field-name="User__c" data-id="userUpdate" variant="label-hidden"
-                                            style="margin-bottom: 0;" onchange={handleUserChange}></lightning-input-field>
-                                    </div>
-                                    <div class="slds-col slds-size_1-of-12 slds-align-bottom slds-var-p-left_xx-small">
-                                        <lightning-button label="Add" variant="brand" onclick={handleUserSubmit}></lightning-button>
-                                    </div>
-                                </div>
-            
-                            </lightning-record-edit-form>
-                            <div class="slds-p-around_x-small ticketUserContainer">
-                                <template if:true={ticketUsers}>
-                                    <template for:each={ticketUsers.data} for:item="ticketUser">
-                                        <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser}>
-                                        </c-ticket-view-user-list>
-                                    </template>
-                                </template>
-                            </div> -->
-                    </div>
-                </template>
+                    </div> 
+                </template> -->
             </div>
-        </div>
     </lightning-card>
     <template if:true={isModalOpen}>
         <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"

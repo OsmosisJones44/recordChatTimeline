@@ -159,14 +159,16 @@ export default class NotificationListTile extends LightningElement {
         const eventElement = this.template.querySelector('lightning-formatted-date-time[data-id="hoverSelect"]');
         eventElement.classList.add('slds-hide');
     }
-    handleSelect(event){
+    handleSelect(event) {
         event.preventDefault();
         event.stopPropagation();
+        console.log(this.msgStatus.Ticket_Message__r.Preview__c);
         const selectEvent = new CustomEvent('timeline', {
             bubbles: true,
             detail: {
                 msgId: this.msgStatus.Ticket_Message__r.Id,
                 id: this.msgStatus.Ticket_Message__r.Record_Id_Form__c,
+                preview: this.msgStatus.Ticket_Message__r.Preview__c
             }
         });
         this.dispatchEvent(selectEvent);  
