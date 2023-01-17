@@ -85,8 +85,8 @@
                     </div>
                 </div>
                 </div>
-                    <template if:false={showCustom}>
-                        <c-chat-user-list ticket-users={ticketUsers} title={userTitle}></c-chat-user-list>
+                    <template if:true={showMembers}>
+                        <c-chat-user-list ticket-users={ticketUsers} title={userTitle} object-name={objectName}></c-chat-user-list>
                     </template>
                     <template if:true={showCustom}>
                         <h3 class="userList">Notifications</h3>

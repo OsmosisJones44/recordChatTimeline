@@ -72,7 +72,7 @@ public with sharing class ChatController {
             }
             List<Ticket_Message__c> recentMsgs = [SELECT Id, SeenBy__c, CreatedDate,Preview__c, DocumentId__c,Record_Id_Form__c, Parent_Record_Id__c, Name, Message__c, OwnerId, OwnerName__c,Parent_Ticket__c,Owner_URL__c,timelineClassName__c, Preview_Name__c
             FROM Ticket_Message__c WHERE Record_Id_Form__c != '' AND Id IN :ticketMsgs ORDER BY CreatedDate DESC];
-            List<Help_Desk_Message_Status__c> msgStatuses2 = [SELECT Id,tableTimelineClass__c,Ticket_Message__r.OwnerId, Ticket_Message__r.Message__c,Ticket_Message__r.Preview__c, Ticket_Message__r.Id, Ticket_Message__r.CreatedDate,Ticket_Message__r.DocumentId__c,Ticket_Message__r.OwnerName__c, Ticket_Message__r.Owner_URL__c, CreatedDate, Name, Ticket_Message__c,Ticket_Message__r.Record_Id_Form__c, OwnerId,Read__c,Liked__c FROM Help_Desk_Message_Status__c WHERE OwnerId = :userId AND Ticket_Message__c IN: recentMsgs ORDER BY CreatedDate DESC];
+            List<Help_Desk_Message_Status__c> msgStatuses2 = [SELECT Id, Search_Formula__c, tableTimelineClass__c,Ticket_Message__r.OwnerId, Ticket_Message__r.Message__c,Ticket_Message__r.Preview__c, Ticket_Message__r.Id, Ticket_Message__r.CreatedDate,Ticket_Message__r.DocumentId__c,Ticket_Message__r.OwnerName__c, Ticket_Message__r.Owner_URL__c, CreatedDate, Name, Ticket_Message__c,Ticket_Message__r.Record_Id_Form__c,Ticket_Message__r.Message_Source__c, OwnerId,Read__c,Liked__c FROM Help_Desk_Message_Status__c WHERE OwnerId = :userId AND Ticket_Message__c IN: recentMsgs ORDER BY CreatedDate DESC];
             return msgStatuses2;
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
@@ -82,7 +82,7 @@ public with sharing class ChatController {
     @AuraEnabled(cacheable=true)
     public static list<Help_Desk_Message_Status__c> findRecentOpenTicketMessages(string userId){
         try {
-            List<Help_Desk_Message_Status__c> msgStatuses = [SELECT Id, Ticket_Message__r.Message__c, Ticket_Message__r.Id, Ticket_Message__r.CreatedDate,Ticket_Message__r.DocumentId__c,Ticket_Message__r.OwnerName__c, Ticket_Message__r.Owner_URL__c, CreatedDate, Name, Ticket_Message__c,Ticket_Message__r.Record_Id_Form__c, OwnerId,Read__c,Liked__c FROM Help_Desk_Message_Status__c WHERE OwnerId = :userId ORDER BY CreatedDate DESC];
+            List<Help_Desk_Message_Status__c> msgStatuses = [SELECT Id, Ticket_Message__r.Message__c, Ticket_Message__r.Id, Ticket_Message__r.CreatedDate,Ticket_Message__r.DocumentId__c,Ticket_Message__r.OwnerName__c, Ticket_Message__r.Owner_URL__c, CreatedDate, Name, Ticket_Message__c,Ticket_Message__r.Record_Id_Form__c, OwnerId,Read__c,Liked__c FROM Help_Desk_Message_Status__c WHERE OwnerId = :userId AND Read__c = false ORDER BY CreatedDate DESC];
             Set<Id> parentMsgIds = new Set<Id>();
             Set<Id> ticketMsgs = new Set<Id>();
             for(Help_Desk_Message_Status__c a: msgStatuses){
@@ -95,7 +95,7 @@ public with sharing class ChatController {
             }
             List<Ticket_Message__c> recentMsgs = [SELECT Id, SeenBy__c, CreatedDate,Preview__c, DocumentId__c,Record_Id_Form__c, Parent_Record_Id__c, Name, Message__c, OwnerId, OwnerName__c,Parent_Ticket__c,Owner_URL__c,timelineClassName__c, Preview_Name__c
             FROM Ticket_Message__c WHERE Record_Id_Form__c != '' AND Id IN :ticketMsgs ORDER BY CreatedDate DESC];
-            List<Help_Desk_Message_Status__c> msgStatuses2 = [SELECT Id,tableTimelineClass__c,Ticket_Message__r.Parent_Record_Id__c,Ticket_Message__r.OwnerId, Ticket_Message__r.Message__c,Ticket_Message__r.Preview__c, Ticket_Message__r.Id, Ticket_Message__r.CreatedDate,Ticket_Message__r.DocumentId__c,Ticket_Message__r.OwnerName__c, Ticket_Message__r.Owner_URL__c, CreatedDate, Name, Ticket_Message__c,Ticket_Message__r.Record_Id_Form__c, OwnerId,Read__c,Liked__c FROM Help_Desk_Message_Status__c WHERE OwnerId = :userId AND Read__c = false AND Ticket_Message__c IN: recentMsgs ORDER BY CreatedDate DESC];
+            List<Help_Desk_Message_Status__c> msgStatuses2 = [SELECT Id, Search_Formula__c,tableTimelineClass__c,Ticket_Message__r.Parent_Record_Id__c,Ticket_Message__r.OwnerId, Ticket_Message__r.Message__c,Ticket_Message__r.Preview__c, Ticket_Message__r.Id, Ticket_Message__r.CreatedDate,Ticket_Message__r.Message_Source__c,Ticket_Message__r.DocumentId__c,Ticket_Message__r.OwnerName__c, Ticket_Message__r.Owner_URL__c, CreatedDate, Name, Ticket_Message__c,Ticket_Message__r.Record_Id_Form__c, OwnerId,Read__c,Liked__c FROM Help_Desk_Message_Status__c WHERE OwnerId = :userId AND Read__c = false AND Ticket_Message__c IN: recentMsgs ORDER BY CreatedDate DESC];
             return msgStatuses2;
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());

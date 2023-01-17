@@ -4,7 +4,7 @@ import { updateRecord } from 'lightning/uiRecordApi';
 import { refreshApex } from '@salesforce/apex';
 import getCurrentUserPhoto from '@salesforce/apex/BirthdayController.getCurrentUserPhoto';
 import getCurUser from '@salesforce/apex/BirthdayController.getCurUser';
-import createReadStatus from '@salesforce/apex/ChatController.createReadStatus';
+// import createReadStatus from '@salesforce/apex/ChatController.createReadStatus';
 import getUserMsgStatus from '@salesforce/apex/ChatController.getUserMsgStatus';
 // import MESSAGE_OBJECT from '@salesforce/schema/Help_Desk_Message_Status__c';
 // import TICKET_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Ticket_Message__c';
@@ -162,13 +162,14 @@ export default class NotificationListTile extends LightningElement {
     handleSelect(event) {
         event.preventDefault();
         event.stopPropagation();
-        console.log(this.msgStatus.Ticket_Message__r.Preview__c);
+        console.log(this.msgStatus.Ticket_Message__r.Message_Source__c);
         const selectEvent = new CustomEvent('timeline', {
             bubbles: true,
             detail: {
                 msgId: this.msgStatus.Ticket_Message__r.Id,
                 id: this.msgStatus.Ticket_Message__r.Record_Id_Form__c,
-                preview: this.msgStatus.Ticket_Message__r.Preview__c
+                preview: this.msgStatus.Ticket_Message__r.Preview__c,
+                source: this.msgStatus.Ticket_Message__r.Message_Source__c
             }
         });
         this.dispatchEvent(selectEvent);  

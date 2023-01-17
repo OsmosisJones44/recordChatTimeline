@@ -8,10 +8,15 @@
                 <lightning-button-icon icon-name="utility:back" onclick={goBack}></lightning-button-icon>
             </template>
         </div>
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Content Loading"></lightning-spinner>
+        </template>
         <template if:true={mainArea}>
             <template if:true={showSearch}>
-                <lightning-input type="search" label="Search Timeline" onchange={handleSearch}>
-                </lightning-input>
+                <div class="slds-p-vertical_x-small slds-border_bottom slds-m-bottom_x-small">
+                    <lightning-input type="search" label="Search Timeline" onchange={handleSearch}>
+                    </lightning-input>
+                </div>
             </template>
             <template if:true={showAll}>
                 <div class="slds-grid slds-wrap leftGridClass">
@@ -38,7 +43,7 @@
             </template>
         </template>
         <template if:false={mainArea}>
-            <c-chat-timeline record-id={recordId} title={timelineTitle}></c-chat-timeline>
+            <c-chat-timeline record-id={recordId} title={timelineTitle} show-members={showMembers} object-name={objectName} show-custom={showCustom} ticket-users={ticketUsers} user-title={userTitle}></c-chat-timeline>
         </template>
         <div slot="footer">
             <template if:true={mainArea}>

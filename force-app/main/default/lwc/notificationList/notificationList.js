@@ -1,6 +1,10 @@
 import { LightningElement, wire, api } from 'lwc';
 import findRecentTicketMessages from '@salesforce/apex/ChatController.findRecentTicketMessages';
 import findRecentOpenTicketMessages from '@salesforce/apex/ChatController.findRecentOpenTicketMessages';
+// import getTicketMembers from '@salesforce/apex/BirthdayController.getTicketMembers';
+// import getSetupMembers from '@salesforce/apex/BirthdayController.getSetupMembers';
+// import getCashRequestMembers from '@salesforce/apex/BirthdayController.getCashRequestMembers';
+import getRecordMembers from '@salesforce/apex/BirthdayController.getRecordMembers';
 import USER_ID from '@salesforce/user/Id';
 import OFFICE_SPACE from '@salesforce/resourceUrl/Office_Space';
 import { refreshApex } from '@salesforce/apex';
@@ -28,20 +32,28 @@ const columns = [
 ];
 
 export default class NotificationList extends LightningElement {
-    columns = columns;
+    recordId;
     userId = USER_ID;
+    columns = columns;
     officeSpacePic = OFFICE_SPACE;
     showTimeline;
     trueValue = true;
-    isLoading = true;
+    isLoading = false;
     lastSavedData;
     lastSavedOpenData;
+    showMembers = false;
+    showCustom = false;
+    ticketMembers;
+    setupMembers;
+    cashRequestMembers;
+    userTitle;
+    ticketUsers = {};
+    objectName;
     recentMsgs;
     recentMsgKey;
     recentOpenMsgs;
     recentOpenMsgKey;
     showAll;
-    recordId;
     mainArea;
     showSearch;
     error;
@@ -86,6 +98,84 @@ export default class NotificationList extends LightningElement {
         this.lastSavedOpenData = this.recentOpenMsgs;
         this.isLoading = false;
     }
+    @wire(getRecordMembers, { ticketId: '$recordId', objectName: '$objectName' })
+    memberSetup(result) {
+        this.membersKey = result;
+        const { data, error } = result;
+        if (data) {
+            this.ticketUsers = JSON.parse(JSON.stringify(data));
+            this.error = undefined;
+        } else if (error) {
+            this.ticketUsers = undefined;
+            this.error = error;
+            console.error(error);
+        } else {
+            this.error = undefined;
+            this.ticketUsers = undefined;
+        }
+        this.lastSavedRecordData = this.ticketUsers;
+        this.isLoading = false;
+    }
+    // @wire(getTicketMembers, { ticketId: '$recordId' })
+    // ticketMemberSetup(result) {
+    //     this.ticketMembersKey = result;
+    //     const { data, error } = result;
+    //     if (data) {
+    //         this.ticketMembers = JSON.parse(JSON.stringify(data));
+    //         this.error = undefined;
+    //     } else if (error) {
+    //         this.ticketMembers = undefined;
+    //         this.error = error;
+    //         console.error(error);
+    //     } else {
+    //         this.error = undefined;
+    //         this.ticketMembers = undefined;
+    //     }
+    //     this.ticketUsers = {
+    //         data: this.ticketMembers
+    //     }
+    //     this.isLoading = false;
+    // }
+    // @wire(getSetupMembers, { ticketId: '$recordId' })
+    // setupMemberSetup(result) {
+    //     this.setupMembersKey = result;
+    //     const { data, error } = result;
+    //     if (data) {
+    //         this.setupMembers = JSON.parse(JSON.stringify(data));
+    //         this.error = undefined;
+    //     } else if (error) {
+    //         this.setupMembers = undefined;
+    //         this.error = error;
+    //         console.error(error);
+    //     } else {
+    //         this.error = undefined;
+    //         this.setupMembers = undefined;
+    //     }
+    //     // this.ticketUsers.data = this.setupMembers;
+    //     this.isLoading = false;
+    // }
+    // @wire(getCashRequestMembers, { ticketId: '$recordId' })
+    // cashMemberSetup(result) {
+    //     this.cashRequestMembersKey = result;
+    //     const { data, error } = result;
+    //     if (data) {
+    //         this.cashRequestMembers = JSON.parse(JSON.stringify(data));
+    //         this.error = undefined;
+    //     } else if (error) {
+    //         this.cashRequestMembers = undefined;
+    //         this.error = error;
+    //         console.error(error);
+    //     } else {
+    //         this.error = undefined;
+    //         this.cashRequestMembers = undefined;
+    //     }
+    //     // this.ticketUsers.data = this.cashRequestMembers;
+    //     this.isLoading = false;
+    // }    
+    // @wire(getTicketMembers, {ticketId: '$recordId'}) ticketMembers;
+    // @wire(getSetupMembers, {ticketId: '$recordId'}) setupMembers;
+    // @wire(getCashRequestMembers, {ticketId: '$recordId'}) cashRequestMembers;
+
 
     connectedCallback() {
         this.showAll = false;
@@ -108,9 +198,50 @@ export default class NotificationList extends LightningElement {
     }
 
     openTimelineView(event) {
-        this.mainArea = false;
+        this.isLoading = true;
         this.recordId = event.detail.id;
         this.timelineTitle = event.detail.preview;
+        const source = event.detail.source;
+        console.log(this.cashRequestMembers);
+        if (source === 'Raise Cash' || source === 'Account Setup' || source === 'Help Desk') {
+            switch (source) {
+                case 'Raise Cash':
+                    this.userTitle = 'Cash Request Members';
+                    this.showMembers = true;
+                    this.showCustom = false;
+                    this.isLoading = false;
+                    this.mainArea = false;
+                    this.objectName = 'raiseCash';
+                    refreshApex(this.membersKey);
+                    break;
+                case 'Account Setup':
+                    this.userTitle = 'Setup Members';
+                    this.showMembers = true;
+                    this.showCustom = false;
+                    this.isLoading = false;
+                    this.mainArea = false;
+                    this.objectName = 'acctSetup';
+                    refreshApex(this.membersKey);
+                    break;
+                case 'Help Desk':
+                    this.userTitle = 'Ticket Members';
+                    this.showMembers = true;
+                    this.showCustom = false;
+                    this.isLoading = false;
+                    this.mainArea = false;
+                    this.objectName = 'helpDesk';
+                    refreshApex(this.membersKey);
+                    break;
+                default:
+                    this.isLoading = false;
+                    break;
+            }
+        } else {
+            this.showMembers = false;
+            this.showCustom = true;
+            this.isLoading = false;
+            this.mainArea = false;
+        }
     }
 
     goBack() {
@@ -121,6 +252,7 @@ export default class NotificationList extends LightningElement {
 
     handleTimelineView(event) {
         this.showTimeline = true;
+        console.log(event.detail);
         this.recordId = event.detail.id;
         const el = this.template.querySelector('c-chat-timeline');
         el.refreshTimelinePosts(event.detail.id);

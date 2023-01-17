@@ -45,7 +45,9 @@ export default class ChatTimeline extends LightningElement {
     @api ticketUsers;
     @api userTitle;
     @api ticketUser;
+    @api objectName;
     @api showCustom = false;
+    @api showMembers = false;
     @api notifications = []; 
     @api recipients = [];
     customRecipients = [];
