@@ -241,6 +241,16 @@ export default class ChatTimeline extends LightningElement {
     refreshPosts() {
         return refreshApex(this.timelinePostKey);
     }
+    refreshUsers(event) {
+        this.refreshPosts();
+        const selectEvent = new CustomEvent('refresh', {
+            bubbles: true,
+            detail: {
+                objectName: event.detail.objectName
+            }
+        });
+        this.dispatchEvent(selectEvent);  
+    }
     handleMessageChange(event) {
         this.messageValue = event.target.value;
     }

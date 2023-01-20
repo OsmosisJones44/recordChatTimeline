@@ -196,7 +196,9 @@ export default class NotificationList extends LightningElement {
     toggleSearch() {
         this.showSearch = !this.showSearch;
     }
-
+    handleUserSuccess(event) {
+        return refreshApex(this.membersKey);
+    }
     openTimelineView(event) {
         this.isLoading = true;
         this.recordId = event.detail.id;
