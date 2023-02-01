@@ -293,26 +293,32 @@ export default class ChatTimeline extends LightningElement {
         // event.preventDefault();
         // event.stopPropagation();
         this.isLoading = true;
-        this.customRecipients.push(this.userNameValue);
-        console.log('UserVal: '+this.userNameValue);
-        console.log('RecipientArrayVal: '+this.customRecipients);
-        getCurUser({userId:this.userNameValue})
-        .then((result) => {
-            console.log(JSON.stringify(result));
-            
-            // this.curUser = result;
-            this.customNotifications.push(result);
-            console.log('NotificationArrayVal: '+JSON.stringify(this.customNotifications));
-            this.isLoading = false;
-            // this.curName = result.Name;
-            this.error = undefined;
-        })
-            .catch((error) => {
-                console.log(error);
-                this.error = error;
+        if (!this.recipients.includes(this.userNameValue)) {
+            this.customRecipients.push(this.userNameValue);
+            console.log('UserVal: '+this.userNameValue);
+            console.log('RecipientArrayVal: '+this.customRecipients);
+            getCurUser({userId:this.userNameValue})
+            .then((result) => {
+                console.log(JSON.stringify(result));
+                
+                // this.curUser = result;
+                this.customNotifications.push(result);
+                console.log('NotificationArrayVal: '+JSON.stringify(this.customNotifications));
                 this.isLoading = false;
-                // this.curUser = undefined;
-        });
+                // this.curName = result.Name;
+                this.error = undefined;
+                this.template.querySelector('lightning-input-field[data-id="userUpdate"]').value = null;
+            })
+                .catch((error) => {
+                    console.log(error);
+                    this.error = error;
+                    this.isLoading = false;
+                    // this.curUser = undefined;
+            });
+        } else {
+            this.template.querySelector('lightning-input-field[data-id="userUpdate"]').value = null;
+            this.isLoading = false;
+        }
     }
     sendCustomNotifications(result) {
         console.log(result);
@@ -320,7 +326,7 @@ export default class ChatTimeline extends LightningElement {
         if (this.customRecipients.length != 0) {
             this.customRecipients.forEach(rec => {
                 const fields = {};
-                fields[HDMESSAGE_FIELD.fieldApiName] = this.messageValue;
+                fields[HDMESSAGE_FIELD.fieldApiName] = result.id;
                 fields[HDOWNER_FIELD.fieldApiName] = rec;
                 const recordInput = { apiName: STATUS_OBJECT.objectApiName, fields };
                 createRecord(recordInput)
@@ -331,7 +337,7 @@ export default class ChatTimeline extends LightningElement {
                         console.log(JSON.stringify(error));
                         this.dispatchEvent(
                             new ShowToastEvent({
-                                title: 'Error Creating Record',
+                                title: 'Error Creating Custom Notifcations',
                                 message: 'Contact your Salesforce Admin',
                                 variant: 'error',
                             }),
@@ -360,7 +366,7 @@ export default class ChatTimeline extends LightningElement {
                             variant: 'success',
                         }),
                         );
-                        // this.sendCustomNotifications(result);
+                        this.sendCustomNotifications(result);
                         refreshApex(this.timelinePostKey)
                         .then(() => {
                             this.isLoading = false;

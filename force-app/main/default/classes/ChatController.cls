@@ -55,6 +55,15 @@ public with sharing class ChatController {
             return null;
         }        
     }
+    @AuraEnabled(cacheable=true)
+    public static List<Help_Desk_Message_Status__c> getMessageStatuses(string messageId){
+        List<Help_Desk_Message_Status__c> msgStatuses = [SELECT Id, Ticket_Message__r.Message__c, Ticket_Message__r.Id, Ticket_Message__r.CreatedDate,Ticket_Message__r.DocumentId__c,Ticket_Message__r.OwnerName__c, Ticket_Message__r.Owner_URL__c, CreatedDate, Name, Ticket_Message__c,Ticket_Message__r.Record_Id_Form__c, OwnerId,Read__c,Liked__c FROM Help_Desk_Message_Status__c WHERE Ticket_Message__c = :messageId ORDER BY CreatedDate DESC];
+    }
+    @AuraEnabled(cacheable=true)
+    public static Integer getNumLikes(string messageId){
+        List<Help_Desk_Message_Status__c> msgStatuses = [SELECT Id, Ticket_Message__r.Message__c, Ticket_Message__r.Id, Ticket_Message__r.CreatedDate,Ticket_Message__r.DocumentId__c,Ticket_Message__r.OwnerName__c, Ticket_Message__r.Owner_URL__c, CreatedDate, Name, Ticket_Message__c,Ticket_Message__r.Record_Id_Form__c, OwnerId,Read__c,Liked__c FROM Help_Desk_Message_Status__c WHERE Ticket_Message__c = :messageId AND Liked__c = true ORDER BY CreatedDate DESC];
+        
+    }
 
     @AuraEnabled(cacheable=true)
     public static list<Help_Desk_Message_Status__c> findRecentTicketMessages(string userId){
