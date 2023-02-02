@@ -110,8 +110,6 @@
                                     </c-ticket-view-user-list>
                                 </template>
                             </template>
-                        </div>
-                        <div class="slds-p-horizontal_x-small slds-p-bottom_x-small ticketUserContainer">
                             <template if:true={customNotifications}>
                                 <template for:each={customNotifications} for:item="ticketUser">
                                     <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser}>

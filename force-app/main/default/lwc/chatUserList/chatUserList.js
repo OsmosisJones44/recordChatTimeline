@@ -26,6 +26,7 @@ export default class ChatUserList extends LightningElement {
     selectedName;
     messageValue;
     isLoading;
+    userNameValue;
     
     handleUserChange(event){
         this.userNameValue = event.target.value;
@@ -40,86 +41,97 @@ export default class ChatUserList extends LightningElement {
         this.dispatchEvent(selectEvent);  
     }
     handleUserSubmit() {
-        const fields = {};
-        console.log(this.objectName);
-        console.log(this.recordId);
         this.isLoading = true;
-        if (this.objectName === 'helpDesk') {
-            fields[TICKET_FIELD.fieldApiName] = this.recordId;
-        } else if (this.objectName === 'acctSetup') {
-            fields[SETUP_FIELD.fieldApiName] = this.recordId;
-        } else if (this.objectName === 'raiseCash') {
-            fields[REQUEST_FIELD.fieldApiName] = this.recordId;
-        }
-        fields[USER_FIELD.fieldApiName] = this.userNameValue;
-        fields[TICKETOWN_FIELD.fieldApiName] = this.userId;
-        fields[ACTIVE_FIELD.fieldApiName] = true;
-        const recordInput = { apiName: USER_OBJECT.objectApiName, fields };
-        createRecord(recordInput)
-            .then(() => {
-                this.dispatchEvent(
-                    new ShowToastEvent({
-                        title: 'Success',
-                        message: 'User Added to Ticket',
-                        variant: 'success',
-                    }),
-                );
-                getCurUser({
-                    userId: this.userNameValue
-                })
-                .then(result =>{
-                    this.selectedName = result.Name;
-                    const fields = {};
-                    this.messageValue = this.selectedName + ' was just added to the Ticket';
-                    fields[MESSAGE_FIELD.fieldApiName] = this.messageValue;
-                    fields[OWNER_FIELD.fieldApiName] = this.userId;
-                    fields[PARENT_FIELD.fieldApiName] = this.recordId;
-                    // fields[HIDDEN_FIELD.fieldApiName] = true;
-                    const recordInput = { apiName: MESSAGE_OBJECT.objectApiName, fields };
-                    createRecord(recordInput)
-                    .then(() => {
-                        this.isLoading = false;
-                        this.dispatchEvent(
-                            new ShowToastEvent({
-                                title: 'Success',
-                                message: 'Timeline Updated',
-                                variant: 'success',
-                            }),
+        if (this.userNameValue) {
+            const fields = {};
+            console.log(this.objectName);
+            console.log(this.recordId);
+            if (this.objectName === 'helpDesk') {
+                fields[TICKET_FIELD.fieldApiName] = this.recordId;
+            } else if (this.objectName === 'acctSetup') {
+                fields[SETUP_FIELD.fieldApiName] = this.recordId;
+            } else if (this.objectName === 'raiseCash') {
+                fields[REQUEST_FIELD.fieldApiName] = this.recordId;
+            }
+            fields[USER_FIELD.fieldApiName] = this.userNameValue;
+            fields[TICKETOWN_FIELD.fieldApiName] = this.userId;
+            fields[ACTIVE_FIELD.fieldApiName] = true;
+            const recordInput = { apiName: USER_OBJECT.objectApiName, fields };
+            createRecord(recordInput)
+                .then(() => {
+                    this.dispatchEvent(
+                        new ShowToastEvent({
+                            title: 'Success',
+                            message: 'User Added to Ticket',
+                            variant: 'success',
+                        }),
+                    );
+                    getCurUser({
+                        userId: this.userNameValue
+                    })
+                    .then(result =>{
+                        this.selectedName = result.Name;
+                        const fields = {};
+                        this.messageValue = this.selectedName + ' was just added to the Ticket';
+                        fields[MESSAGE_FIELD.fieldApiName] = this.messageValue;
+                        fields[OWNER_FIELD.fieldApiName] = this.userId;
+                        fields[PARENT_FIELD.fieldApiName] = this.recordId;
+                        // fields[HIDDEN_FIELD.fieldApiName] = true;
+                        const recordInput = { apiName: MESSAGE_OBJECT.objectApiName, fields };
+                        createRecord(recordInput)
+                        .then(() => {
+                            this.isLoading = false;
+                            this.dispatchEvent(
+                                new ShowToastEvent({
+                                    title: 'Success',
+                                    message: 'Timeline Updated',
+                                    variant: 'success',
+                                }),
+                                );
+                                this.template.querySelector('lightning-input-field[data-id="userUpdate"]').value = null;
+                                this.handleUserSuccess();
+                            })
+                        .catch(error => {
+                            console.log('Ticket Message: '+JSON.stringify(error));
+                            this.dispatchEvent(
+                                new ShowToastEvent({
+                                    title: 'Error Creating Record',
+                                    message: 'Contact your Salesforce Admin',
+                                    variant: 'error',
+                                }),
                             );
-                            this.template.querySelector('lightning-input-field[data-id="userUpdate"]').value = null;
-                            this.handleUserSuccess();
-                        })
+                        });
+                    })
                     .catch(error => {
-                        console.log('Ticket Message: '+JSON.stringify(error));
+                        console.log('Get User: '+JSON.stringify(error));
                         this.dispatchEvent(
                             new ShowToastEvent({
-                                title: 'Error Creating Record',
+                                title: 'Error Getting User',
                                 message: 'Contact your Salesforce Admin',
                                 variant: 'error',
                             }),
                         );
-                    });
+                    })
                 })
                 .catch(error => {
-                    console.log('Get User: '+JSON.stringify(error));
+                    console.log('User Relationship: '+JSON.stringify(error));
                     this.dispatchEvent(
                         new ShowToastEvent({
-                            title: 'Error Getting User',
+                            title: 'Error Creating Record',
                             message: 'Contact your Salesforce Admin',
                             variant: 'error',
                         }),
                     );
-                })
-            })
-            .catch(error => {
-                console.log('User Relationship: '+JSON.stringify(error));
-                this.dispatchEvent(
-                    new ShowToastEvent({
-                        title: 'Error Creating Record',
-                        message: 'Contact your Salesforce Admin',
-                        variant: 'error',
-                    }),
-                );
-            });
+                });
+        } else {
+            this.isLoading = false;
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Please select a user',
+                    message: 'Contact your Salesforce Admin w/ any questions',
+                    variant: 'error',
+                }),
+            );
+        }
     } 
 }

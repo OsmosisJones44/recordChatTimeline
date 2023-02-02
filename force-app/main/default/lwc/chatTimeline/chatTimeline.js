@@ -293,31 +293,42 @@ export default class ChatTimeline extends LightningElement {
         // event.preventDefault();
         // event.stopPropagation();
         this.isLoading = true;
-        if (!this.recipients.includes(this.userNameValue)) {
-            this.customRecipients.push(this.userNameValue);
-            console.log('UserVal: '+this.userNameValue);
-            console.log('RecipientArrayVal: '+this.customRecipients);
-            getCurUser({userId:this.userNameValue})
-            .then((result) => {
-                console.log(JSON.stringify(result));
-                
-                // this.curUser = result;
-                this.customNotifications.push(result);
-                console.log('NotificationArrayVal: '+JSON.stringify(this.customNotifications));
-                this.isLoading = false;
-                // this.curName = result.Name;
-                this.error = undefined;
-                this.template.querySelector('lightning-input-field[data-id="userUpdate"]').value = null;
-            })
-                .catch((error) => {
-                    console.log(error);
-                    this.error = error;
+        if (this.userNameValue) {
+            if (!this.recipients.includes(this.userNameValue)) {
+                this.customRecipients.push(this.userNameValue);
+                console.log('UserVal: '+this.userNameValue);
+                console.log('RecipientArrayVal: '+this.customRecipients);
+                getCurUser({userId:this.userNameValue})
+                .then((result) => {
+                    console.log(JSON.stringify(result));
+                    
+                    // this.curUser = result;
+                    this.customNotifications.push(result);
+                    console.log('NotificationArrayVal: '+JSON.stringify(this.customNotifications));
                     this.isLoading = false;
-                    // this.curUser = undefined;
-            });
+                    // this.curName = result.Name;
+                    this.error = undefined;
+                    this.template.querySelector('lightning-input-field[data-id="userUpdate"]').value = null;
+                })
+                    .catch((error) => {
+                        console.log(error);
+                        this.error = error;
+                        this.isLoading = false;
+                        // this.curUser = undefined;
+                });
+            } else {
+                this.template.querySelector('lightning-input-field[data-id="userUpdate"]').value = null;
+                this.isLoading = false;
+            }
         } else {
-            this.template.querySelector('lightning-input-field[data-id="userUpdate"]').value = null;
             this.isLoading = false;
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Error Adding User',
+                    message: 'Contact your Salesforce Admin',
+                    variant: 'error',
+                }),
+            );
         }
     }
     sendCustomNotifications(result) {
