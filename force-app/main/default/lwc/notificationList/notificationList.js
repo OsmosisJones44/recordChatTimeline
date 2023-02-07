@@ -58,8 +58,15 @@ export default class NotificationList extends LightningElement {
     showSearch;
     error;
     timelineTitle;
-    pageTitle = 'Open Timeline Messages';
+    pageTitle = 'Timelines with Open Messages';
 
+    get noNewMsg() {
+        if (this.recentOpenMsgs.length > 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }    
 
     // @wire(findRecentTicketMessages, { userId: '$userId' }) recentMsgs;
     @wire(findRecentTicketMessages, { userId: '$userId' })
@@ -86,6 +93,7 @@ export default class NotificationList extends LightningElement {
         const { data, error } = result;
         if (data) {
             this.recentOpenMsgs = JSON.parse(JSON.stringify(data));
+            // this.recentOpenMsgs = data;
             this.error = undefined;
         } else if (error) {
             this.recentOpenMsgs = undefined;
@@ -96,7 +104,7 @@ export default class NotificationList extends LightningElement {
             this.recentOpenMsgs = undefined;
         }
         this.lastSavedOpenData = this.recentOpenMsgs;
-        this.isLoading = false;
+        this.isLoading = false; 
     }
     @wire(getRecordMembers, { ticketId: '$recordId', objectName: '$objectName' })
     memberSetup(result) {
@@ -293,7 +301,7 @@ export default class NotificationList extends LightningElement {
         const searchKey = event.target.value.toLowerCase();
         console.log( 'Search String is ' + searchKey );
         if ( searchKey ) {
-            this.recentOpenMsgs = this.lastSavedOpenData;
+            this.recentOpenMsgs.data = this.lastSavedOpenData;
             // console.log( 'Tickets Records are ' + JSON.stringify( this.recentMsgs ) );
             if ( this.recentOpenMsgs ) {
                 let recs = [];

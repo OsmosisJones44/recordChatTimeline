@@ -37,13 +37,16 @@
                             <template for:each={recentOpenMsgs} for:item="openPost">
                                 <c-notification-list-tile key={openPost.Id} msg-status={openPost} ontimeline={openTimelineView}></c-notification-list-tile>
                             </template>
+                            <template if:true={noNewMsg}>
+                                <c-zz-desert message="0 Timelines with Unread Messages"></c-zz-desert>
+                            </template>
                         </template>
                     </div>
                 </div>
             </template>
         </template>
         <template if:false={mainArea}>
-            <c-chat-timeline record-id={recordId} onrefresh={handleUserSuccess} title={timelineTitle} show-members={showMembers} object-name={objectName} show-custom={showCustom} ticket-users={ticketUsers} user-title={userTitle}></c-chat-timeline>
+            <c-chat-timeline record-id={recordId} onrefresh={handleUserSuccess} show-timeline title={timelineTitle} show-members={showMembers} object-name={objectName} show-custom={showCustom} ticket-users={ticketUsers} user-title={userTitle}></c-chat-timeline>
         </template>
         <div slot="footer">
             <template if:true={mainArea}>

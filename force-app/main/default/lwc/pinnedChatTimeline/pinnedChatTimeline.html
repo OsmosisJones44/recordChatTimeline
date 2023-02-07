@@ -47,12 +47,13 @@
             <div class="containerClass">
                 <template if:true={timelinePosts}>
                     <template for:each={timelinePosts} for:item="timelinePost">
-                        <c-chat-timeline-tile key={timelinePost.Id} timeline-post={timelinePost} onrefresh={refreshPosts}
-                            onseen={openSeenModal} current-name={curName}></c-chat-timeline-tile>
+                        <c-chat-timeline-tile key={timelinePost.Id} show-pinned={showPinned} show-thread={showThread}
+                            timeline-post={timelinePost} onrefresh={refreshPosts} onseen={openSeenModal}
+                            current-name={curName}></c-chat-timeline-tile>
                     </template>
-                </template>
-                <template if:true={noData}>
-                    <c-no-data message="Nothing Pinned Yet" desert></c-no-data>
+                    <template if:true={noNewMsg}>
+                        <c-zz-fishing-deals message="Nothing Pinned Yet" height="100" width="auto"></c-zz-fishing-deals>
+                    </template>
                 </template>
             </div>
             <!-- <div class="slds-grid slds-wrap slds-p-top_small">

@@ -4,5 +4,6 @@
     "**/bower_components": true,
     "**/.sfdx": true
   },
-  "todo-tree.tree.showBadges": true
+  "todo-tree.tree.showBadges": true,
+  "livePreview.defaultPreviewPath": "/force-app/main/default/lwc/chatTimelineTile/chatTimelineTile.html"
 }

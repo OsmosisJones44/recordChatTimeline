@@ -50,11 +50,17 @@ export default class ChatTimeline extends LightningElement {
     @api showMembers = false;
     @api notifications = []; 
     @api recipients = [];
+    @api showPinned;
+    @api showThread;
+    @api inThread = false;
+    // @api showTimeline = false;
+    showRecordThreads;
     customRecipients = [];
     customNotifications = [];
     timelinePostKey;
     timelinePosts;
     mainArea;
+    ticketMsg;
     lastSavedData;
     disableButton;
     showFilters;
@@ -62,7 +68,6 @@ export default class ChatTimeline extends LightningElement {
     ticketSeenUsers;
     ticketMessageId;
     isModalOpen;
-    seenModal;
     sendEmail;
     sendEmailVal;
     followUpTask;
@@ -145,7 +150,6 @@ export default class ChatTimeline extends LightningElement {
         ];
     }
 
-
     // @wire(getMessages, {parentId: '$recordId'}) timelinePosts;
     @wire(getMessages, {parentId: '$recordId'})
     ticketSetup(result) {
@@ -157,7 +161,7 @@ export default class ChatTimeline extends LightningElement {
         } else if (error) {
             this.timelinePosts = undefined;
             this.error = error;
-            console.error(error);
+            console.error(JSON.stringify(error));
         } else {
             this.error = undefined;
             this.timelinePosts = undefined;
@@ -165,12 +169,29 @@ export default class ChatTimeline extends LightningElement {
         this.lastSavedData = this.timelinePosts;
         this.isLoading = false;
     };
-    @wire(getReadUsers, { ticketMessageId: '$ticketMessageId' }) ticketSeenUsers;
-
+    @wire(getReadUsers, { ticketMessageId: '$ticketMessageId' })
+    userSetup(result) {
+        this.ticketSeenUsers = result;
+        const { data, error } = result;
+        if (data) {
+            this.ticketUsers = JSON.parse(JSON.stringify(data));
+            this.error = undefined;
+        } else if (error) {
+            this.ticketUsers = undefined;
+            this.error = error;
+            console.error(JSON.stringify(error));
+        } else {
+            this.error = undefined;
+            this.ticketUsers = undefined;
+        }
+        this.lastSavedUserData = this.ticketUsers;
+        this.isLoading = false;
+    };
     
     connectedCallback() {
         this.disableButton = false;
         this.mainArea = true;
+        this.showRecordThreads = false;
         this.registerErrorListener();
         this.handleSubscribe();
         // console.log(this.recordId);
@@ -236,7 +257,7 @@ export default class ChatTimeline extends LightningElement {
     @api
     refreshTimelinePosts(rowId) {
         this.recordId = rowId;
-        refreshApex(this.timelinePostKey);
+        this.refreshPosts();
     }
     refreshPosts() {
         return refreshApex(this.timelinePostKey);
@@ -271,7 +292,16 @@ export default class ChatTimeline extends LightningElement {
         this.showSearch = !this.showSearch;
         this.timelinePosts = this.lastSavedData;
         refreshApex(this.timelinePostKey);
-    }    
+    }  
+    toggleThreads() {
+        console.log('ChatTimeline: '+this.recordId);
+        this.showRecordThreads = !this.showRecordThreads;
+        this.mainArea = !this.mainArea;
+        if (this.showRecordThreads) {
+            const el = this.template.querySelector('c-thread-container');
+            el.handleRefresh(); 
+        }
+    }
     scrollToBottom(){
         let containerChoosen = this.template.querySelector(".containerClass");
         containerChoosen.scrollTop = containerChoosen.scrollHeight;
@@ -626,21 +656,30 @@ export default class ChatTimeline extends LightningElement {
     //         i = Math.floor(Math.log(bytes) / Math.log(k));
     //     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     // }
-    openInfoModal() {
+    openModal(event) {
+        this.inThread = event.detail.inThread;
         this.isModalOpen = true;
-        this.infoModal = true;
-        this.seenModal = false;
-        this.modalHeader = 'Help Desk Notice';
-    }
-    openSeenModal(event) {
         this.ticketMessageId = event.detail.id;
-        this.isModalOpen = true;
-        this.seenModal = true;
-        this.modalHeader = 'Message Seen By...';
-        return refreshApex(this.ticketSeenUsers);
+        this.ticketMsg = event.detail.ticketMsg;
+        const showInfo = event.detail.showInfo;
+        if (this.inThread) {
+            this.modalHeader = 'Message Info';
+        } else {
+            this.modalHeader = 'Message Thread';
+            if (showInfo) {
+                const el = this.template.querySelector('c-thread-tile');
+                el.showInfoTab();    
+            }
+        }
+        // const el = this.template.querySelector('lightning-tabset');
+        // el.activeTabValue = 'info';
+        refreshApex(this.ticketSeenUsers);
     }
     closeModal() {
         this.isModalOpen = false;
+        this.refreshPosts();
+        const el = this.template.querySelectorAll('c-chat-timeline-tile');
+        el.forEach(elChild => elChild.refreshThread());  
     } 
     // openPreview(event){
     //     let elementId = event.currentTarget.dataset.id;

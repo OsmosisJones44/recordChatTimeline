@@ -23,12 +23,50 @@
 }
 .timeClass{
     font-size: smaller;
+    height: 21px;
 }
 .opacityClass{
     opacity: .4;
 }
 .animateFade{
     animation: fadeIn .25s;
+}
+.borderClass{
+    border: 1px solid transparent;
+}
+.borderClass:hover{
+    border-radius: .25rem;
+    border: 1px solid rgb(158, 158, 158);
+    background-color: white;
+    cursor: pointer;
+}
+.displayIt{
+    display: none;
+}
+.displayIt:hover{
+    display: block;
+}
+.marginVert{
+    margin-top: auto;
+    margin-bottom: auto;
+}
+.smallFont{
+    font-size:smaller;
+}
+.marginRight{
+    margin-right:auto;
+}
+.marginRight{
+    margin-left:auto;
+}
+.overFlow{
+    overflow: hidden;
+}
+.widthClass{
+    width: 58.33%
+}
+.flexNone{
+    flex:none;
 }
 
 @keyframes fadeIn {

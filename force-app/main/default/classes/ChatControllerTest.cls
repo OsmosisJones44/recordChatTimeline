@@ -2,7 +2,6 @@
 public with sharing class ChatControllerTest {
     @isTest
     static void findAccounts2() {
-        BirthdayControllerTest.createAccounts(10);
         Ticket_Message__c newStatus = new Ticket_Message__c();
         newStatus.OwnerId = '0052E00000JfpsNQAR';
         newStatus.Message__c = 'true';

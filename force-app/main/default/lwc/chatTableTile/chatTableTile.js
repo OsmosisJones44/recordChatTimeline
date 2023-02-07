@@ -11,6 +11,9 @@ import getUserMsgStatus from '@salesforce/apex/ChatController.getUserMsgStatus';
 // import READ_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Read__c';
 import ID_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Id';
 import LIKED_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Liked__c';
+import PARENT_FIELD from '@salesforce/schema/Ticket_Message__c.Id';
+import CLOSED_FIELD from '@salesforce/schema/Ticket_Message__c.Closed_Thread__c';
+
 // import OWNER_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.OwnerId';
 import USER_ID from '@salesforce/user/Id';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -19,6 +22,8 @@ export default class ChatTableTile extends NavigationMixin(LightningElement) {
     @api msgStatus;
     @api curName;
     @api curUser;
+    @api showConversation = false;
+    @api showThread = false;
     userId = USER_ID;
     smallPhotoUrl;
     showTime;
@@ -28,6 +33,8 @@ export default class ChatTableTile extends NavigationMixin(LightningElement) {
     liked;
     userMsgStatus;
     showLikes = false;
+    isLoading;
+    disableButton;
 
     @wire(getCurrentUserPhoto, {
         userId: '$msgStatus.Ticket_Message__r.OwnerId'
@@ -102,6 +109,7 @@ export default class ChatTableTile extends NavigationMixin(LightningElement) {
         //         console.log(error);
         //     })
         this.seenBy = this.msgStatus.Ticket_Message__r.SeenBy__c;
+        // this.closedTicket = this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Closed_Thread__c;
         this.setValues();
     }
     renderedCallback(){
@@ -119,6 +127,102 @@ export default class ChatTableTile extends NavigationMixin(LightningElement) {
                 selectedRecordId: this.msgStatus.Ticket_Message__r.DocumentId__c
             }
         })
+    }
+    handleOpen() {
+        const parentId = this.msgStatus.Ticket_Message__r.Parent_Record_Id__c;
+        console.log("ParentId: "+parentId)
+        this[NavigationMixin.Navigate]({
+            type: 'standard__recordPage',
+            attributes: {
+                recordId: parentId,
+                actionName: 'view'
+            }
+        });
+    }
+    handleOpenThread() {
+        const parentId = this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Parent_Record_Id__c;
+        console.log("ParentId: "+parentId)
+        this[NavigationMixin.Navigate]({
+            type: 'standard__recordPage',
+            attributes: {
+                recordId: parentId,
+                actionName: 'view'
+            }
+        });
+    }
+    handleResolve(event) {
+        event.stopPropagation();
+        event.preventDefault();
+        this.isLoading = true;
+        this.disableButton = true;
+        const fields = {};
+        fields[PARENT_FIELD.fieldApiName] = this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__c;
+        fields[CLOSED_FIELD.fieldApiName] = true;
+
+        const recordInput = { fields };
+
+        updateRecord(recordInput)
+            .then(() => {
+                this.isLoading = false;
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Success',
+                        message: 'Thread Resolved',
+                        variant: 'success'
+                    })
+                );
+                this.disableButton = false;
+                this.handleRefresh();
+            })
+            .catch(error => {
+                console.log(JSON.stringify(error));
+                this.isLoading = false;
+                this.disableButton = false;
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Error Resolving Message Thread',
+                        message: 'Screenshot Me and send to your Salesoforce Administrator',
+                        variant: 'error'
+                    })
+                );
+            });
+    }
+    handleReopen(event) {
+        event.stopPropagation();
+        event.preventDefault();
+        this.isLoading = true;
+        this.disableButton = true;
+        const fields = {};
+        fields[PARENT_FIELD.fieldApiName] = this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__c;
+        fields[CLOSED_FIELD.fieldApiName] = false;
+
+        const recordInput = { fields };
+
+        updateRecord(recordInput)
+            .then(() => {
+                this.isLoading = false;
+                this.disableButton = false;
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Success',
+                        message: 'Thread Re-Opened',
+                        variant: 'success'
+                    })
+                );
+                this.handleRefresh();
+            })
+            .catch(error => {
+                this.isLoading = false;
+                this.disableButton = false;
+                console.log(JSON.stringify(error));
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Error Re-Opening Message Thread',
+                        message: 'Screenshot Me and send to your Salesoforce Administrator',
+                        variant: 'error'
+                    })
+                );
+            });
     }
     handleLiked(event) {
         event.preventDefault();
@@ -160,21 +264,40 @@ export default class ChatTableTile extends NavigationMixin(LightningElement) {
         eventElement.classList.add('slds-hide');
     }
     handleSelect(event){
-        event.preventDefault();
-        event.stopPropagation();
-        const selectEvent = new CustomEvent('timeline', {
-            bubbles: true,
-            detail: {
-                msgId: this.msgStatus.Ticket_Message__r.Id,
-                id: this.msgStatus.Ticket_Message__r.Record_Id_Form__c,
-            }
-        });
-        this.dispatchEvent(selectEvent);  
+        // event.preventDefault();
+        // event.stopPropagation();
+        if (this.showThread) {
+            const selectEvent = new CustomEvent('timeline', {
+                bubbles: false,
+                detail: {
+                    msgId: this.msgStatus.Ticket_Message__r.Id,
+                    id: this.msgStatus.Ticket_Message__r.Record_Id_Form__c,
+                    timelinePost: this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r
+                }
+            });
+            this.dispatchEvent(selectEvent);  
+        } else {
+            const selectEvent = new CustomEvent('timeline', {
+                bubbles: false,
+                detail: {
+                    msgId: this.msgStatus.Ticket_Message__r.Id,
+                    id: this.msgStatus.Ticket_Message__r.Record_Id_Form__c,
+                    timelinePost: this.msgStatus.Ticket_Message__r
+                }
+            });
+            this.dispatchEvent(selectEvent); 
+        }
     }
     openSeenBy(event){
         event.preventDefault();
         event.stopPropagation();
         const selectEvent = new CustomEvent('seen', {
+            detail: this.msgStatus.Ticket_Message__r.Id
+        });
+        this.dispatchEvent(selectEvent);  
+    }
+    handleRefresh(){
+        const selectEvent = new CustomEvent('refresh', {
             detail: this.msgStatus.Ticket_Message__r.Id
         });
         this.dispatchEvent(selectEvent);  

@@ -12,5 +12,9 @@
         <targetConfig targets="lightning__FlowScreen">
             <property name="recordId" label="recordId" type="String" />
         </targetConfig>
+        <targetConfig targets="lightning__RecordPage">
+              <property name="showPinned" type="Boolean" />
+              <property name="showThread" type="Boolean" />
+        </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>

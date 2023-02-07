@@ -1,0 +1,94 @@
+<template>
+    <lightning-card title={ticketMsg.Preview__c} icon-name={ticketMsg.Icon_Name__c}>
+        <div slot="actions">
+            <lightning-button-group>
+                <lightning-button-icon onclick={handleOpen} icon-name="utility:new_window" tooltip="Open Parent Record"
+                    size="small"></lightning-button-icon>
+                <template if:false={closedThread}>
+                    <lightning-button-icon onclick={handleResolve} icon-name="utility:success" variant="brand" tooltip="Resolve Thread"
+                        size="small"></lightning-button-icon>
+                </template>
+                <template if:true={closedThread}>
+                    <lightning-button-icon onclick={handleReopen} icon-name="utility:email_open" tooltip="Re-Open Closed Thread"
+                        size="small"></lightning-button-icon>
+                </template>
+            </lightning-button-group>
+        </div>
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading">
+            </lightning-spinner>
+        </template>
+        <template if:true={mainArea}>
+            <div class="slds-p-around-large slds-m-bottom_small">
+                <c-chat-timeline-tile timeline-post={ticketMsg} show-pinned onrefresh={refreshPosts} 
+                    current-name={curName}></c-chat-timeline-tile>
+            </div>
+            <lightning-tabset data-id="threadTabs">
+                <lightning-tab label="Thread" icon-name="utility:comments" value="thread">
+                    <div class={threadBox}>
+                        <c-chat-timeline record-id={recordId} title="Message Thread" ticket-users={ticketUsers} in-thread recipients={customRecipients} notifications={ticketUsers}></c-chat-timeline>
+                    </div>
+                </lightning-tab>
+                <lightning-tab label="Notified" icon-name="utility:people" value="info">
+                    <slot name="seen"></slot>
+                    <!-- <div class="slds-col slds-size_1-of-1 slds-p-around_x-small">
+                        <lightning-file-upload label="Attach file" name="fileUploader" record-id={ticketMsg.Parent_Record_Id__c}
+                            onuploadfinished={handleUploadFinished} multiple>
+                        </lightning-file-upload>
+                        <lightning-spinner if:true={isLoading} alternative-text="Loading" size="small"></lightning-spinner>
+                        <h3 class="userList">{fileTitle}</h3>
+                        <div class="slds-m-horizontal_x-small attachmentContainer">
+                            <ul>
+                                <template if:true={loaded}>
+                                    <template for:each={attachments} for:item="attachment">
+                                        <li key={attachment.Id} class="forceContentVirtualRelatedListStencil forceRecordLayout">
+                                            <div class="slds-list_horizontal slds-media_center slds-var-p-bottom_xx-small">
+                                                <div class="slds-show_inline-block slds-align-middle thumbnailImg">
+                                                    <lightning-icon icon-name={attachment.icon} alternative-text="Doctype file"
+                                                        data-id={attachment.Id} title="Doctype"></lightning-icon>
+                                                    <img src={attachment.src} class="thumbnailImg slds-hide" data-id={attachment.Id}
+                                                        onload={handleLoad} />
+                                                </div>
+                                                <div
+                                                    class="slds-show_inline-block slds-var-p-left_x-small slds-truncate slds-var-m-right_x-small">
+                                                    <a class="itemTitle uiOutputText" onclick={openPreview}
+                                                        data-id={attachment.ContentDocumentId}>{attachment.ContentDocument.Title}</a>
+                                                    <p class="slds-m-around_none secondaryFields slds-text-body_small slds-truncate">
+                                                        <span>
+                                                            <lightning-formatted-date-time value={attachment.ContentDocument.CreatedDate}>
+                                                            </lightning-formatted-date-time>
+                                                        </span>
+                                                        <span> {attachment.size} </span>
+                                                        <span>{attachment.ContentDocument.FileExtension}</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </template>
+                                </template>
+                            </ul>
+                            <template if:true={moreRecords}>
+                                <a onclick={loadMore}>
+                                    <div class="slds-card__footer">
+                                        <template if:true={moreLoaded}>
+                                            <span>View More</span>
+                                        </template>
+                                        <template if:false={moreLoaded}>
+                                            <div style="position: relative; min-height:50px;">
+                                                <lightning-spinner alternative-text="Loading" size="small">
+                                                </lightning-spinner>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </a>
+                            </template>
+                        </div>
+                    </div> -->
+                </lightning-tab>
+                <lightning-tab label="Parent Timeline" icon-name="utility:chat" value="parent">
+                    <c-chat-timeline record-id={ticketMsg.Parent_Record_Id__c} title="Timeline" source={source} show-pinned></c-chat-timeline>
+                </lightning-tab>
+            </lightning-tabset>
+        </template>
+    </lightning-card>
+</template>

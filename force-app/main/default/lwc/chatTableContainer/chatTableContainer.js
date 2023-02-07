@@ -1,4 +1,5 @@
-import { LightningElement, wire } from 'lwc';
+import { LightningElement, wire, api } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
 import findRecentTicketMessages from '@salesforce/apex/ChatController.findRecentTicketMessages';
 import USER_ID from '@salesforce/user/Id';
 import OFFICE_SPACE from '@salesforce/resourceUrl/Office_Space';
@@ -26,17 +27,34 @@ const columns = [
     }
 ];
 
-export default class ChatTableContainer extends LightningElement {
+export default class ChatTableContainer extends NavigationMixin(LightningElement) {
+    @api previewWidth = "slds-col slds-size_1-of-2 slds-border_right leftGridClass";
+    @api timelineWidth = "slds-col slds-size_1-of-2 slds-border_left slds-p-horizontal_x-small slds-p-top_x-small";
+    @api showTimelineVal = false;
     columns = columns;
     userId = USER_ID;
     officeSpacePic = OFFICE_SPACE;
     showTimeline;
     trueValue = true;
-    isLoading = true;
+    isLoading;
     lastSavedData;
     recentMsgs;
     recentMsgKey;
+    recordId = '';
+    showTimeline = false;
 
+    get noMsgSelected() {
+        if (this.recordId != '') {
+            return false;
+        } else {
+            return true;
+        }
+    }  
+
+    constructor() {
+        super();
+        this.isLoading = true;
+    }
 
     // @wire(findRecentTicketMessages, { userId: '$userId' }) recentMsgs;
     @wire(findRecentTicketMessages, { userId: '$userId' })
@@ -67,8 +85,23 @@ export default class ChatTableContainer extends LightningElement {
     handleTimelineView(event) {
         this.showTimeline = true;
         this.recordId = event.detail.id;
-        const el = this.template.querySelector('c-chat-timeline');
-        el.refreshTimelinePosts(event.detail.id);
+        this.ticketMsg = event.detail.timelinePost;
+        // const el = this.template.querySelector('c-chat-timeline');
+        // el.refreshTimelinePosts(event.detail.id);
+    }
+    handleOpen() {
+        const parentId = this.ticketMsg.Parent_Record_Id__c;
+        console.log("ParentId: "+parentId)
+        this[NavigationMixin.Navigate]({
+            type: 'standard__recordPage',
+            attributes: {
+                recordId: parentId,
+                actionName: 'view'
+            }
+        });
+    }
+    handleRefresh() {
+        return refreshApex(this.recentMsgKey);
     }
     handleSearch(event) {
         const searchKey = event.target.value.toLowerCase();

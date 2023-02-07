@@ -1,0 +1,11 @@
+<template>
+    <c-trading-desk-notifications card-width="slds-col slds-size_1-of-3 slds-p-horizontal_xx-small slds-p-bottom_x-small" utility-bar></c-trading-desk-notifications>
+    <lightning-tabset variant="scoped">
+        <lightning-tab label="Timelines" icon-name="utility:chat">
+            <c-chat-table-container timeline-width="slds-col slds-size_1-of-2 slds-border_left slds-p-horizontal_x-small slds-p-top_x-small" preview-width="slds-col slds-size_1-of-2 slds-border_right leftGridClass" show-timeline-val></c-chat-table-container>
+        </lightning-tab>
+        <lightning-tab label="Threads" icon-name="utility:comments">
+            <c-thread-container thread-box="slds-m-left_medium slds-box slds-box_xx-small" show-thread-val record-id=""></c-thread-container>
+        </lightning-tab>
+    </lightning-tabset>
+</template>

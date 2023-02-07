@@ -1,12 +1,11 @@
-.leftGridClass{
-    max-height: 75vh;
-    overflow-y: scroll;
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
-}
-/* Hide scrollbar for Chrome, Safari and Opera */
-.leftGridClass::-webkit-scrollbar {
-    display: none;
+.userList{
+    font-weight: bold; 
+    font-size: max(.65vw, 14px);
+    color: #3C648D;
+    text-align: left;
+    width: 97%;
+    padding-bottom: 6px;
+    padding-top: 6px;
 }
 .gridClass{
     max-height: 75vh;
@@ -16,5 +15,15 @@
 }
 /* Hide scrollbar for Chrome, Safari and Opera */
 .gridClass::-webkit-scrollbar {
+    display: none;
+}
+.leftGridClass{
+    max-height: 75vh;
+    overflow-y: scroll;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+/* Hide scrollbar for Chrome, Safari and Opera */
+.leftGridClass::-webkit-scrollbar {
     display: none;
 }

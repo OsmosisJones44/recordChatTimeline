@@ -38,6 +38,8 @@ export default class PinnedChatTimeline extends LightningElement {
     @api defaultNbFileDisplayed;
     @api limitRows;  
     @api title = 'Pinned Timeline Posts';
+    @api showPinned = false;
+    @api showThread = false;;
     noData;
     timelinePostKey;
     timelinePosts;
@@ -128,6 +130,13 @@ export default class PinnedChatTimeline extends LightningElement {
             { label: 'Low', value: 'Low' },
         ];
     }
+    get noNewMsg() {
+        if (this.timelinePosts.length > 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }      
 
 
     // @wire(getMessages, {parentId: '$recordId'}) timelinePosts;

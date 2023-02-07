@@ -1,31 +1,40 @@
 .containerClass{
     cursor: pointer;
+    border-bottom: 1px solid rgb(37, 37, 37);
 }
 .containerClass:hover{
-    background-color: rgb(228, 228, 228);
+    background-color: rgb(241, 241, 241);
 }
 .unseenClass{
     background-color: #3C648D;
-    padding: .5rem;
+    padding: .75rem;
     /* color: white; */
 }
-
+:host {
+    --sds-c-card-color-background: transparent;
+}
 .seenClass{
-    padding: .5rem;
+    padding-top: .3rem;
+    padding-bottom: .3rem;
 }
-.seenClass:hover{
+/* .seenClass:hover{
     background-color: rgb(228, 228, 228);
-}
+} */
 .previewClass{
     opacity: 1;
     font-size: .9rem;
     font-weight: bold;
 }
+.previewClassLight{
+    opacity: 1;
+    font-size: smaller;
+    font-weight: normal;
+}
 .timeClass{
     font-size: smaller;
 }
 .opacityClass{
-    opacity: .4;
+    opacity: .5;
 }
 .animateFade{
     animation: fadeIn .25s;
