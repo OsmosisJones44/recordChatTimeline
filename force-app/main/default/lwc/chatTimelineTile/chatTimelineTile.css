@@ -69,6 +69,11 @@
     flex:none;
 }
 
+.setThreadWidth{
+    width: min(100%,600px)
+}
+
+
 @keyframes fadeIn {
     from {
         transform: scale(.99) translateY(-.05rem);

@@ -26,7 +26,7 @@
             <lightning-tabset data-id="threadTabs">
                 <lightning-tab label="Thread" icon-name="utility:comments" value="thread">
                     <div class={threadBox}>
-                        <c-chat-timeline record-id={recordId} title="Message Thread" ticket-users={ticketUsers} in-thread recipients={customRecipients} notifications={ticketUsers}></c-chat-timeline>
+                        <c-chat-timeline record-id={recordId} title="Message Thread" ticket-users={ticketUsers} timeline-container-class={timelineContainerClass} in-thread recipients={customRecipients} notifications={ticketUsers}></c-chat-timeline>
                     </div>
                 </lightning-tab>
                 <lightning-tab label="Notified" icon-name="utility:people" value="info">

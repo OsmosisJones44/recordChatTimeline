@@ -1,6 +1,12 @@
 .containerClass{
     display:flex;
-    max-height: Min(50vh,50rem);
+    max-height: 40vh;
+    overflow-y: auto;
+    flex-direction:column-reverse;
+}
+.threadTimelineClass{
+    display:flex;
+    max-height: 25vh;
     overflow-y: auto;
     flex-direction:column-reverse;
 }
@@ -16,3 +22,8 @@
 .moveLeft{
     transform: translateX(-.5rem);
 }
+
+.modalExtender{
+    max-width: 50rem;
+}
+lightning-rich-text-toolbar-button[data-id="richTextSelect"] > button

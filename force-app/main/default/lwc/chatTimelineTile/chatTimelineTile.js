@@ -27,6 +27,10 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
     @api showThread = false;
     showLikes = false;
     thread;
+    smallPhotoThreadArr = [];
+    smallPhotoThreads = [...new Set(this.smallPhotoThreadArr)];
+    // smallPhotoThreads = [...new Set(array)];
+    // smallPhotoThreadsSet = new Set();
     openThread = false;
     threadLen;
     recentMsg;
@@ -72,6 +76,10 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
         return this.timelinePost.Thread__c;
     }
 
+    get smallPhotoThreadsList() {
+        return this.removeDuplicates(this.smallPhotoThreads, "threadSmallPhotoUrl");
+    }
+
     // get postOwner(){
     //     return this.recentThread[0].OwnerId;
     // }
@@ -84,17 +92,36 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
             this.recentThread = JSON.parse(JSON.stringify(data));
             this.error = undefined;
             this.threadLen = this.recentThread.length;
-                if (this.threadLen > 0) {
-                    this.openThread = true;
-                    this.recentMsg = this.recentThread[0];
-                    this.createdDate = new Date(this.recentMsg.CreatedDate);
-                    console.log('ResultLen: ',this.threadLen);
-                    console.log('recentMsg: ',JSON.stringify(this.recentMsg));
+            if (this.threadLen > 0) {
+                this.openThread = true;
+                this.recentMsg = this.recentThread[0];
+                this.createdDate = new Date(this.recentMsg.CreatedDate);
+                // console.log('ResultLen: ',this.threadLen);
+                // console.log('recentMsg: ', JSON.stringify(this.recentMsg));
+                // getCurrentUserPhoto({
+                //     userId: this.recentMsg.OwnerId
+                // })
+                //     .then(result => {
+                //         this.threadSmallPhotoUrl = result;
+                //         this.handleHoverThread();
+                //         this.handleNoHoverThread();
+                //         this.error = undefined;
+                //     })
+                //     .catch(error => {
+                //         this.threadSmallPhotoUrl = undefined;
+                //         this.error = error;
+                //         console.log(JSON.stringify(error));
+                //     })
+                this.recentThread.forEach(element => {
                     getCurrentUserPhoto({
-                        userId: this.recentMsg.OwnerId
+                        userId: element.OwnerId
                     })
                         .then(result => {
-                            this.threadSmallPhotoUrl = result;
+                            this.threadSmallPhotoUrl = {
+                                id: element.Id,
+                                threadSmallPhotoUrl: result
+                            };
+                            this.smallPhotoThreads.push(this.threadSmallPhotoUrl);
                             this.handleHoverThread();
                             this.handleNoHoverThread();
                             this.error = undefined;
@@ -104,8 +131,12 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
                             this.error = error;
                             console.log(JSON.stringify(error));
                         })
-                    this.error = undefined;
-                }
+                });
+                // console.log("Threads Before: "+JSON.stringify(this.smallPhotoThreads));
+                // this.removeDuplicates(this.smallPhotoThreads, "threadSmallPhotoUrl");
+                // console.log("Threads After: "+JSON.stringify(this.smallPhotoThreads))
+                this.error = undefined;
+            }
         }else if(error){
             console.log(JSON.stringify(error));
         }else{
@@ -169,6 +200,13 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
             })
         this.editMsg = false;
         this.setValues();
+    }
+    removeDuplicates(arr, prop) {
+        let obj = {};
+        return arr.filter(function(item) {
+            let value = item[prop];
+            return obj.hasOwnProperty(value) ? false : (obj[value] = true);
+        });
     }
     @api
     refreshThread() {

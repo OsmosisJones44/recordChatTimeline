@@ -52,7 +52,7 @@
         </div>
         <template if:true={mainArea}>
             <div class="slds-p-horizontal_small">
-                <div class="containerClass">
+                <div class={timelineContainerClass}>
                     <template for:each={timelinePosts} for:item="timelinePost">
                         <c-chat-timeline-tile key={timelinePost.Id} timeline-post={timelinePost} show-pinned={showPinned} show-thread={showThread} onthread={openModal} onrefresh={refreshPosts}
                             onseen={openModal} current-name={curName}></c-chat-timeline-tile>
@@ -66,13 +66,19 @@
                     <div class="slds-col slds-size_11-of-12">
                         <lightning-input-rich-text variant="bottom-toolbar" value={messageValue}
                             placeholder="Enter Timeline Message..." onchange={handleMessageChange} formats={formats}>
+                            <lightning-rich-text-toolbar-button-group slot="toolbar" style="flex-grow:1;"></lightning-rich-text-toolbar-button-group>
+                            <lightning-rich-text-toolbar-button-group slot="toolbar" aria-label="Template Button Group">
+                                <lightning-rich-text-toolbar-button icon-name="utility:send" variant="brand" data-id="richTextSelect" icon-alternative-text="Insert Doc Template"
+                                    onclick={createMessage}>
+                                </lightning-rich-text-toolbar-button>
+                            </lightning-rich-text-toolbar-button-group>
                         </lightning-input-rich-text>
                     </div>
                     <div class="slds-col slds-size_1-of-12">
                         <div class="slds-grid slds-wrap">
                             <div class="slds-col slds-size_1-of-1 slds-align_absolute-center">
                                 <lightning-button-icon data-id="timelineSendButton" class="slds-m-top_small" name="save"
-                                    variant="brand" onclick={createMessage} icon-name="utility:send" icon-position="right"
+                                    variant="brand" onclick={createMessage} icon-name="utility:send"
                                     disabled={disableButton} tooltip="Send">
                                 </lightning-button-icon>
                             </div>
@@ -92,7 +98,7 @@
                             </div> -->
                         </div>
                     </div>
-                    </div>
+                    <div class="slds-col slds-size_1-of-1">
                         <template if:true={showMembers}>
                             <c-chat-user-list ticket-users={ticketUsers} title={userTitle} record-id={recordId} onrefresh={refreshUsers} object-name={objectName}></c-chat-user-list>
                         </template>
@@ -126,6 +132,8 @@
                                 </template>
                             </div>
                         </template>
+                    </div>
+                </div>
                     <!-- <template if:true={timelineFile}>
                         <div class="slds-col slds-size_1-of-1 slds-p-around_x-small">
                             <lightning-file-upload label="Attach file" name="fileUploader" record-id={recordId}

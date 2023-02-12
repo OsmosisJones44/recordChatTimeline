@@ -53,6 +53,7 @@ export default class ChatTimeline extends LightningElement {
     @api showPinned;
     @api showThread;
     @api inThread = false;
+    @api timelineContainerClass = 'containerClass';
     // @api showTimeline = false;
     showRecordThreads;
     customRecipients = [];

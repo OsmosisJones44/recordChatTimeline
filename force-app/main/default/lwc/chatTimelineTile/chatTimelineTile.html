@@ -56,19 +56,32 @@
                 </template>
                 <template if:true={showThread}>
                     <template if:true={openThread}>
-                        <div class="slds-grid slds-m-horizontal_xxx-small slds-m-top_xx-small">
-                            <div class="slds-col slds-size_7-of-12">
-                                <div class="slds-grid slds-wrap borderClass marginVert slds-p-around_xxx-small" onmouseover={handleHoverThread} onmouseout={handleNoHoverThread} onclick={handleOpenThread}>
+                        <div class="slds-m-horizontal_xxx-small slds-m-top_xx-small">
+                            <div class="setThreadWidth">
+                                <div class="slds-grid borderClass marginVert slds-p-around_xxx-small" onmouseover={handleHoverThread} onmouseout={handleNoHoverThread} onclick={handleOpenThread}>
                                     <div class="slds-col flexNone">
+                                        <div class="slds-grid">
+                                            <template for:each={smallPhotoThreadsList} for:item="photo" for:index="index">
+                                            <!-- <div class="slds-col flexNone slds-m-horizontal_xxx-small" key={photo.id}>
+                                                <lightning-avatar slot="media" size="small" src={photo.threadSmallPhotoUrl} fallback-icon-name="standard:user">
+                                                </lightning-avatar>
+                                            </div> -->
+                                            <c-chat-avatar size="small" photo={photo} key={photo.id} container-class="slds-col flexNone slds-m-horizontal_xxx-small"></c-chat-avatar>
+                                        </template>
+                                        </div>
+                                        <!-- <lightning-avatar slot="media" size="small" src={threadSmallPhotoUrl} fallback-icon-name="standard:user">
+                                        </lightning-avatar>
                                         <lightning-avatar slot="media" size="small" src={threadSmallPhotoUrl} fallback-icon-name="standard:user">
                                         </lightning-avatar>
+                                        <lightning-avatar slot="media" size="small" src={threadSmallPhotoUrl} fallback-icon-name="standard:user">
+                                        </lightning-avatar> -->
                                     </div>
                                     <div class="slds-col flexNone marginVert slds-m-horizontal_x-small smallFont">
                                         <a class="slds-truncate" onclick={handleOpenThread}>{numReplies}</a>
                                     </div>
-                                    <div class="slds-col flexNone marginVert smallFont overFlow">
+                                    <div class="slds-col flexNone marginVert smallFont overFlow slds-truncate">
                                         <template if:true={showRelDate}>
-                                            <span>Last reply <lightning-relative-date-time value={createdDate} class="slds-truncate"></lightning-relative-date-time></span>
+                                            <span class="slds-truncate">Last reply <lightning-relative-date-time value={createdDate} class="slds-truncate"></lightning-relative-date-time></span>
                                         </template>
                                         <template if:false={showRelDate}>
                                             View Thread
@@ -85,14 +98,14 @@
                 <div class="slds-grid slds-wrap timeClass slds-p-top_xx-small">
                     <div class="slds-col slds-size_8-of-12">
                         <div class="slds-grid">
-                            <div class="slds-col flexNone marginVert">
+                            <div class="slds-col flexNone">
                                 <lightning-formatted-date-time data-id="hoverSelect" class="animateFade opacityClass"
                                     value={timelinePost.CreatedDate} year="numeric" month="short" day="2-digit"
                                     hour="2-digit" minute="2-digit" hour12="true">
                                 </lightning-formatted-date-time>
                             </div>
-                            <div class="slds-col flexNone opacityClass slds-m-horizontal_xx-small marginVert">|</div>
-                            <div class="slds-col flexNone marginVert">
+                            <div class="slds-col flexNone opacityClass slds-m-horizontal_xx-small">|</div>
+                            <div class="slds-col flexNone">
                                 <lightning-relative-date-time value={createdDateParent} class="opacityClass"></lightning-relative-date-time>
                             </div>
                         </div>
