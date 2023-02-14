@@ -8,7 +8,20 @@
 .unseenClass{
     background-color: #3C648D;
     padding: .75rem;
-    /* color: white; */
+    color: white;
+    transition: all .10s;
+    border-radius: .5rem
+}
+.unseenClass:hover{
+    border-radius: .5rem
+}
+.nameLinkClass{
+    text-decoration: none;
+    color: inherit;
+    font-weight: bold;
+}
+.nameLinkClass{
+    text-decoration: underline;
 }
 :host {
     --sds-c-card-color-background: transparent;
@@ -39,7 +52,6 @@
 .animateFade{
     animation: fadeIn .25s;
 }
-
 @keyframes fadeIn {
     from {
         transform: scale(.99) translateY(-.05rem);

@@ -81,7 +81,7 @@
                                     </div>
                                     <div class="slds-col flexNone marginVert smallFont overFlow slds-truncate">
                                         <template if:true={showRelDate}>
-                                            <span class="slds-truncate">Last reply <lightning-relative-date-time value={createdDate} class="slds-truncate"></lightning-relative-date-time></span>
+                                            <span class="slds-truncate">{lastReply}<lightning-relative-date-time value={createdDate} class="slds-truncate"></lightning-relative-date-time></span>
                                         </template>
                                         <template if:false={showRelDate}>
                                             View Thread

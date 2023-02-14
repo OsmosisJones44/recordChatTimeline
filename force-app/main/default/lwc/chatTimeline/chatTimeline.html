@@ -4,15 +4,20 @@
             <lightning-button-group>
                 <template if:true={mainArea}>
                     <template if:false={inThread}>
-                        <lightning-button-icon style="float:right" variant="container" tooltip="See Record Threads"
-                            icon-name="utility:comments" onclick={toggleThreads}>
-                        </lightning-button-icon>
+                        <template if:true={mainArea}>
+                            <lightning-button-icon style="float:right" variant="container" tooltip="See Record Threads"
+                                icon-name="utility:comments" onclick={openThreadView}>
+                            </lightning-button-icon>
+                        </template>
                     </template>
                     <lightning-button-icon style="float:right" variant="container" tooltip="Search Timeline Posts"
                         icon-name="utility:search" onclick={toggleListFilters}>
                     </lightning-button-icon>
                 </template>
                 <template if:false={mainArea}>
+                    <lightning-button-icon style="float:right" variant="brand" tooltip="See Record Threads"
+                        icon-name="utility:comments" onclick={closeThreadView}>
+                    </lightning-button-icon>
                     <lightning-button-icon variant="border-filled" icon-name="utility:back" onclick={connectedCallback}>
                     </lightning-button-icon>
                 </template>
@@ -54,22 +59,25 @@
             <div class="slds-p-horizontal_small">
                 <div class={timelineContainerClass}>
                     <template for:each={timelinePosts} for:item="timelinePost">
-                        <c-chat-timeline-tile key={timelinePost.Id} timeline-post={timelinePost} show-pinned={showPinned} show-thread={showThread} onthread={openModal} onrefresh={refreshPosts}
-                            onseen={openModal} current-name={curName}></c-chat-timeline-tile>
+                        <c-chat-timeline-tile key={timelinePost.Id} timeline-post={timelinePost}
+                            show-pinned={showPinned} show-thread={showThread} onthread={openModal}
+                            onrefresh={refreshPosts} onseen={openModal} current-name={curName}></c-chat-timeline-tile>
                     </template>
                 </div>
                 <template if:true={isLoading}>
                     <lightning-spinner alternative-text="Loading">
                     </lightning-spinner>
                 </template>
-                <div class="slds-grid slds-wrap slds-p-top_small">
-                    <div class="slds-col slds-size_11-of-12">
+                <div class="slds-grid slds-wrap">
+                    <div class="slds-col slds-size_11-of-12" data-id="selectRichText">
                         <lightning-input-rich-text variant="bottom-toolbar" value={messageValue}
                             placeholder="Enter Timeline Message..." onchange={handleMessageChange} formats={formats}>
-                            <lightning-rich-text-toolbar-button-group slot="toolbar" style="flex-grow:1;"></lightning-rich-text-toolbar-button-group>
-                            <lightning-rich-text-toolbar-button-group slot="toolbar" aria-label="Template Button Group">
-                                <lightning-rich-text-toolbar-button icon-name="utility:send" variant="brand" data-id="richTextSelect" icon-alternative-text="Insert Doc Template"
-                                    onclick={createMessage}>
+                            <lightning-rich-text-toolbar-button-group slot="toolbar"
+                                style="flex-grow:1;"></lightning-rich-text-toolbar-button-group>
+                            <lightning-rich-text-toolbar-button-group slot="toolbar" data-id="richTextVal"
+                                aria-label="Template Button Group">
+                                <lightning-rich-text-toolbar-button icon-name="utility:send" data-id="richTextSelect"
+                                    icon-alternative-text="Insert Doc Template" onclick={createMessage}>
                                 </lightning-rich-text-toolbar-button>
                             </lightning-rich-text-toolbar-button-group>
                         </lightning-input-rich-text>
@@ -100,7 +108,8 @@
                     </div>
                     <div class="slds-col slds-size_1-of-1">
                         <template if:true={showMembers}>
-                            <c-chat-user-list ticket-users={ticketUsers} title={userTitle} record-id={recordId} onrefresh={refreshUsers} object-name={objectName}></c-chat-user-list>
+                            <c-chat-user-list ticket-users={ticketUsers} title={userTitle} record-id={recordId}
+                                onrefresh={refreshUsers} object-name={objectName}></c-chat-user-list>
                         </template>
                         <template if:true={showCustom}>
                             <h3 class="userList">Notifications</h3>
@@ -108,13 +117,15 @@
                                 <div class="slds-col slds-size_10-of-12 slds-align-bottom">
                                     <lightning-record-edit-form object-api-name="User_Ticket_Relationship__c"
                                         data-id="userSubmit">
-                                        <lightning-input-field field-name="User__c" data-id="userUpdate" variant="label-hidden"
-                                            style="margin-bottom: 0;" onchange={handleUserChange}></lightning-input-field>
-        
+                                        <lightning-input-field field-name="User__c" data-id="userUpdate"
+                                            variant="label-hidden" style="margin-bottom: 0;"
+                                            onchange={handleUserChange}></lightning-input-field>
+
                                     </lightning-record-edit-form>
                                 </div>
                                 <div class="slds-col slds-size_1-of-12 slds-align-bottom slds-var-p-left_xx-small">
-                                    <lightning-button label="Add" variant="brand" onclick={handleAddUser}></lightning-button>
+                                    <lightning-button label="Add" variant="brand"
+                                        onclick={handleAddUser}></lightning-button>
                                 </div>
                             </div>
                             <div class="slds-p-horizontal_x-small slds-p-top_x-small ticketUserContainer">
@@ -134,7 +145,7 @@
                         </template>
                     </div>
                 </div>
-                    <!-- <template if:true={timelineFile}>
+                <!-- <template if:true={timelineFile}>
                         <div class="slds-col slds-size_1-of-1 slds-p-around_x-small">
                             <lightning-file-upload label="Attach file" name="fileUploader" record-id={recordId}
                                 onuploadfinished={handleUploadFinished} multiple>
@@ -199,7 +210,10 @@
         </template>
         <template if:true={showRecordThreads}>
             <div class="slds-border_top">
-                <c-thread-container record-id={recordId} thread-box="slds-m-left_medium slds-box slds-box_xx-small" thread-width="slds-col slds-size_1-of-1 slds-border_left slds-p-horizontal_x-small slds-p-top_x-small" preview-width="slds-col slds-size_1-of-1 slds-border_right"></c-thread-container>
+                <c-thread-container record-id={recordId} chat-toggle
+                    thread-box="slds-m-left_medium slds-box slds-box_xx-small"
+                    thread-width="slds-col slds-size_1-of-1 slds-border_left slds-p-horizontal_x-small slds-p-top_x-small"
+                    preview-width="slds-col slds-size_1-of-1 slds-border_right"></c-thread-container>
             </div>
         </template>
     </lightning-card>
@@ -220,7 +234,8 @@
 
                 <div class="slds-modal__content slds-p-around_medium userContainer" id="modal-content-id-1">
                     <template if:false={inThread}>
-                        <c-thread-tile record-id={ticketMessageId} ticket-msg={ticketMsg} main-area ticket-users={ticketUsers} show-pinned>
+                        <c-thread-tile record-id={ticketMessageId} ticket-msg={ticketMsg} main-area
+                            ticket-users={ticketUsers} show-pinned>
                             <div slot="seen">
                                 <template if:true={ticketUsers}>
                                     <template for:each={ticketUsers} for:item="ticketUser">
@@ -230,13 +245,13 @@
                                     </template>
                                 </template>
                             </div>
-                        </c-thread-tile> 
+                        </c-thread-tile>
                     </template>
                     <template if:true={inThread}>
                         <template if:true={ticketUsers}>
                             <template for:each={ticketUsers} for:item="ticketUser">
-                                <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser} timeline-post-id={ticketMessageId}
-                                    show-seen show-likes>
+                                <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser}
+                                    timeline-post-id={ticketMessageId} show-seen show-likes>
                                 </c-ticket-view-user-list>
                             </template>
                         </template>

@@ -71,6 +71,13 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
             return this.threadLen + ' Reply';
         }
     }
+    get lastReply() {
+        if (this.threadLen > 1) {
+            return 'Last Reply ';
+        } else {
+            return '';
+        }
+    }    
 
     get thread() {
         return this.timelinePost.Thread__c;

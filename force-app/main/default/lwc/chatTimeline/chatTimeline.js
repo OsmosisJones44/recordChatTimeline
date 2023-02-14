@@ -193,6 +193,7 @@ export default class ChatTimeline extends LightningElement {
         this.disableButton = false;
         this.mainArea = true;
         this.showRecordThreads = false;
+        // this.setValues();
         this.registerErrorListener();
         this.handleSubscribe();
         // console.log(this.recordId);
@@ -294,14 +295,17 @@ export default class ChatTimeline extends LightningElement {
         this.timelinePosts = this.lastSavedData;
         refreshApex(this.timelinePostKey);
     }  
-    toggleThreads() {
-        console.log('ChatTimeline: '+this.recordId);
-        this.showRecordThreads = !this.showRecordThreads;
-        this.mainArea = !this.mainArea;
-        if (this.showRecordThreads) {
-            const el = this.template.querySelector('c-thread-container');
-            el.handleRefresh(); 
-        }
+    openThreadView() {
+        this.showRecordThreads = true;
+        console.log('ChatTimeline: '+this.recordId, this.showRecordThreads);
+        this.mainArea = false;
+        const el = this.template.querySelector('c-thread-container');
+        el.handleThreadRefresh(); 
+    }
+    closeThreadView() {
+        this.showRecordThreads = false;
+        console.log('ChatTimeline: '+this.recordId, this.showRecordThreads);
+        this.mainArea = true; 
     }
     scrollToBottom(){
         let containerChoosen = this.template.querySelector(".containerClass");
@@ -875,4 +879,8 @@ export default class ChatTimeline extends LightningElement {
             this.timelinePosts = this.lastSavedData;
         }        
     }     
+    // setValues() {
+    //     let richText = this.template.querySelector('');
+    //     console.log('richText: ' + JSON.stringify(richText));
+    // }
 }

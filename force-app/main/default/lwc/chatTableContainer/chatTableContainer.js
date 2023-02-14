@@ -28,8 +28,8 @@ const columns = [
 ];
 
 export default class ChatTableContainer extends NavigationMixin(LightningElement) {
-    @api previewWidth = "slds-col slds-size_1-of-2 slds-border_right leftGridClass";
-    @api timelineWidth = "slds-col slds-size_1-of-2 slds-border_left slds-p-horizontal_x-small slds-p-top_x-small";
+    @api previewWidth = "slds-col slds-size_1-of-2 slds-border_right";
+    @api timelineWidth = "slds-col slds-size_1-of-2 slds-p-horizontal_x-small slds-p-top_x-small";
     @api showTimelineVal = false;
     columns = columns;
     userId = USER_ID;
@@ -83,6 +83,7 @@ export default class ChatTableContainer extends NavigationMixin(LightningElement
     }
 
     handleTimelineView(event) {
+        console.log(JSON.stringify(event.detail));
         this.showTimeline = true;
         this.recordId = event.detail.id;
         this.ticketMsg = event.detail.timelinePost;

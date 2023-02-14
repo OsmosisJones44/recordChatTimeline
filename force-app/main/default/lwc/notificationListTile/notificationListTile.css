@@ -7,9 +7,13 @@
 .unseenClass{
     background-color: #3C648D;
     padding: .5rem;
+    transition: all .15s;
     /* color: white; */
 }
-
+.unseenClass:hover{
+    border-radius: .25rem;
+    /* color: white; */
+}
 .seenClass{
     padding: .5rem;
 }

@@ -3,7 +3,12 @@ import { NavigationMixin } from 'lightning/navigation';
 // import { updateRecord } from 'lightning/uiRecordApi';
 import USER_ID from '@salesforce/user/Id';
 import findRecentThreadTicketMessages from '@salesforce/apex/ChatController.findRecentThreadTicketMessages';
+import findRecentRecordThreadTicketMessages from '@salesforce/apex/ChatController.findRecentRecordThreadTicketMessages';
 import getReadUsers from '@salesforce/apex/BirthdayController.getReadUsers';
+import STATUS_OBJECT from '@salesforce/schema/Help_Desk_Message_Status__c';
+import OWNER_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.OwnerId';
+// import READ_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Read__c';
+import MESSAGE_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Ticket_Message__c';
 import { refreshApex } from '@salesforce/apex';
 import {
     subscribe,
@@ -14,15 +19,19 @@ import {
 } from 'lightning/empApi';
 
 export default class ThreadContainer extends NavigationMixin(LightningElement) {
-    @api previewWidth = "slds-col slds-size_1-of-2 slds-border_right leftGridClass";
-    @api threadWidth = "slds-col slds-size_1-of-2 slds-border_left slds-p-horizontal_x-small slds-p-top_x-small";
+    @api previewWidth = "slds-col slds-size_1-of-2 slds-border_right";
+    @api threadWidth = "slds-col slds-size_1-of-2 slds-p-horizontal_x-small slds-p-top_x-small";
     @api showThreadVal = false;
     @api threadBox = "slds-m-left_xx-large slds-box slds-box_xx-small";
     @api recordId;
+    @api chatToggle = false;
     showPreview;
     userId = USER_ID;
     post;
     showThread = false;
+    recentThreadMsgKey;
+    recentThreadMsgs;
+    lastSavedThreadData;    
     recentMsgKey;
     recentMsgs;
     lastSavedData;
@@ -50,11 +59,31 @@ export default class ThreadContainer extends NavigationMixin(LightningElement) {
         this.isLoading = true;
     }
 
-    @wire(findRecentThreadTicketMessages, {
+    @wire(findRecentRecordThreadTicketMessages, {
         userId: '$userId',
         recordId: '$recordId'
     }) 
     ticketSetup(result) {
+        this.recentThreadMsgKey = result;
+        const { data, error } = result;
+        if (data) {
+            this.recentThreadMsgs = JSON.parse(JSON.stringify(data));
+            this.error = undefined;
+        } else if (error) {
+            this.recentThreadMsgs = undefined;
+            this.error = error;
+            console.error(JSON.stringify(error));
+        } else {
+            this.error = undefined;
+            this.recentMsgs = undefined;
+        }
+        this.lastSavedThreadData = this.recentThreadMsgs;
+        this.isLoading = false;
+    }
+    @wire(findRecentThreadTicketMessages, {
+        userId: '$userId'
+    }) 
+    threadSetup(result) {
         this.recentMsgKey = result;
         const { data, error } = result;
         if (data) {
@@ -63,7 +92,7 @@ export default class ThreadContainer extends NavigationMixin(LightningElement) {
         } else if (error) {
             this.recentMsgs = undefined;
             this.error = error;
-            console.error(error);
+            console.error(JSON.stringify(error));
         } else {
             this.error = undefined;
             this.recentMsgs = undefined;
@@ -94,7 +123,10 @@ export default class ThreadContainer extends NavigationMixin(LightningElement) {
         this.showPreview = true;
         this.showTimeline = false;
     }
-
+    // renderedCallback(){
+    //     refreshApex(this.recentThreadMsgKey);
+    //     refreshApex(this.recentMsgKey);
+    // }
     handleTimelineView(event) {
         if (!this.showTimeline) {
             this.showThreadVal = true;
@@ -115,8 +147,13 @@ export default class ThreadContainer extends NavigationMixin(LightningElement) {
     }
     @api
     handleRefresh() {
-        console.log('threadContianer'+this.recordId);
+        console.log('threadContianer' + this.recordId);
         return refreshApex(this.recentMsgKey);
+    }
+    @api
+    handleThreadRefresh() {
+        console.log('threadContianer' + this.recordId);
+        return refreshApex(this.recentThreadMsgKey);
     }
     handleOpen() {
         const parentId = this.ticketMsg.Parent_Record_Id__c;
@@ -201,6 +238,48 @@ export default class ThreadContainer extends NavigationMixin(LightningElement) {
             );
         }
     } 
+    handleUserSubmit() {
+        this.isLoading = true;
+        if (this.userNameValue) {
+            const fields = {};
+            fields[OWNER_FIELD.fieldApiName] = this.userNameValue;
+            fields[MESSAGE_FIELD.fieldApiName] = this.recordId;
+            fields[OWNER_FIELD.fieldApiName] = this.userId;
+            const recordInput = { apiName: STATUS_OBJECT.objectApiName, fields };
+            createRecord(recordInput)
+                .then(() => {
+                    this.dispatchEvent(
+                        new ShowToastEvent({
+                            title: 'Success',
+                            message: 'User Added to Thread',
+                            variant: 'success',
+                        }),
+                    );
+                    this.isLoading = false;
+                    refreshApex(this.ticketSeenUsers);
+                })
+                .catch(error => {
+                    this.isLoading = false;
+                    console.log('User Relationship: '+JSON.stringify(error));
+                    this.dispatchEvent(
+                        new ShowToastEvent({
+                            title: 'Error Creating Record',
+                            message: 'Contact your Salesforce Admin',
+                            variant: 'error',
+                        }),
+                    );
+                });
+        } else {
+            this.isLoading = false;
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Please select a user',
+                    message: 'Contact your Salesforce Admin w/ any questions',
+                    variant: 'error',
+                }),
+            );
+        }
+    }     
     handleUserChange(event) {
         this.userNameValue = event.target.value;
         console.log(this.userNameValue);

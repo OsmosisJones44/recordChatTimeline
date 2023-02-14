@@ -1,5 +1,10 @@
 <template>
     <lightning-card title="Timeline Message Threads" icon-name="standard:feedback">
+        <div slot="actions">
+            <template if:true={showTimeline}>
+                <lightning-button-icon onclick={connectedCallback} icon-name="utility:back"></lightning-button-icon>
+            </template>
+        </div>
         <div class="slds-grid slds-wrap slds-border_top slds-border_bottom slds-p-horizontal_xx-small gridClass">
             <template if:true={isLoading}>
                 <lightning-spinner alternative-text="content loading"></lightning-spinner>
@@ -12,9 +17,17 @@
                             </lightning-input>
                         </div>
                         <div class="slds-col slds-size_1-of-1 leftGridClass">
-                            <template for:each={recentMsgs} for:item="post" for:index="index">
-                                <c-chat-table-tile msg-status={post} key={post.Id} show-thread onrefresh={handleRefresh}
-                                    ontimeline={handleTimelineView}></c-chat-table-tile>
+                            <template if:false={chatToggle}>
+                                <template for:each={recentMsgs} for:item="post" for:index="index">
+                                    <c-chat-table-tile msg-status={post} key={post.Id} show-thread onrefresh={handleRefresh}
+                                        ontimeline={handleTimelineView}></c-chat-table-tile>
+                                </template>
+                            </template>
+                            <template if:true={chatToggle}>
+                                <template for:each={recentThreadMsgs} for:item="post" for:index="index">
+                                    <c-chat-table-tile msg-status={post} key={post.Id} show-thread onrefresh={handleThreadRefresh}
+                                        ontimeline={handleTimelineView}></c-chat-table-tile>
+                                </template>
                             </template>
                         </div>
                     </div>
@@ -23,7 +36,37 @@
             <template if:true={showThreadVal}>
                 <div class={threadWidth}>
                     <template if:true={noMsgSelected}>
-                        <c-zz-open-road message="No Thread Selected"></c-zz-open-road>
+                        <c-zz-open-road>
+                            <div slot="message">
+                                <div class="slds-grid slds-border_top">
+                                    <div class="slds-col slds-size_1-of-2 slds-border_right">
+                                        <div class="slds-align_absolute-center">
+                                            <div class="slds-grid slds-wrap">
+                                                <div class="slds-col slds-size_1-of-1 slds-p-around_small">
+                                                    <div class="slds-text-longform">
+                                                        <h3 class="slds-text-heading_medium">No Thread Selected</h3>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <div class="slds-grid slds-wrap">
+                                            <div class="slds-col slds-size_1-of-1 slds-p-around_small">
+                                                <div class="slds-text-longform">
+                                                    <h3 class="slds-text-heading_medium">Click Below for Training on how to use the Internal Process
+                                                        Hub</h3>
+                                                </div>
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-1">
+                                                <lightning-button label="IPH Training" onclick={handleTrainingRedirect} variant="outline"
+                                                    icon-name="utility:trailhead_alt" icon-position="right"></lightning-button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </c-zz-open-road>
                     </template>
                     <template if:true={showTimeline}>
                         <c-thread-tile record-id={recordId} ticket-msg={ticketMsg} main-area ticket-users={ticketUsers} thread-box={threadBox} onrefresh={handleRefresh}>
@@ -38,7 +81,7 @@
                                         </lightning-record-edit-form>
                                     </div>
                                     <div class="slds-col slds-size_1-of-12 slds-align-bottom slds-var-p-left_xx-small">
-                                        <lightning-button label="Add" variant="brand" onclick={handleAddUser}></lightning-button>
+                                        <lightning-button label="Add" variant="brand" onclick={handleUserSubmit}></lightning-button>
                                     </div>
                                 </div>
                                 <div class="slds-p-horizontal_x-small slds-p-top_x-small ticketUserContainer">
