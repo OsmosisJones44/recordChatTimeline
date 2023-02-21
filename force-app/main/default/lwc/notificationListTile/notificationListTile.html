@@ -1,37 +1,172 @@
 <template>
     <template if:true={msgStatus}>
-        <lightning-card title={msgStatus.Ticket_Message__r.Preview__c} icon-name={msgStatus.Ticket_Message__r.Icon_Name__c}>
-            <div class="containerClass borderClass slds-m-around_xx-small slds-p-around_x-small" onclick={handleSelect}>
-                <!-- <p class="previewClass">{msgStatus.Ticket_Message__r.Preview__c}</p> -->
-                <!-- <div class={msgStatus.tableTimelineClass__c}> -->
-                    <lightning-tile label={msgStatus.Ticket_Message__r.OwnerName__c} type="media"
-                        href={msgStatus.Ticket_Message__r.Owner_URL__c}>
-                        <div class={msgStatus.tableTimelineClass__c} slot="media">
-                            <lightning-avatar size="large" slot="media" src={smallPhotoUrl} fallback-icon-name="standard:user">
-                            </lightning-avatar>
-                        </div>
-                        <div class="slds-line-clamp_small">
-                            <lightning-formatted-rich-text value={msgStatus.Ticket_Message__r.Message__c}>
-                            </lightning-formatted-rich-text>
-                        </div>
-                        <br>
-                        <template if:true={msgStatus.Ticket_Message__r.DocumentId__c}>
-                            <div class="slds-p-vertical_x-small slds-p-left_x-small">
-                                <lightning-button icon-name="utility:preview" variant="Neutral" onclick={openPreview}
-                                    label="Preview File" icon-position="right" size="small"></lightning-button>
+        <div class="containerClass slds-p-around_xxx-small" onclick={handleSelect}>
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading">
+                </lightning-spinner>
+            </template>
+            <template if:true={showConversation}>
+                <lightning-card title={preview} variant="narrow"
+                    icon-name={msgStatus.Ticket_Message__r.Icon_Name__c}>
+                    <div slot="actions">
+                        <lightning-button-group>
+                            <template if:true={msgStatus.Ticket_Message__r.DocumentId__c}>
+                                <lightning-button-icon icon-name="utility:file" variant="brand"
+                                    tooltip="Open File Preview" onclick={openPreview}
+                                    size="small"></lightning-button-icon>
+                            </template>
+                            <lightning-button-icon icon-name="utility:preview" onclick={handleMarkRead} size="small"
+                                tooltip="Mark Read"></lightning-button-icon>
+                                <lightning-button-icon icon-name="utility:comments" onclick={handleOpenThread} size="small"
+                                    tooltip="Open Post Thread"></lightning-button-icon>
+                            <lightning-button-icon icon-name="utility:chat" onclick={handleOpenTimeline} size="small"
+                                tooltip="Open Timeline"></lightning-button-icon>
+                            <lightning-button-icon onclick={handleOpen} icon-name="utility:new_window"
+                            tooltip="Open Parent Record" size="small"
+                            disabled={disableButton}></lightning-button-icon>
+                        </lightning-button-group>
+                    </div>
+                    <!-- <p class="previewClass">{msgStatus.Ticket_Message__r.Preview__c}</p> -->
+                    <!-- <div class={msgStatus.tableTimelineClass__c}> -->
+                    <div class="slds-grid">
+                        <div class="slds-col slds-size_2-of-12 slds-p-around_xx-small justifyCenter">
+                            <div class={msgStatus.tableTimelineClass__c}></div>
+                            <div class="slds-m-left_x-small">
+                                <div class="avatarBorder">
+                                    <lightning-avatar size="large" variant="circle" src={smallPhotoUrl}
+                                        fallback-icon-name="standard:user">
+                                    </lightning-avatar>
+                                </div>
                             </div>
+                        </div>
+                        <div class="slds-col slds-size_10-of-12">
+                            <div class="slds-grid slds-wrap">
+                                <div class="slds-col slds-size_1-of-1">
+                                    <a href={msgStatus.Ticket_Message__r.Owner_URL__c}
+                                        class="nameLinkClass">{msgStatus.Ticket_Message__r.OwnerName__c}</a>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1">
+                                    <div class="slds-line-clamp_x-small slds-p-vertical_xx-small">
+                                        <lightning-formatted-rich-text value={msgStatus.Ticket_Message__r.Message__c}>
+                                        </lightning-formatted-rich-text>
+                                    </div>
+                                    <!-- <br> -->
+                                    <div class="slds-grid timeClass">
+                                        <!-- <div class="slds-col slds-size_1-of-1">
+                                                <lightning-formatted-date-time class="animateFade opacityClass"
+                                                    value={msgStatus.Ticket_Message__r.CreatedDate} year="numeric" month="short"
+                                                    day="2-digit" weekday="long" hour="2-digit" minute="2-digit" hour12="true">
+                                                </lightning-formatted-date-time>
+                                            </div> -->
+                                        <div class="slds-col flexNone">
+                                            <lightning-formatted-date-time data-id="hoverSelect"
+                                                class="animateFade opacityClass"
+                                                value={msgStatus.Ticket_Message__r.CreatedDate} year="numeric"
+                                                month="short" day="2-digit" hour="2-digit" minute="2-digit"
+                                                hour12="true">
+                                            </lightning-formatted-date-time>
+                                        </div>
+                                        <div class="slds-col flexNone opacityClass slds-m-horizontal_xx-small">|</div>
+                                        <div class="slds-col flexNone">
+                                            <lightning-relative-date-time value={createdDateParent}
+                                                class="opacityClass"></lightning-relative-date-time>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- </div> -->
+                </lightning-card>
+            </template>
+            <template if:true={showThread}>
+                <lightning-card title={threadPreview} variant="narrow"
+                    icon-name={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Icon_Name__c}>
+                    <div slot="actions">
+                        <template if:true={msgStatus.Ticket_Message__r.DocumentId__c}>
+                            <lightning-button-icon icon-name="utility:file" onclick={openPreview}
+                            size="small"></lightning-button-icon>
                         </template>
-                        <div class="slds-grid timeClass">
-                            <div class="slds-col slds-size_9-of-12">
-                                <lightning-formatted-date-time class="slds-hide opacityClass"
-                                    value={msgStatus.Ticket_Message__r.CreatedDate} year="numeric" month="short"
-                                    day="2-digit" weekday="long" hour="2-digit" minute="2-digit" hour12="true">
+                        <!-- <div class="slds-p-horizontal_xx-small">
+                            <template if:false={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Closed_Thread__c}>
+                                <lightning-button-icon onclick={handleResolve} icon-name="utility:success"
+                                tooltip="Resolve Thread" variant="brand" size="small"
+                                disabled={disableButton}></lightning-button-icon>
+                            </template>
+                            <template if:true={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Closed_Thread__c}>
+                                <lightning-button-icon onclick={handleReopen} icon-name="utility:email_open"
+                                tooltip="Re-Open Closed Thread" size="small"
+                                disabled={disableButton}></lightning-button-icon>
+                            </template>
+                        </div> -->
+                        <lightning-button-group>
+                            <lightning-button-icon icon-name="utility:preview" onclick={handleMarkRead} size="small"
+                            tooltip="Mark Read"></lightning-button-icon>
+                            <lightning-button-icon icon-name="utility:comments" onclick={handleOpenThread} size="small"
+                            tooltip="Open Post Thread"></lightning-button-icon>
+                            <lightning-button-icon icon-name="utility:chat" onclick={handleOpenTimeline} size="small"
+                                tooltip="Open Timeline"></lightning-button-icon>
+                            <lightning-button-icon onclick={handleOpenThread} icon-name="utility:new_window"
+                                tooltip="Open Parent Record" size="small"
+                                disabled={disableButton}></lightning-button-icon>
+                        </lightning-button-group>
+                    </div>
+                    <div class="slds-border_bottom slds-m-bottom_xx-small">
+                        <!-- <p class="previewClass">{msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Preview__c}</p> -->
+                        <div class="previewClassLight slds-line-clamp_small slds-p-around_xx-small">
+                            <lightning-formatted-rich-text
+                                value={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Message__c}></lightning-formatted-rich-text>
+                        </div>
+                        <div class="slds-grid timeClass slds-p-left_xx-small">
+                            <div class="slds-col slds-size_1-of-1">
+                                <lightning-formatted-date-time class="animateFade opacityClass"
+                                    value={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.CreatedDate}
+                                    year="numeric" month="short" day="2-digit" weekday="long" hour="2-digit"
+                                    minute="2-digit" hour12="true">
                                 </lightning-formatted-date-time>
                             </div>
                         </div>
-                    </lightning-tile>
-                <!-- </div> -->
-            </div>
-        </lightning-card>
+                    </div>
+                    <template if:false={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Closed_Thread__c}>
+                        <div class="slds-grid">
+                            <div class="slds-col slds-size_2-of-12 slds-p-around_xx-small justifyCenter">
+                                <div class={msgStatus.tableTimelineClass__c}></div>
+                                <div class="slds-m-left_x-small">
+                                    <div class="avatarBorder">
+                                        <lightning-avatar size="large" variant="circle" src={smallPhotoUrl}
+                                            fallback-icon-name="standard:user">
+                                        </lightning-avatar>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-col slds-size_10-of-12">
+                                <div class="slds-grid slds-wrap">
+                                    <div class="slds-col slds-size_1-of-1">
+                                        <a href={msgStatus.Ticket_Message__r.Owner_URL__c}
+                                            class="nameLinkClass">{msgStatus.Ticket_Message__r.OwnerName__c}</a>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1">
+                                        <div class="slds-line-clamp_large slds-p-vertical_xx-small">
+                                            <lightning-formatted-rich-text
+                                                value={msgStatus.Ticket_Message__r.Message__c}>
+                                            </lightning-formatted-rich-text>
+                                        </div>
+                                        <div class="slds-grid timeClass">
+                                            <div class="slds-col slds-size_1-of-1">
+                                                <lightning-formatted-date-time class="animateFade opacityClass"
+                                                    value={msgStatus.Ticket_Message__r.CreatedDate} year="numeric"
+                                                    month="short" day="2-digit" weekday="long" hour="2-digit"
+                                                    minute="2-digit" hour12="true">
+                                                </lightning-formatted-date-time>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </lightning-card>
+            </template>
+        </div>
     </template>
 </template>

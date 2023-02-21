@@ -1,6 +1,8 @@
 import { LightningElement, wire, api } from 'lwc';
 import findRecentTicketMessages from '@salesforce/apex/ChatController.findRecentTicketMessages';
 import findRecentOpenTicketMessages from '@salesforce/apex/ChatController.findRecentOpenTicketMessages';
+import findRecentOpenThreadTicketMessages from '@salesforce/apex/ChatController.findRecentOpenThreadTicketMessages';
+import getUnreadTimelineMessages from '@salesforce/apex/NASController.getUnreadTimelineMessages';
 // import getTicketMembers from '@salesforce/apex/BirthdayController.getTicketMembers';
 // import getSetupMembers from '@salesforce/apex/BirthdayController.getSetupMembers';
 // import getCashRequestMembers from '@salesforce/apex/BirthdayController.getCashRequestMembers';
@@ -49,50 +51,100 @@ export default class NotificationList extends LightningElement {
     userTitle;
     ticketUsers = {};
     objectName;
-    recentMsgs;
+    recentMsgs = [];
     recentMsgKey;
-    recentOpenMsgs;
+    recentOpenMsgs = [];
     recentOpenMsgKey;
     showAll;
     mainArea;
     showSearch;
     error;
     timelineTitle;
-    pageTitle = 'Timelines with Open Messages';
+    openMsgs = [];
+    mergedObj = {};
+    numNewMsgs = 0;
+    newMessages;
 
     get noNewMsg() {
-        if (this.recentOpenMsgs.length > 0) {
+        if (this.openMsgs.length > 0) {
             return false;
         } else {
             return true;
         }
-    }    
+    }   
+    get pageTitle() {
+        if (this.newMessages.data) {
+            return 'Unread Messages ('+this.newMessages.data.length+')';
+        } else {
+            return 'Unread Messages (-)'
+        }
+    }
+    // get openMsgs() {
+    //     if (this.recentMsgs && this.recentOpenMsgs) {
+    //         return [...this.recentMsgs, ...this.recentOpenMsgs].map(obj => {
+    //             return {
+    //                 ...obj,
+    //                 date: new Date(obj['CreatedDate'])
+    //             };
+    //         }).sort((a, b) => {
+    //             if (a.date && b.date) {
+    //                 return a.date.getTime() - b.date.getTime();
+    //             }
+    //         })
+    //     }
+    // }
 
     // @wire(findRecentTicketMessages, { userId: '$userId' }) recentMsgs;
-    @wire(findRecentTicketMessages, { userId: '$userId' })
-    ticketSetup(result) {
+    // @wire(findRecentTicketMessages, { userId: '$userId' })
+    // ticketSetup(result) {
+    //     this.recentMsgKey = result;
+    //     const { data, error } = result;
+    //     if (data) {
+    //         this.recentMsgs = JSON.parse(JSON.stringify(data));
+    //         this.error = undefined;
+    //     } else if (error) {
+    //         this.recentMsgs = undefined;
+    //         this.error = error;
+    //         console.error(error);
+    //     } else {
+    //         this.error = undefined;
+    //         this.recentMsgs = undefined;
+    //     }
+    //     this.lastSavedData = this.recentMsgs;
+    //     this.isLoading = false;
+    // }
+    @wire(getUnreadTimelineMessages, { userId: '$userId' }) newMessages;
+    @wire(findRecentOpenThreadTicketMessages, {
+        userId: '$userId'
+    }) 
+    threadSetup(result) {
         this.recentMsgKey = result;
         const { data, error } = result;
         if (data) {
+            console.log("reg: "+JSON.stringify(data));
             this.recentMsgs = JSON.parse(JSON.stringify(data));
+            console.log(JSON.stringify(this.recentMsgs));
+            // this.recentMsgs = data;
             this.error = undefined;
         } else if (error) {
             this.recentMsgs = undefined;
             this.error = error;
-            console.error(error);
+            console.error(JSON.stringify(error));
         } else {
             this.error = undefined;
             this.recentMsgs = undefined;
         }
         this.lastSavedData = this.recentMsgs;
         this.isLoading = false;
-    }
+    }    
     @wire(findRecentOpenTicketMessages, { userId: '$userId' })
     notificationSetup(result) {
         this.recentOpenMsgKey = result;
         const { data, error } = result;
         if (data) {
+            console.log("Open: "+JSON.stringify(data));
             this.recentOpenMsgs = JSON.parse(JSON.stringify(data));
+            console.log(JSON.stringify(this.recentOpenMsgs));
             // this.recentOpenMsgs = data;
             this.error = undefined;
         } else if (error) {
@@ -105,6 +157,7 @@ export default class NotificationList extends LightningElement {
         }
         this.lastSavedOpenData = this.recentOpenMsgs;
         this.isLoading = false; 
+        this.setOpenMsgs();
     }
     @wire(getRecordMembers, { ticketId: '$recordId', objectName: '$objectName' })
     memberSetup(result) {
@@ -123,6 +176,7 @@ export default class NotificationList extends LightningElement {
         }
         this.lastSavedRecordData = this.ticketUsers;
         this.isLoading = false;
+        this.setOpenMsgs();
     }
     // @wire(getTicketMembers, { ticketId: '$recordId' })
     // ticketMemberSetup(result) {
@@ -188,14 +242,60 @@ export default class NotificationList extends LightningElement {
     connectedCallback() {
         this.showAll = false;
         this.mainArea = true;
-        this.pageTitle = 'Open Timeline Messages';
+        // this.setOpenMsgs();
         this.registerErrorListener();
         this.handleSubscribe();
     } 
+    setOpenMsgs() {
+        console.log("Open1: ",typeof this.recentMsgs, " ", JSON.stringify(this.recentMsgs));
+        console.log("Open2: ", typeof this.recentOpenMsgs, " ", JSON.stringify(this.recentOpenMsgs));
+        if (this.recentMsgs && this.recentOpenMsgs) {
+            const tempOpenMsgs = [...this.recentMsgs, ...this.recentOpenMsgs];
+            this.openMsgs = tempOpenMsgs.map(obj => {
+                return {
+                    ...obj,
+                    date: new Date(obj['CreatedDate'])
+                };
+            }).sort((a, b) => {
+                if (a.date && b.date) {
+                    return b.date.getTime() - a.date.getTime();
+                }
+                return 0;
+            });
+            console.log(tempOpenMsgs.length);
+            this.numNewMsgs = tempOpenMsgs.length;
+        }
 
+        // mergedObj = {};
+
+        // for (const key in this.recentMsgs) {
+        // const item = obj1[key];
+        // this.mergedObj[key] = {
+        //     ...item,
+        //     date: new Date(item.CreatedDate),
+        // };
+        // }
+
+        // for (const key in this.recentOpenMsgs) {
+        // const item = obj2[key];
+        // this.mergedObj[key] = {
+        //     ...item,
+        //     date: new Date(item.CreatedDate),
+        // };
+        // }
+
+        // this.openMsgs = Object.values(this.mergedObj).sort((a, b) => {
+        // if (a.date && b.date) {
+        //     return a.date.getTime() - b.date.getTime();
+        // }
+        // return 0;
+        // });
+    }
     showAllMsgs() {
+        this.isLoading = true;
         this.showAll = true;
         this.pageTitle = 'All Timeline Messages';
+        this.isLoading = false;
     }
     showOpenMsgs() {
         this.showAll = false;

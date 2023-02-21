@@ -28,7 +28,7 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
     @api customRecipients;
     @api showThread = false;
     @api threadBox = "slds-m-left_xx-large slds-box slds-box_xx-small";
-    @api timelineContainerClass = 'threadTimelineContainer';
+    @api timelineContainerClass = 'threadTimelineClass';
     userId = USER_ID;
     closedThread;
     isLoading = false;

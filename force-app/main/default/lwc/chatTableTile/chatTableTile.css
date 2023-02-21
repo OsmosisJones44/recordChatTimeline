@@ -6,33 +6,50 @@
     background-color: rgb(241, 241, 241);
 }
 .unseenClass{
-    background-color: #3C648D;
-    padding: .75rem;
+    background-color: #1982fc;
+    /* background-color: #3C648D; */
+    height: .75rem;
+    width: .75rem;
     color: white;
     transition: all .10s;
-    border-radius: .5rem
+    border-radius: 50%;
 }
-.unseenClass:hover{
-    border-radius: .5rem
-}
+
 .nameLinkClass{
     text-decoration: none;
     color: inherit;
     font-weight: bold;
 }
-.nameLinkClass{
+.nameLinkClass:hover{
     text-decoration: underline;
 }
 :host {
     --sds-c-card-color-background: transparent;
 }
 .seenClass{
-    padding-top: .3rem;
-    padding-bottom: .3rem;
+    background-color: transparent;
+    /* background-color: #3C648D; */
+    height: 12px;
+    width: 12px;
+    color: white;
+    transition: all .10s;
+    border-radius: 50%;
 }
 /* .seenClass:hover{
     background-color: rgb(228, 228, 228);
 } */
+.avatarBorder{
+    border: 1px solid rgb(183, 183, 183);
+    border-radius: 50%;
+}
+.flexNone{
+    flex: none;
+}
+.justifyCenter{
+    align-items: center;
+    display: flex;
+    margin: auto;
+}
 .previewClass{
     opacity: 1;
     font-size: .9rem;

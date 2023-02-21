@@ -81,6 +81,7 @@ export default class ChatTableTile extends NavigationMixin(LightningElement) {
 
     connectedCallback() {
         this.showLikes = true;
+        this.createdDateParent = new Date(this.msgStatus.Ticket_Message__r.CreatedDate);
         // getCurrentUserPhoto({
         //     userId: this.msgStatus.Ticket_Message__r.OwnerId
         // })

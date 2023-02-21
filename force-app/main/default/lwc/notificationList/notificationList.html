@@ -1,64 +1,62 @@
 <template>
-    <lightning-card title={pageTitle} icon-name="standard:past_chat">
-        <div slot="actions">
-            <template if:true={mainArea}>
-                <lightning-button-icon icon-name="utility:search" onclick={toggleSearch} alternative-text="Toggle Search"></lightning-button-icon>
-            </template>
-            <template if:false={mainArea}>
-                <lightning-button-icon icon-name="utility:back" onclick={goBack}></lightning-button-icon>
-            </template>
-        </div>
-        <template if:true={isLoading}>
-            <lightning-spinner alternative-text="Content Loading"></lightning-spinner>
-        </template>
-        <template if:true={mainArea}>
-            <template if:true={showSearch}>
-                <div class="slds-p-vertical_x-small slds-border_bottom slds-m-bottom_x-small">
-                    <lightning-input type="search" label="Search Timeline" onchange={handleSearch}>
-                    </lightning-input>
-                </div>
-            </template>
-            <template if:true={showAll}>
-                <div class="slds-grid slds-wrap leftGridClass">
-                    <div class="slds-col slds-size_1-of-1">
-                        <template if:true={recentMsgs}>
-                            <template for:each={recentMsgs} for:item="post" for:index="index">
-                                <c-notification-list-tile key={post.Id} msg-status={post}
-                                    ontimeline={openTimelineView}></c-notification-list-tile>
-                            </template>
-                        </template>
-                    </div>
-                </div>
-            </template>
-            <template if:false={showAll}>
-                <div class="slds-grid slds-wrap leftGridClass">
-                    <div class="slds-col slds-size_1-of-1">
-                        <template if:true={recentOpenMsgs}>
-                            <template for:each={recentOpenMsgs} for:item="openPost">
-                                <c-notification-list-tile key={openPost.Id} msg-status={openPost} ontimeline={openTimelineView}></c-notification-list-tile>
-                            </template>
-                            <template if:true={noNewMsg}>
-                                <c-zz-desert message="0 Timelines with Unread Messages"></c-zz-desert>
-                            </template>
-                        </template>
-                    </div>
-                </div>
-            </template>
-        </template>
-        <template if:false={mainArea}>
-            <c-chat-timeline record-id={recordId} onrefresh={handleUserSuccess} show-timeline title={timelineTitle} show-members={showMembers} object-name={objectName} show-custom={showCustom} ticket-users={ticketUsers} user-title={userTitle}></c-chat-timeline>
-        </template>
-        <div slot="footer">
-            <template if:true={mainArea}>
-                <template if:false={showAll}>
-                    <lightning-button label="Show All Timelines" onclick={showAllMsgs}
-                        variant="base"></lightning-button>
+    <div class="slds-p-horizontal_xx-small">
+        <lightning-card title={pageTitle} icon-name="standard:past_chat">
+            <div slot="actions">
+                <template if:true={mainArea}>
+                    <lightning-button-group>
+                        <!-- <lightning-button-icon tooltip="Show All Timelines" onclick={showAllMsgs} icon-name="utility:list"></lightning-button-icon> -->
+                        <lightning-button-icon icon-name="utility:search" onclick={toggleSearch} tooltip="Toggle Search"></lightning-button-icon>
+                    </lightning-button-group>
                 </template>
-                <template if:true={showAll}>
-                    <lightning-button label="Open Only" icon-name="utility:preview" icon-position="right" onclick={showOpenMsgs}
-                        variant="base"></lightning-button>
+                <template if:false={mainArea}>
+                    <lightning-button-group>
+                        <!-- <lightning-button-icon icon-name="utility:preview" if:true={showAll} onclick={showOpenMsgs} tooltip="Show Unread Only"></lightning-button-icon> -->
+                        <lightning-button-icon icon-name="utility:back" onclick={goBack} tooltip="Go Back"></lightning-button-icon>
+                    </lightning-button-group>
                 </template>
+            </div>
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Content Loading"></lightning-spinner>
             </template>
-        </div>
-    </lightning-card>
+            <div class="slds-border_top slds-p-top_xx-small">
+                <template if:true={mainArea}>
+                    <template if:true={showSearch}>
+                        <div class="slds-p-vertical_x-small slds-border_bottom slds-m-bottom_x-small">
+                            <lightning-input type="search" label="Search Timeline" onchange={handleSearch}>
+                            </lightning-input>
+                        </div>
+                    </template>
+                    <!-- <template if:true={showAll}>
+                        <div class="slds-grid slds-wrap leftGridClass">
+                            <div class="slds-col slds-size_1-of-1">
+                                <template if:true={recentMsgs}>
+                                    <template for:each={recentMsgs} for:item="post" for:index="index">
+                                        <c-notification-list-tile key={post.Id} msg-status={post}
+                                            ontimeline={openTimelineView}></c-notification-list-tile>
+                                    </template>
+                                </template>
+                            </div>
+                        </div>
+                    </template> -->
+                    <template if:false={showAll}>
+                        <div class="slds-grid slds-wrap leftGridClass">
+                            <div class="slds-col slds-size_1-of-1">
+                                <template if:true={openMsgs}>
+                                    <template for:each={openMsgs} for:item="openPost">
+                                        <c-notification-list-tile key={openPost.Id} msg-status={openPost} ontimeline={openTimelineView} unread-msgs={newMessages.data}></c-notification-list-tile>
+                                    </template>
+                                    <template if:true={noNewMsg}>
+                                        <c-zz-desert message="0 Timelines with Unread Messages"></c-zz-desert>
+                                    </template>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+                <template if:false={mainArea}>
+                    <c-chat-timeline record-id={recordId} onrefresh={handleUserSuccess} show-timeline title={timelineTitle} show-members={showMembers} object-name={objectName} show-custom={showCustom} ticket-users={ticketUsers} user-title={userTitle}></c-chat-timeline>
+                </template>
+            </div>
+        </lightning-card>
+    </div>
 </template>
