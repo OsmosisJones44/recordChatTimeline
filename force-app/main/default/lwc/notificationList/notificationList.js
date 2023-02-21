@@ -3,9 +3,12 @@ import findRecentTicketMessages from '@salesforce/apex/ChatController.findRecent
 import findRecentOpenTicketMessages from '@salesforce/apex/ChatController.findRecentOpenTicketMessages';
 import findRecentOpenThreadTicketMessages from '@salesforce/apex/ChatController.findRecentOpenThreadTicketMessages';
 import getUnreadTimelineMessages from '@salesforce/apex/NASController.getUnreadTimelineMessages';
+import getReadUsers from '@salesforce/apex/BirthdayController.getReadUsers';
 // import getTicketMembers from '@salesforce/apex/BirthdayController.getTicketMembers';
 // import getSetupMembers from '@salesforce/apex/BirthdayController.getSetupMembers';
 // import getCashRequestMembers from '@salesforce/apex/BirthdayController.getCashRequestMembers';
+import { subscribe as sub, unsubscribe as unsub, publish, MessageContext } from 'lightning/messageService';
+import TRADINGDESKMESSAGE from '@salesforce/messageChannel/TradingDeskMessage__c';
 import getRecordMembers from '@salesforce/apex/BirthdayController.getRecordMembers';
 import USER_ID from '@salesforce/user/Id';
 import OFFICE_SPACE from '@salesforce/resourceUrl/Office_Space';
@@ -64,6 +67,12 @@ export default class NotificationList extends LightningElement {
     mergedObj = {};
     numNewMsgs = 0;
     newMessages;
+    modalHeader;
+    ticketSeenUsers;
+    ticketUsers;
+    ticketMessageId;
+    ticketMsg;
+
 
     get noNewMsg() {
         if (this.openMsgs.length > 0) {
@@ -113,6 +122,8 @@ export default class NotificationList extends LightningElement {
     //     this.lastSavedData = this.recentMsgs;
     //     this.isLoading = false;
     // }
+    @wire(MessageContext)
+    messageContext;
     @wire(getUnreadTimelineMessages, { userId: '$userId' }) newMessages;
     @wire(findRecentOpenThreadTicketMessages, {
         userId: '$userId'
@@ -178,6 +189,24 @@ export default class NotificationList extends LightningElement {
         this.isLoading = false;
         this.setOpenMsgs();
     }
+    @wire(getReadUsers, { ticketMessageId: '$ticketMessageId' })
+    userSetup(result) {
+        this.ticketSeenUsers = result;
+        const { data, error } = result;
+        if (data) {
+            this.ticketUsers = JSON.parse(JSON.stringify(data));
+            this.error = undefined;
+        } else if (error) {
+            this.ticketUsers = undefined;
+            this.error = error;
+            console.error(JSON.stringify(error));
+        } else {
+            this.error = undefined;
+            this.ticketUsers = undefined;
+        }
+        this.lastSavedUserData = this.ticketUsers;
+        this.isLoading = false;
+    };
     // @wire(getTicketMembers, { ticketId: '$recordId' })
     // ticketMemberSetup(result) {
     //     this.ticketMembersKey = result;
@@ -245,7 +274,69 @@ export default class NotificationList extends LightningElement {
         // this.setOpenMsgs();
         this.registerErrorListener();
         this.handleSubscribe();
+        this.subscribeToMessageChannel();
+        // this.getSetups();
+    }
+    disconnectedCallback() {
+        this.unsubscribeToMessageChannel();
+    }
+    unsubscribeToMessageChannel() {
+        unsub(this.subscription);
+        this.subscription = null;
     } 
+    // TODO Change publish behavior below to remove read messages clicked from Respond to UI event by publishing message
+    // handleEditSelect(event) {
+    //     const payload = { recordId: event.target.message.Id };
+
+    //     publish(this.messageContext, TRADINGDESKMESSAGE, payload);
+    // }
+    subscribeToMessageChannel() {
+        this.subscription = sub(
+            this.messageContext,
+            TRADINGDESKMESSAGE,
+            (message) => this.handleMessage(message)
+        );
+    }
+    handleMessage(message) {
+        console.log(message);
+        console.log('Tes');
+        if (message.source === 'New_Account_Setup__c') {
+            console.log('hub');
+            let tempId = message.Id;
+            getSingleNas({ nasId: tempId })
+                .then(result => {
+                    console.log(result);
+                    let tempRes = result;
+                    const message = {
+                        Id: tempRes.Id,
+                        Financial_Account_Name__c: tempRes.Financial_Account_Name__c
+                    }
+                    console.log('message: ' + JSON.stringify(message));
+                    this.openTimelineView(message);
+                }).catch(err => {
+                    console.log('error: ' + err);
+                })
+        }
+    }
+    // Respond to UI event by publishing message
+    handleOpenTimeline(event) {
+        const payload = {
+            recordId: event.detail.recordId,
+            source: event.detail.source
+        };
+
+        publish(this.messageContext, TRADINGDESKMESSAGE, payload);
+    }    
+    openModal(event) {
+        this.isModalOpen = true;
+        this.ticketMessageId = event.detail.id;
+        this.ticketMsg = event.detail.ticketMsg;
+        this.modalHeader = 'Add To Message Thread...';
+        refreshApex(this.ticketSeenUsers);
+    }
+    closeModal() {
+        this.isModalOpen = false;
+    }      
     setOpenMsgs() {
         console.log("Open1: ",typeof this.recentMsgs, " ", JSON.stringify(this.recentMsgs));
         console.log("Open2: ", typeof this.recentOpenMsgs, " ", JSON.stringify(this.recentOpenMsgs));

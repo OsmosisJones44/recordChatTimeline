@@ -48,7 +48,7 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
     }
 
     get threadPreview() {
-        return 'Thread: '+this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Preview__c + ' (' +this.numMsgs+')';
+        return 'Thread - '+this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Preview__c + ' (' +this.numMsgs+')';
     }
 
     get preview() {
