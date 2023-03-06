@@ -21,11 +21,15 @@ public with sharing class ChatControllerTest {
         Test.startTest();
         List<Ticket_Message__c> conts = ChatController.getMessages('');
         List<Ticket_Message__c> conts2 = ChatController.getPinnedMessages('');
+        List<Ticket_Message__c> conts11 = ChatController.getRecentThreadMsg('');
         string conts3 = ChatController.createReadStatus(newStatus.Id ,'0052E00000JfpsNQAR');
         string conts4 = ChatController.createReadStatus(newStatus3.Id ,'0052E00000JfpsNQAR');
         Help_Desk_Message_Status__c conts5 = ChatController.getUserMsgStatus('0052E00000JfpsNQAR','');
         list<Help_Desk_Message_Status__c> conts6 = ChatController.findRecentTicketMessages('0052E00000JfpsNQAR');
         list<Help_Desk_Message_Status__c> conts8 = ChatController.findRecentOpenTicketMessages('0052E00000JfpsNQAR');
+        list<Help_Desk_Message_Status__c> conts9 = ChatController.findRecentOpenThreadTicketMessages('0052E00000JfpsNQAR');
+        list<Help_Desk_Message_Status__c> conts10 = ChatController.findRecentThreadTicketMessages('0052E00000JfpsNQAR');
+        list<Help_Desk_Message_Status__c> conts12 = ChatController.findRecentRecordThreadTicketMessages('0052E00000JfpsNQAR',newStatus.Id);
         Test.stopTest();
     }
 }

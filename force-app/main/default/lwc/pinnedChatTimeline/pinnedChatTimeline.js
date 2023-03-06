@@ -161,7 +161,24 @@ export default class PinnedChatTimeline extends LightningElement {
         this.lastSavedData = this.timelinePosts;
         this.isLoading = false;
     };
-    @wire(getReadUsers, { ticketMessageId: '$ticketMessageId' }) ticketSeenUsers;
+    @wire(getReadUsers, { ticketMessageId: '$ticketMessageId' })
+    userSetup(result) {
+        this.ticketSeenUsers = result;
+        const { data, error } = result;
+        if (data) {
+            this.ticketUsers = JSON.parse(JSON.stringify(data));
+            this.error = undefined;
+        } else if (error) {
+            this.ticketUsers = undefined;
+            this.error = error;
+            console.error(JSON.stringify(error));
+        } else {
+            this.error = undefined;
+            this.ticketUsers = undefined;
+        }
+        this.lastSavedUserData = this.ticketUsers;
+        this.isLoading = false;
+    };
 
     
     connectedCallback() {
@@ -277,6 +294,28 @@ export default class PinnedChatTimeline extends LightningElement {
             this.createMessage();
         }
     }
+    openModal(event) {
+        this.inThread = event.detail.inThread;
+        this.isModalOpen = true;
+        this.ticketMessageId = event.detail.id;
+        this.ticketMsg = event.detail.ticketMsg;
+        const showInfo = event.detail.showInfo;
+        if (this.inThread) {
+            this.modalHeader = 'Message Info';
+        } else {
+            this.modalHeader = 'Message Thread';
+            if (showInfo) {
+                const el = this.template.querySelector('c-thread-tile');
+                el.showInfoTab();    
+            }
+        }
+        // const el = this.template.querySelector('lightning-tabset');
+        // el.activeTabValue = 'info';
+        refreshApex(this.ticketSeenUsers);
+    }
+    closeModal() {
+        this.isModalOpen = false;
+    }  
     updateCounters(recordCount){
         this.offset += recordCount;
         this.moreRecords = this.offset < this.totalFiles;
@@ -546,22 +585,6 @@ export default class PinnedChatTimeline extends LightningElement {
             i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     }
-    openInfoModal() {
-        this.isModalOpen = true;
-        this.infoModal = true;
-        this.seenModal = false;
-        this.modalHeader = 'Help Desk Notice';
-    }
-    openSeenModal(event) {
-        this.ticketMessageId = event.detail.id;
-        this.isModalOpen = true;
-        this.seenModal = true;
-        this.modalHeader = 'Message Seen By...';
-        return refreshApex(this.ticketSeenUsers);
-    }
-    closeModal() {
-        this.isModalOpen = false;
-    } 
     openPreview(event){
         let elementId = event.currentTarget.dataset.id;
         this[NavigationMixin.Navigate]({

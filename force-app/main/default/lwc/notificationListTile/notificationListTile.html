@@ -68,7 +68,7 @@
                                         </div>
                                         <div class="slds-col flexNone opacityClass slds-m-horizontal_xx-small">|</div>
                                         <div class="slds-col flexNone">
-                                            <lightning-relative-date-time value={createdDateParent}
+                                            <lightning-relative-date-time value={createdDate}
                                                 class="opacityClass"></lightning-relative-date-time>
                                         </div>
                                     </div>
@@ -118,12 +118,22 @@
                                 value={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Message__c}></lightning-formatted-rich-text>
                         </div>
                         <div class="slds-grid timeClass slds-p-left_xx-small">
-                            <div class="slds-col slds-size_1-of-1">
+                            <!-- <div class="slds-col slds-size_1-of-1">
                                 <lightning-formatted-date-time class="animateFade opacityClass"
                                     value={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.CreatedDate}
                                     year="numeric" month="short" day="2-digit" weekday="long" hour="2-digit"
                                     minute="2-digit" hour12="true">
                                 </lightning-formatted-date-time>
+                            </div> -->
+                            <div class="slds-col flexNone">
+                                <lightning-formatted-date-time data-id="hoverSelect" class="animateFade opacityClass"
+                                    value={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.CreatedDate} year="numeric" month="short" day="2-digit" hour="2-digit"
+                                    minute="2-digit" hour12="true">
+                                </lightning-formatted-date-time>
+                            </div>
+                            <div class="slds-col flexNone opacityClass slds-m-horizontal_xx-small">|</div>
+                            <div class="slds-col flexNone">
+                                <lightning-relative-date-time value={createdDateParent} class="opacityClass"></lightning-relative-date-time>
                             </div>
                         </div>
                     </div>
@@ -152,12 +162,22 @@
                                             </lightning-formatted-rich-text>
                                         </div>
                                         <div class="slds-grid timeClass">
-                                            <div class="slds-col slds-size_1-of-1">
+                                            <!-- <div class="slds-col slds-size_1-of-1">
                                                 <lightning-formatted-date-time class="animateFade opacityClass"
                                                     value={msgStatus.Ticket_Message__r.CreatedDate} year="numeric"
                                                     month="short" day="2-digit" weekday="long" hour="2-digit"
                                                     minute="2-digit" hour12="true">
                                                 </lightning-formatted-date-time>
+                                            </div> -->
+                                            <div class="slds-col flexNone">
+                                                <lightning-formatted-date-time data-id="hoverSelect" class="animateFade opacityClass"
+                                                    value={msgStatus.Ticket_Message__r.CreatedDate} year="numeric" month="short" day="2-digit" hour="2-digit"
+                                                    minute="2-digit" hour12="true">
+                                                </lightning-formatted-date-time>
+                                            </div>
+                                            <div class="slds-col flexNone opacityClass slds-m-horizontal_xx-small">|</div>
+                                            <div class="slds-col flexNone">
+                                                <lightning-relative-date-time value={createdDate} class="opacityClass"></lightning-relative-date-time>
                                             </div>
                                         </div>
                                     </div>

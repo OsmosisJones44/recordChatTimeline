@@ -55,6 +55,13 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
         return this.msgStatus.Ticket_Message__r.Preview__c + ' (' +this.numMsgs+')';
     }
 
+    get createdDate() {
+        return  new Date(this.msgStatus.Ticket_Message__r.CreatedDate);
+    }
+    get createdDateParent() {
+        return new Date(this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.CreatedDate);
+    }
+
     // get numMsgs() {
     //     let tempVar = [];
     //     tempVar = this.unreadMsgs.filter(obj => obj.Parent_Record_Id__c === this.msgStatus.Parent_Record_Id__c);
@@ -107,7 +114,7 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
 
     connectedCallback() {
         this.showLikes = true;
-        this.createdDateParent = new Date(this.msgStatus.Ticket_Message__r.CreatedDate);
+        // this.createdDate = new Date(this.msgStatus.Ticket_Message__r.CreatedDate);
         if (this.msgStatus.Ticket_Message__r.Message_Source__c === 'Message Thread') {
             this.showThread = true;
         } else {

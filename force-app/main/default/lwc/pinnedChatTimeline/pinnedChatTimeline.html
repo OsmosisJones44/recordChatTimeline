@@ -47,8 +47,8 @@
             <div class="containerClass">
                 <template if:true={timelinePosts}>
                     <template for:each={timelinePosts} for:item="timelinePost">
-                        <c-chat-timeline-tile key={timelinePost.Id} show-pinned={showPinned} show-thread={showThread}
-                            timeline-post={timelinePost} onrefresh={refreshPosts} onseen={openSeenModal}
+                        <c-chat-timeline-tile key={timelinePost.Id} timeline-post={timelinePost} show-pinned={showPinned}
+                            show-thread={showThread} onthread={openModal} onrefresh={refreshPosts} onseen={openModal}
                             current-name={curName}></c-chat-timeline-tile>
                     </template>
                     <template if:true={noNewMsg}>
@@ -209,11 +209,25 @@
                 </header>
 
                 <div class="slds-modal__content slds-p-around_medium userContainer" id="modal-content-id-1">
-                    <template if:true={seenModal}>
-                        <template if:true={ticketSeenUsers}>
-                            <template for:each={ticketSeenUsers.data} for:item="ticketUser">
-                                <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser}
-                                    timeline-post-id={ticketMessageId} show-likes show-seen>
+                    <template if:false={inThread}>
+                        <c-thread-tile record-id={ticketMessageId} ticket-msg={ticketMsg} main-area ticket-users={ticketUsers}
+                            show-pinned>
+                            <div slot="seen">
+                                <template if:true={ticketUsers}>
+                                    <template for:each={ticketUsers} for:item="ticketUser">
+                                        <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser}
+                                            timeline-post-id={ticketMessageId} show-seen show-likes>
+                                        </c-ticket-view-user-list>
+                                    </template>
+                                </template>
+                            </div>
+                        </c-thread-tile>
+                    </template>
+                    <template if:true={inThread}>
+                        <template if:true={ticketUsers}>
+                            <template for:each={ticketUsers} for:item="ticketUser">
+                                <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser} timeline-post-id={ticketMessageId}
+                                    show-seen show-likes>
                                 </c-ticket-view-user-list>
                             </template>
                         </template>
