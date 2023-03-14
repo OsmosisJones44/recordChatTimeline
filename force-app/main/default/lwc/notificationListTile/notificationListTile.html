@@ -15,14 +15,14 @@
                                     tooltip="Open File Preview" onclick={openPreview}
                                     size="small"></lightning-button-icon>
                             </template>
-                            <lightning-button-icon icon-name="utility:email_open" onclick={handleMarkRead} size="small"
+                            <lightning-button-icon icon-name="utility:email_open" onclick={handleMarkRead} size="medium" variant="border-filled"
                                 tooltip="Mark Read"></lightning-button-icon>
-                                <lightning-button-icon icon-name="utility:comments" onclick={handleOpenThread} size="small"
+                                <lightning-button-icon icon-name="utility:comments" onclick={handleOpenThread} size="medium" variant="border-filled"
                                     tooltip="Open Post Thread"></lightning-button-icon>
-                            <lightning-button-icon icon-name="utility:chat" onclick={handleOpenTimeline} size="small"
+                            <lightning-button-icon icon-name="utility:chat" onclick={handleOpenTimeline} size="medium" variant="border-filled"
                                 tooltip="Open Timeline"></lightning-button-icon>
                             <lightning-button-icon onclick={handleOpen} icon-name="utility:new_window"
-                            tooltip="Open Parent Record" size="small"
+                            tooltip="Open Parent Record" size="medium" variant="border-filled"
                             disabled={disableButton}></lightning-button-icon>
                         </lightning-button-group>
                     </div>
@@ -100,14 +100,14 @@
                             </template>
                         </div> -->
                         <lightning-button-group>
-                            <lightning-button-icon icon-name="utility:email_open" onclick={handleMarkRead} size="small"
-                            tooltip="Mark Read"></lightning-button-icon>
-                            <lightning-button-icon icon-name="utility:comments" onclick={handleOpenThread} size="small"
-                            tooltip="Open Post Thread"></lightning-button-icon>
-                            <lightning-button-icon icon-name="utility:chat" onclick={handleOpenTimeline} size="small"
-                                tooltip="Open Timeline"></lightning-button-icon>
-                            <lightning-button-icon onclick={handleOpenThread} icon-name="utility:new_window"
-                                tooltip="Open Parent Record" size="small"
+                            <lightning-button-icon icon-name="utility:email_open" onclick={handleMarkRead} size="medium"
+                            tooltip="Mark Read" variant="border-filled"></lightning-button-icon>
+                            <lightning-button-icon icon-name="utility:comments" onclick={handleOpenThread} size="medium"
+                            tooltip="Open Thread" variant="border-filled"></lightning-button-icon>
+                            <lightning-button-icon icon-name="utility:chat" onclick={handleOpenTimeline} size="medium"
+                                tooltip="Open Timeline" variant="border-filled"></lightning-button-icon>
+                            <lightning-button-icon onclick={handleOpen} icon-name="utility:new_window"
+                                tooltip="Open Parent Record" size="medium" variant="border-filled"
                                 disabled={disableButton}></lightning-button-icon>
                         </lightning-button-group>
                     </div>

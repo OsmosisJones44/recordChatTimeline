@@ -25,6 +25,7 @@ export default class ThreadContainer extends NavigationMixin(LightningElement) {
     @api threadBox = "slds-m-left_xx-large slds-box slds-box_xx-small";
     @api recordId;
     @api chatToggle = false;
+    @api parentRecordId = '';
     showPreview;
     userId = USER_ID;
     post;

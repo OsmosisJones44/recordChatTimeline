@@ -31,6 +31,7 @@ export default class ChatTableContainer extends NavigationMixin(LightningElement
     @api previewWidth = "slds-col slds-size_1-of-2 slds-border_right";
     @api timelineWidth = "slds-col slds-size_1-of-2 slds-p-horizontal_x-small slds-p-top_x-small";
     @api showTimelineVal = false;
+    @api parentRecordId = '';
     columns = columns;
     userId = USER_ID;
     officeSpacePic = OFFICE_SPACE;
@@ -63,6 +64,9 @@ export default class ChatTableContainer extends NavigationMixin(LightningElement
         const { data, error } = result;
         if (data) {
             this.recentMsgs = JSON.parse(JSON.stringify(data));
+            if (this.parentRecordId) {
+                
+            }
             this.error = undefined;
             this.noData = false
         } else if (error) {

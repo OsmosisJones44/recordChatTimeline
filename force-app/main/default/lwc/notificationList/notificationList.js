@@ -68,6 +68,7 @@ export default class NotificationList extends LightningElement {
     numNewMsgs = 0;
     newMessages;
     modalHeader;
+    isModalOpen;
     ticketSeenUsers;
     ticketUsers;
     ticketMessageId;
@@ -326,9 +327,20 @@ export default class NotificationList extends LightningElement {
         };
 
         publish(this.messageContext, TRADINGDESKMESSAGE, payload);
-    }    
+    }  
+    handleOpenThread(event) {
+        console.log('Testing Open Thread');
+        // const payload = {
+        //     recordId: event.detail.recordId,
+        //     source: event.detail.source
+        // };
+
+        // publish(this.messageContext, TRADINGDESKMESSAGE, payload);
+        this.openModal(event);
+    }  
     openModal(event) {
         this.isModalOpen = true;
+        this.mainArea = false;
         this.ticketMessageId = event.detail.id;
         this.ticketMsg = event.detail.ticketMsg;
         this.modalHeader = 'Add To Message Thread...';
@@ -338,8 +350,8 @@ export default class NotificationList extends LightningElement {
         this.isModalOpen = false;
     }      
     setOpenMsgs() {
-        console.log("Open1: ",typeof this.recentMsgs, " ", JSON.stringify(this.recentMsgs));
-        console.log("Open2: ", typeof this.recentOpenMsgs, " ", JSON.stringify(this.recentOpenMsgs));
+        // console.log("Open1: ",typeof this.recentMsgs, " ", JSON.stringify(this.recentMsgs));
+        // console.log("Open2: ", typeof this.recentOpenMsgs, " ", JSON.stringify(this.recentOpenMsgs));
         if (this.recentMsgs && this.recentOpenMsgs) {
             const tempOpenMsgs = [...this.recentMsgs, ...this.recentOpenMsgs];
             this.openMsgs = tempOpenMsgs.map(obj => {
@@ -353,7 +365,6 @@ export default class NotificationList extends LightningElement {
                 }
                 return 0;
             });
-            console.log(tempOpenMsgs.length);
             this.numNewMsgs = tempOpenMsgs.length;
         }
 
@@ -524,6 +535,8 @@ export default class NotificationList extends LightningElement {
             console.log('New message received: ', JSON.stringify(response));
             refreshApex(this.recentMsgKey);
             refreshApex(this.recentOpenMsgKey);
+            const el = this.template.querySelector('c-notification-list-tile');
+            el.refreshMe();
             // let updatedTicketId = response.data.payload.TicketId__c;
         };
 

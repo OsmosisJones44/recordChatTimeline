@@ -1,3 +1,5 @@
-import { LightningElement } from 'lwc';
+import { LightningElement, api } from 'lwc';
 
-export default class MessageCenterUtility extends LightningElement {}
+export default class MessageCenterUtility extends LightningElement {
+    @api recordId;
+}

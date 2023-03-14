@@ -4,7 +4,7 @@ import { updateRecord } from 'lightning/uiRecordApi';
 import { refreshApex } from '@salesforce/apex';
 import getCurrentUserPhoto from '@salesforce/apex/BirthdayController.getCurrentUserPhoto';
 import getCurUser from '@salesforce/apex/BirthdayController.getCurUser';
-import createReadStatus from '@salesforce/apex/BirthdayController.createReadStatus';
+import createReadStatus from '@salesforce/apex/ChatController.createReadStatus';
 import getUserMsgStatus from '@salesforce/apex/ChatController.getUserMsgStatus';
 // import MESSAGE_OBJECT from '@salesforce/schema/Help_Desk_Message_Status__c';
 // import TICKET_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Ticket_Message__c';
@@ -60,6 +60,13 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
     }
     get createdDateParent() {
         return new Date(this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.CreatedDate);
+    }
+
+    get numMsgs() {
+        return this.unreadMsgsVar.length;
+    }
+    get unreadMsgsVar() {
+        return this.unreadMsgs.filter(obj => obj.Ticket_Message__r.Parent_Record_Id__c === this.msgStatus.Ticket_Message__r.Parent_Record_Id__c);
     }
 
     // get numMsgs() {
@@ -120,14 +127,20 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
         } else {
             this.showConversation = true;
         }
-        let tempVar = [];
-        tempVar = this.unreadMsgs.filter(obj => obj.Parent_Record_Id__c === this.msgStatus.Parent_Record_Id__c && obj.Ticket_Message__r.Message_Source__c === this.msgStatus.Ticket_Message__r.Message_Source__c);
-        this.numMsgs = tempVar.length;
+        console.log('msgStatus: ' + JSON.stringify(this.msgStatus));
+        // this.tempVar = [];
+        // this.tempVar = this.unreadMsgs.filter(obj => obj.Ticket_Message__r.Parent_Record_Id__c === this.msgStatus.Ticket_Message__r.Parent_Record_Id__c);
         this.setValues();
     }
     renderedCallback(){
         refreshApex(this.smallPhotoUrlKey);
         refreshApex(this.msgStatusKey);
+    }
+    @api
+    refreshMe() {
+        refreshApex(this.smallPhotoUrlKey);
+        refreshApex(this.msgStatusKey);
+        this.connectedCallback();
     }
     openPreview(){
         //let elementId = event.currentTarget.dataset.id;
@@ -144,15 +157,27 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
     handleOpen(event) {
         event.preventDefault();
         event.stopPropagation();
-        const parentId = this.msgStatus.Ticket_Message__r.Parent_Record_Id__c;
-        console.log("ParentId: "+parentId)
-        this[NavigationMixin.Navigate]({
-            type: 'standard__recordPage',
-            attributes: {
-                recordId: parentId,
-                actionName: 'view'
-            }
-        });
+        if (this.msgStatus.Ticket_Message__r.Message_Source__c === 'Message Thread') {
+            const parentId = this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Parent_Record_Id__c;
+            console.log("ParentId: "+parentId)
+            this[NavigationMixin.Navigate]({
+                type: 'standard__recordPage',
+                attributes: {
+                    recordId: parentId,
+                    actionName: 'view'
+                }
+            });
+        } else {
+            const parentId = this.msgStatus.Ticket_Message__r.Parent_Record_Id__c;
+            console.log("ParentId: "+parentId)
+            this[NavigationMixin.Navigate]({
+                type: 'standard__recordPage',
+                attributes: {
+                    recordId: parentId,
+                    actionName: 'view'
+                }
+            });
+        }
     }
     // handleOpenThread() {
     //     const parentId = this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Parent_Record_Id__c;
@@ -196,7 +221,7 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'Error Resolving Message Thread',
-                        message: 'Screenshot Me and send to your Salesoforce Administrator',
+                        message: 'Screenshot Me and send to your Salesforce Administrator',
                         variant: 'error'
                     })
                 );
@@ -233,7 +258,7 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'Error Re-Opening Message Thread',
-                        message: 'Screenshot Me and send to your Salesoforce Administrator',
+                        message: 'Screenshot Me and send to your Salesforce Administrator',
                         variant: 'error'
                     })
                 );
@@ -263,7 +288,7 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
             .catch(error => {
                 this.dispatchEvent(
                     new ShowToastEvent({
-                        title: 'Error Liking Message - Screenshot Me and send to your Salesoforce Administrator',
+                        title: 'Error Liking Message - Screenshot Me and send to your Salesforce Administrator',
                         message: error.body.message,
                         variant: 'error'
                     })
@@ -356,13 +381,13 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
         });
     }
     handleOpenTimeline(event) {
-        event.preventDefault();
-        event.stopPropagation();
+        // event.preventDefault();
+        // event.stopPropagation();
         console.log(this.msgStatus.Ticket_Message__r.Message_Source__c);
         if (this.msgStatus.Ticket_Message__r.Message_Source__c === "Message Thread") {
             const selectEvent = new CustomEvent('opentimeline', {
             detail: {
-                recordId: this.parentId,
+                recordId: this.msgStatus.Ticket_Message__r.Parent_Record_Id__c,
                 source: this.msgStatus.Ticket_Message__r.Message_Source__c,
             }
             });
@@ -370,7 +395,7 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
         } else {
             const selectEvent = new CustomEvent('opentimeline', {
             detail: {
-                recordId: this.parentId,
+                recordId: this.msgStatus.Ticket_Message__r.Parent_Record_Id__c,
                 source: this.msgStatus.Ticket_Message__r.Message_Source__c,
             }
             });
@@ -378,12 +403,12 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
         }
     }   
     handleOpenThread(event) {
-        event.preventDefault();
-        event.stopPropagation();
+        // event.preventDefault();
+        // event.stopPropagation();
         if (this.msgStatus.Ticket_Message__r.Message_Source__c === "Message Thread") {
             const selectEvent = new CustomEvent('thread', {
                 detail: {
-                    id: this.parentId,
+                    id: this.msgStatus.Ticket_Message__r.Parent_Record_Id__c,
                     ticketMsg: this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r
                 }
             });
@@ -391,7 +416,7 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
         } else {
             const selectEvent = new CustomEvent('thread', {
                 detail: {
-                    id: this.parentId,
+                    id: this.msgStatus.Ticket_Message__r.Parent_Record_Id__c,
                     ticketMsg: this.msgStatus.Ticket_Message__r
                 }
             });
@@ -402,32 +427,34 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
         event.preventDefault();
         event.stopPropagation();
         this.isLoading = true;
-        // console.log(this.userId);
-        getCurUser({userId:this.userId})
-        .then((result) => {
-            this.curUser = result;
-            this.curName = result.Name;
-            this.error = undefined;
-            createReadStatus({
-                ticketMessageId: this.msgStatus.Ticket_Message__c,
-                userId: this.userId
-            })
-            .then(result => {
-                this.handleRefresh();
-                this.isLoading = false;
-                this.statusId = result;
-                this.error = undefined;
-            })
-            .catch(error => {
-                console.log(JSON.stringify(error));
-                this.statusId = undefined;
-                this.error = error;
-            })
+        createReadStatus({
+            ticketMessageId: this.msgStatus.Ticket_Message__c,
+            userId: this.userId
         })
-        .catch((error) => {
+        .then(result => {
+            this.handleRefresh();
+            this.isLoading = false;
+            this.statusId = result;
+            this.error = undefined;
+        })
+        .catch(error => {
             console.log(JSON.stringify(error));
+            this.isLoading = false;
+            this.statusId = undefined;
             this.error = error;
-            this.curUser = undefined;
-        });
+        })
+        // console.log(this.userId);
+        // getCurUser({userId:this.userId})
+        // .then((result) => {
+        //     this.curUser = result;
+        //     this.curName = result.Name;
+        //     this.error = undefined;
+        // })
+        // .catch((error) => {
+        //     console.log(JSON.stringify(error));
+        //     this.isLoading = false;
+        //     this.error = error;
+        //     this.curUser = undefined;
+        // });
     }
 }

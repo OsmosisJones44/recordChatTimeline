@@ -5,19 +5,21 @@ public with sharing class ChatController {
 
     @AuraEnabled(cacheable=true)
     public static List<Ticket_Message__c> getMessages(string parentId ){
-        try{return [SELECT Id, SeenBy__c, Thread__c, Icon_Name__c,CreatedDate,Record_Id_Form__c, Preview__c,Parent_Record_Id__c, DocumentId__c, Name, Message__c, OwnerId, OwnerName__c,Parent_Ticket__c,Owner_URL__c,timelineClassName__c, CloseMsg__c, Pinned__c
+        // try{
+            return [SELECT Id, SeenBy__c, Thread__c, Icon_Name__c,CreatedDate,Record_Id_Form__c, Preview__c,Parent_Record_Id__c, DocumentId__c, Name, Message__c, OwnerId, OwnerName__c,Parent_Ticket__c,Owner_URL__c,timelineClassName__c, CloseMsg__c, Pinned__c
         FROM Ticket_Message__c WHERE Parent_Record_Id__c =:parentId OR Parent_Ticket__c = :parentId ORDER BY CreatedDate DESC];
-        }catch(system.QueryException e){
-            return null;
-        }
+        // }catch(system.QueryException e){
+        //     return null;
+        // }
     }
     @AuraEnabled(cacheable=true)
     public static List<Ticket_Message__c> getPinnedMessages(string parentId){
-        try{return [SELECT Id, SeenBy__c, CreatedDate,Record_Id_Form__c, Preview__c,Parent_Record_Id__c, DocumentId__c, Name, Message__c, OwnerId, OwnerName__c,Parent_Ticket__c,Owner_URL__c,timelineClassName__c, CloseMsg__c, Pinned__c
+        // try{
+            return [SELECT Id, SeenBy__c, CreatedDate,Record_Id_Form__c, Preview__c,Parent_Record_Id__c, DocumentId__c, Name, Message__c, OwnerId, OwnerName__c,Parent_Ticket__c,Owner_URL__c,timelineClassName__c, CloseMsg__c, Pinned__c
         FROM Ticket_Message__c WHERE Pinned__c = true AND (Parent_Record_Id__c =:parentId OR Parent_Ticket__c = :parentId) ORDER BY CreatedDate DESC];
-        }catch(system.QueryException e){
-            return null;
-        }
+        // }catch(system.QueryException e){
+        //     return null;
+        // }
     }   
     @AuraEnabled
     public static string createReadStatus(string ticketMessageId, string userId){
@@ -142,7 +144,7 @@ public with sharing class ChatController {
                 List<Help_Desk_Message_Status__c> msgStatuses2 = [SELECT Id, Search_Formula__c, tableTimelineClass__c,Ticket_Message__r.OwnerId, 
                 Ticket_Message__r.Parent_Ticket_Message__r.Preview__c,Ticket_Message__r.Parent_Ticket_Message__r.Id,Ticket_Message__r.Parent_Ticket_Message__r.Message__c,Ticket_Message__r.Parent_Ticket_Message__r.Owner_URL__c,Ticket_Message__r.Parent_Ticket_Message__r.OwnerName__c,Ticket_Message__r.Parent_Ticket_Message__r.OwnerId, Ticket_Message__r.Parent_Ticket_Message__r.Icon_Name__c,Ticket_Message__r.Parent_Ticket_Message__r.Closed_Thread__c, 
                 Ticket_Message__r.Parent_Ticket_Message__r.DocumentId__c,Ticket_Message__r.Parent_Ticket_Message__r.CreatedDate,Ticket_Message__r.Parent_Ticket_Message__r.timelineClassName__c,Ticket_Message__r.Parent_Ticket_Message__r.Pinned__c,Ticket_Message__r.Parent_Ticket_Message__r.Thread__c,Ticket_Message__r.Parent_Ticket_Message__r.Parent_Record_Id__c, Ticket_Message__r.Parent_Ticket_Message__c, 
-                Ticket_Message__r.Message__c,Ticket_Message__r.Preview__c, Ticket_Message__r.Id, Ticket_Message__r.CreatedDate,Ticket_Message__r.DocumentId__c,Ticket_Message__r.OwnerName__c, Ticket_Message__r.Owner_URL__c, CreatedDate, Name, Ticket_Message__c,Ticket_Message__r.Record_Id_Form__c,Ticket_Message__r.Icon_Name__c,Ticket_Message__r.Message_Source__c, OwnerId,Read__c,Liked__c 
+                Ticket_Message__r.Message__c,Ticket_Message__r.Preview__c, Ticket_Message__r.Id,Ticket_Message__r.Parent_Record_Id__c, Ticket_Message__r.CreatedDate,Ticket_Message__r.DocumentId__c,Ticket_Message__r.OwnerName__c, Ticket_Message__r.Owner_URL__c, CreatedDate, Name, Ticket_Message__c,Ticket_Message__r.Record_Id_Form__c,Ticket_Message__r.Icon_Name__c,Ticket_Message__r.Message_Source__c, OwnerId,Read__c,Liked__c 
                 FROM Help_Desk_Message_Status__c WHERE OwnerId = :userId AND Ticket_Message__c IN: recentMsgs ORDER BY CreatedDate DESC];
                 return msgStatuses2;
             // }else{
