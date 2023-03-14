@@ -265,6 +265,7 @@ export default class ChatTimeline extends LightningElement {
         return refreshApex(this.timelinePostKey);
     }
     refreshUsers(event) {
+        refreshApex(this.ticketSeenUsers);
         this.refreshPosts();
         const selectEvent = new CustomEvent('refresh', {
             bubbles: true,

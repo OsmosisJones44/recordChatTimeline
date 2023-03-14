@@ -235,7 +235,7 @@
                 <div class="slds-modal__content slds-p-around_medium userContainer" id="modal-content-id-1">
                     <template if:false={inThread}>
                         <c-thread-tile record-id={ticketMessageId} ticket-msg={ticketMsg} main-area
-                            ticket-users={ticketUsers} show-pinned>
+                            ticket-users={ticketUsers} show-pinned onrefresh={refreshUsers}>
                             <div slot="seen">
                                 <template if:true={ticketUsers}>
                                     <template for:each={ticketUsers} for:item="ticketUser">

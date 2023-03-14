@@ -226,30 +226,42 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
     handleAddUser() {
         // event.preventDefault();
         // event.stopPropagation();
+        this.ticketUsers.forEach(el => {
+            this.recipients.push(el.Id);
+        });
+        console.log('Recipients: '+this.recipients);
         this.isLoading = true;
         if (this.userNameValue) {
             if (!this.recipients.includes(this.userNameValue)) {
-                this.customRecipients.push(this.userNameValue);
+                const fields = {};
+                fields[HDMESSAGE_FIELD.fieldApiName] = this.userNameValue;
+                fields[HDOWNER_FIELD.fieldApiName] = this.ticketMsg.Id;
+                const recordInput = { apiName: STATUS_OBJECT.objectApiName, fields };
+                createRecord(recordInput)
+                    .then(result => {
+                        console.log(JSON.stringify(result));
+                        this.dispatchEvent(
+                            new ShowToastEvent({
+                                title: 'Member Successfully Added',
+                                message: 'Please Refresh if the added member is not showing within the "Notified" tab of the Thread Pop-Up',
+                                variant: 'success',
+                            }),
+                        );
+                        this.template.querySelector('lightning-input-field[data-id="userUpdate"]').value = null;
+                        this.handleRefresh();
+                    })
+                    .catch(error => {
+                        console.log(JSON.stringify(error));
+                        this.dispatchEvent(
+                            new ShowToastEvent({
+                                title: 'Error Creating Custom Notifcations',
+                                message: 'Contact your Salesforce Admin',
+                                variant: 'error',
+                            }),
+                        );
+                    });
                 console.log('UserVal: '+this.userNameValue);
-                console.log('RecipientArrayVal: '+this.customRecipients);
-                getCurUser({userId:this.userNameValue})
-                .then((result) => {
-                    console.log(JSON.stringify(result));
-                    
-                    // this.curUser = result;
-                    this.customNotifications.push(result);
-                    console.log('NotificationArrayVal: '+JSON.stringify(this.customNotifications));
-                    this.isLoading = false;
-                    // this.curName = result.Name;
-                    this.error = undefined;
-                    this.template.querySelector('lightning-input-field[data-id="userUpdate"]').value = null;
-                })
-                    .catch((error) => {
-                        console.log(error);
-                        this.error = error;
-                        this.isLoading = false;
-                        // this.curUser = undefined;
-                });
+                // console.log('RecipientArrayVal: '+this.customRecipients);
             } else {
                 this.template.querySelector('lightning-input-field[data-id="userUpdate"]').value = null;
                 this.isLoading = false;

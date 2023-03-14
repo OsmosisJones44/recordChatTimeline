@@ -30,6 +30,19 @@
                     </div>
                 </lightning-tab>
                 <lightning-tab label="Notified" icon-name="utility:people" value="info">
+                    <!-- <h3 class="userList">Notifications</h3> -->
+                    <div class="slds-grid">
+                        <div class="slds-col slds-size_10-of-12 slds-align-bottom">
+                            <lightning-record-edit-form object-api-name="User_Ticket_Relationship__c" data-id="userSubmit">
+                                <lightning-input-field field-name="User__c" data-id="userUpdate" variant="label-hidden"
+                                    style="margin-bottom: 0;" onchange={handleUserChange}></lightning-input-field>
+                    
+                            </lightning-record-edit-form>
+                        </div>
+                        <div class="slds-col slds-size_1-of-12 slds-align-bottom slds-var-p-left_xx-small">
+                            <lightning-button label="Add" variant="brand" onclick={handleAddUser}></lightning-button>
+                        </div>
+                    </div>
                     <slot name="seen"></slot>
                     <!-- <div class="slds-col slds-size_1-of-1 slds-p-around_x-small">
                         <lightning-file-upload label="Attach file" name="fileUploader" record-id={ticketMsg.Parent_Record_Id__c}
