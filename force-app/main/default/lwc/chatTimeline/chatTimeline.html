@@ -72,14 +72,14 @@
                     <div class="slds-col slds-size_11-of-12" data-id="selectRichText">
                         <lightning-input-rich-text variant="bottom-toolbar" value={messageValue}
                             placeholder="Enter Timeline Message..." onchange={handleMessageChange} formats={formats}>
-                            <lightning-rich-text-toolbar-button-group slot="toolbar"
+                            <!-- <lightning-rich-text-toolbar-button-group slot="toolbar"
                                 style="flex-grow:1;"></lightning-rich-text-toolbar-button-group>
                             <lightning-rich-text-toolbar-button-group slot="toolbar" data-id="richTextVal"
                                 aria-label="Template Button Group">
                                 <lightning-rich-text-toolbar-button icon-name="utility:send" data-id="richTextSelect"
                                     icon-alternative-text="Insert Doc Template" onclick={createMessage}>
                                 </lightning-rich-text-toolbar-button>
-                            </lightning-rich-text-toolbar-button-group>
+                            </lightning-rich-text-toolbar-button-group> -->
                         </lightning-input-rich-text>
                     </div>
                     <div class="slds-col slds-size_1-of-12">
@@ -106,7 +106,7 @@
                             </div> -->
                         </div>
                     </div>
-                    <div class="slds-col slds-size_1-of-1">
+                    <!-- <div class="slds-col slds-size_1-of-1">
                         <template if:true={showMembers}>
                             <c-chat-user-list ticket-users={ticketUsers} title={userTitle} record-id={recordId}
                                 onrefresh={refreshUsers} object-name={objectName}></c-chat-user-list>
@@ -143,7 +143,7 @@
                                 </template>
                             </div>
                         </template>
-                    </div>
+                    </div> -->
                 </div>
                 <!-- <template if:true={timelineFile}>
                         <div class="slds-col slds-size_1-of-1 slds-p-around_x-small">
@@ -236,7 +236,7 @@
                     <template if:false={inThread}>
                         <c-thread-tile record-id={ticketMessageId} ticket-msg={ticketMsg} main-area
                             ticket-users={ticketUsers} show-pinned onrefresh={refreshUsers}>
-                            <div slot="seen">
+                            <!-- <div slot="seen">
                                 <template if:true={ticketUsers}>
                                     <template for:each={ticketUsers} for:item="ticketUser">
                                         <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser}
@@ -244,7 +244,7 @@
                                         </c-ticket-view-user-list>
                                     </template>
                                 </template>
-                            </div>
+                            </div> -->
                         </c-thread-tile>
                     </template>
                     <template if:true={inThread}>

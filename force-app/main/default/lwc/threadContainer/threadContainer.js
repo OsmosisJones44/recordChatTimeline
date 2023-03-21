@@ -128,6 +128,9 @@ export default class ThreadContainer extends NavigationMixin(LightningElement) {
     //     refreshApex(this.recentThreadMsgKey);
     //     refreshApex(this.recentMsgKey);
     // }
+    handleTrainingRedirect() {
+        window.open('https://trpg.my.trailhead.com/content/operations/trails/internal-process-hub--timelines', '_blank');
+    }
     handleTimelineView(event) {
         if (!this.showTimeline) {
             this.showThreadVal = true;

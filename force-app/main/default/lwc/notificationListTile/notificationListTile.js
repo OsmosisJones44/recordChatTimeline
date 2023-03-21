@@ -36,8 +36,10 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
     showLikes = false;
     isLoading;
     disableButton;
-    numMsgs;
+    // numMsgs;
     previewKey;
+    varArr = [];
+    vArr = [];
 
     get avatarClass() {
         if (this.smallPhotoUrl) {
@@ -61,12 +63,50 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
     get createdDateParent() {
         return new Date(this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.CreatedDate);
     }
+    get createdDateVal() {
+        return  this.msgStatus.Ticket_Message__r.CreatedDate;
+    }
+    get createdDateParentVal() {
+        return this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.CreatedDate;
+    }
 
     get numMsgs() {
-        return this.unreadMsgsVar.length;
+        this.vArr = this.unreadMsgsVar.length;
+        return this.vArr;
     }
     get unreadMsgsVar() {
-        return this.unreadMsgs.filter(obj => obj.Ticket_Message__r.Parent_Record_Id__c === this.msgStatus.Ticket_Message__r.Parent_Record_Id__c);
+        this.varArr = this.unreadMsgs.filter(obj => obj.Ticket_Message__r.Parent_Record_Id__c === this.msgStatus.Ticket_Message__r.Parent_Record_Id__c);
+        return this.varArr;
+    }
+    get msgOwnerURL() {
+        return this.msgStatus.Ticket_Message__r.Owner_URL__c;
+    }
+    get msgOwnerName() {
+        return this.msgStatus.Ticket_Message__r.OwnerName__c;
+    }
+    get msgValue() {
+        return this.msgStatus.Ticket_Message__r.Message__c;
+    }
+    get msgParentOwnerURL() {
+        return this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Owner_URL__c;
+    }
+    get msgParentOwnerName() {
+        return this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.OwnerName__c;
+    }
+    get msgParentValue() {
+        return this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Message__c;
+    }
+    get msgTableTimelineClass() {
+        return this.msgStatus.Ticket_Message__r.tableTimelineClass__c;
+    }
+    get msgDocumentId() {
+        return this.msgStatus.Ticket_Message__r.DocumentId__c;
+    }
+    get msgParentIconName() {
+        return this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Icon_Name__c;
+    }
+    get msgIconName() {
+        return this.msgStatus.Ticket_Message__r.Icon_Name__c;
     }
 
     // get numMsgs() {
@@ -306,27 +346,23 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
     handleSelect(event){
         // event.preventDefault();
         // event.stopPropagation();
-        if (this.showThread) {
-            const selectEvent = new CustomEvent('timeline', {
-                bubbles: false,
-                detail: {
-                    msgId: this.msgStatus.Ticket_Message__r.Id,
-                    id: this.msgStatus.Ticket_Message__r.Record_Id_Form__c,
-                    timelinePost: this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r
-                }
-            });
-            this.dispatchEvent(selectEvent);  
-        } else {
-            const selectEvent = new CustomEvent('timeline', {
-                bubbles: false,
-                detail: {
-                    msgId: this.msgStatus.Ticket_Message__r.Id,
-                    id: this.msgStatus.Ticket_Message__r.Record_Id_Form__c,
-                    timelinePost: this.msgStatus.Ticket_Message__r
-                }
-            });
-            this.dispatchEvent(selectEvent); 
-        }
+        let parentMsgId = this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__c;
+        let msgId = this.msgStatus.Ticket_Message__r.Id;
+        let recId = this.msgStatus.Ticket_Message__r.Parent_Record_Id__c;
+        let msgSource = this.msgStatus.Ticket_Message__r.Message_Source__c;
+        let preview = this.msgStatus.Ticket_Message__r.Preview__c;
+        let ticketMsg = this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r
+        const selectEvent2 = new CustomEvent('opentimeline', {
+            detail: {
+                msgId: msgId,
+                parentMsgId: parentMsgId,
+                id: recId,
+                source: msgSource,
+                ticketMsg: ticketMsg,
+                preview: preview
+            }
+        });
+        this.dispatchEvent(selectEvent2);  
     }
     openSeenBy(event){
         event.preventDefault();
@@ -381,43 +417,49 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
         });
     }
     handleOpenTimeline(event) {
-        // event.preventDefault();
-        // event.stopPropagation();
+        event.preventDefault();
+        event.stopPropagation();
         console.log(this.msgStatus.Ticket_Message__r.Message_Source__c);
         if (this.msgStatus.Ticket_Message__r.Message_Source__c === "Message Thread") {
             const selectEvent = new CustomEvent('opentimeline', {
             detail: {
-                recordId: this.msgStatus.Ticket_Message__r.Parent_Record_Id__c,
-                source: this.msgStatus.Ticket_Message__r.Message_Source__c,
-            }
+                    msgId: this.msgStatus.Ticket_Message__r.Id,
+                    id: this.msgStatus.Ticket_Message__r.Record_Id_Form__c,
+                    timelinePost: this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r
+                }
             });
             this.dispatchEvent(selectEvent);  
         } else {
             const selectEvent = new CustomEvent('opentimeline', {
             detail: {
-                recordId: this.msgStatus.Ticket_Message__r.Parent_Record_Id__c,
-                source: this.msgStatus.Ticket_Message__r.Message_Source__c,
-            }
+                    msgId: this.msgStatus.Ticket_Message__r.Id,
+                    id: this.msgStatus.Ticket_Message__r.Record_Id_Form__c,
+                    timelinePost: this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r
+                }
             });
             this.dispatchEvent(selectEvent);  
         }
     }   
     handleOpenThread(event) {
-        // event.preventDefault();
-        // event.stopPropagation();
+        event.preventDefault();
+        event.stopPropagation();
         if (this.msgStatus.Ticket_Message__r.Message_Source__c === "Message Thread") {
             const selectEvent = new CustomEvent('thread', {
+                bubbles: true,
                 detail: {
-                    id: this.msgStatus.Ticket_Message__r.Parent_Record_Id__c,
-                    ticketMsg: this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r
+                    msgId: this.msgStatus.Ticket_Message__r.Id,
+                    id: this.msgStatus.Ticket_Message__r.Record_Id_Form__c,
+                    source: this.msgStatus.Ticket_Message__r.Message_Source__c
                 }
             });
             this.dispatchEvent(selectEvent); 
         } else {
             const selectEvent = new CustomEvent('thread', {
+                bubbles: true,
                 detail: {
-                    id: this.msgStatus.Ticket_Message__r.Parent_Record_Id__c,
-                    ticketMsg: this.msgStatus.Ticket_Message__r
+                    msgId: this.msgStatus.Ticket_Message__r.Id,
+                    id: this.msgStatus.Ticket_Message__r.Record_Id_Form__c,
+                    source: this.msgStatus.Ticket_Message__r.Message_Source__c
                 }
             });
             this.dispatchEvent(selectEvent);  
@@ -443,18 +485,5 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
             this.statusId = undefined;
             this.error = error;
         })
-        // console.log(this.userId);
-        // getCurUser({userId:this.userId})
-        // .then((result) => {
-        //     this.curUser = result;
-        //     this.curName = result.Name;
-        //     this.error = undefined;
-        // })
-        // .catch((error) => {
-        //     console.log(JSON.stringify(error));
-        //     this.isLoading = false;
-        //     this.error = error;
-        //     this.curUser = undefined;
-        // });
     }
 }

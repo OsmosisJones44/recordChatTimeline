@@ -1,5 +1,5 @@
 import { LightningElement, wire, api } from 'lwc';
-import findRecentTicketMessages from '@salesforce/apex/ChatController.findRecentTicketMessages';
+// import findRecentTicketMessages from '@salesforce/apex/ChatController.findRecentTicketMessages';
 import findRecentOpenTicketMessages from '@salesforce/apex/ChatController.findRecentOpenTicketMessages';
 import findRecentOpenThreadTicketMessages from '@salesforce/apex/ChatController.findRecentOpenThreadTicketMessages';
 import getUnreadTimelineMessages from '@salesforce/apex/NASController.getUnreadTimelineMessages';
@@ -9,7 +9,7 @@ import getReadUsers from '@salesforce/apex/BirthdayController.getReadUsers';
 // import getCashRequestMembers from '@salesforce/apex/BirthdayController.getCashRequestMembers';
 import { subscribe as sub, unsubscribe as unsub, publish, MessageContext } from 'lightning/messageService';
 import TRADINGDESKMESSAGE from '@salesforce/messageChannel/TradingDeskMessage__c';
-import getRecordMembers from '@salesforce/apex/BirthdayController.getRecordMembers';
+// import getRecordMembers from '@salesforce/apex/BirthdayController.getRecordMembers';
 import USER_ID from '@salesforce/user/Id';
 import OFFICE_SPACE from '@salesforce/resourceUrl/Office_Space';
 import { refreshApex } from '@salesforce/apex';
@@ -72,6 +72,8 @@ export default class NotificationList extends LightningElement {
     ticketSeenUsers;
     ticketUsers;
     ticketMessageId;
+    tempTicketMessageId;
+    messageSource;
     ticketMsg;
 
 
@@ -88,6 +90,24 @@ export default class NotificationList extends LightningElement {
         } else {
             return 'Unread Messages (-)'
         }
+    }
+    get showThread() {
+        if (this.messageSource === "Message Thread") {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    get timelineView() {
+        if (this.messageSource === "Message Thread") {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    get ticketMessageId() {
+        return this.tempTicketMessageId;
     }
     // get openMsgs() {
     //     if (this.recentMsgs && this.recentOpenMsgs) {
@@ -171,25 +191,25 @@ export default class NotificationList extends LightningElement {
         this.isLoading = false; 
         this.setOpenMsgs();
     }
-    @wire(getRecordMembers, { ticketId: '$recordId', objectName: '$objectName' })
-    memberSetup(result) {
-        this.membersKey = result;
-        const { data, error } = result;
-        if (data) {
-            this.ticketUsers = JSON.parse(JSON.stringify(data));
-            this.error = undefined;
-        } else if (error) {
-            this.ticketUsers = undefined;
-            this.error = error;
-            console.error(error);
-        } else {
-            this.error = undefined;
-            this.ticketUsers = undefined;
-        }
-        this.lastSavedRecordData = this.ticketUsers;
-        this.isLoading = false;
-        this.setOpenMsgs();
-    }
+    // @wire(getRecordMembers, { ticketId: '$recordId', objectName: '$objectName' })
+    // memberSetup(result) {
+    //     this.membersKey = result;
+    //     const { data, error } = result;
+    //     if (data) {
+    //         this.ticketUsers = JSON.parse(JSON.stringify(data));
+    //         this.error = undefined;
+    //     } else if (error) {
+    //         this.ticketUsers = undefined;
+    //         this.error = error;
+    //         console.error(error);
+    //     } else {
+    //         this.error = undefined;
+    //         this.ticketUsers = undefined;
+    //     }
+    //     this.lastSavedRecordData = this.ticketUsers;
+    //     this.isLoading = false;
+    //     this.setOpenMsgs();
+    // }
     @wire(getReadUsers, { ticketMessageId: '$ticketMessageId' })
     userSetup(result) {
         this.ticketSeenUsers = result;
@@ -321,22 +341,20 @@ export default class NotificationList extends LightningElement {
     }
     // Respond to UI event by publishing message
     handleOpenTimeline(event) {
-        const payload = {
-            recordId: event.detail.recordId,
-            source: event.detail.source
-        };
-
-        publish(this.messageContext, TRADINGDESKMESSAGE, payload);
-    }  
-    handleOpenThread(event) {
-        console.log('Testing Open Thread');
         // const payload = {
         //     recordId: event.detail.recordId,
         //     source: event.detail.source
         // };
-
+        console.log(JSON.stringify(event.detail));
+        console.log(JSON.stringify(event.detail.source));
+        this.messageSource = event.detail.source;
+        this.recordId = event.detail.id;
+        this.mainArea = false;
+        this.ticketMsg = event.detail.ticketMsg;
+        this.timelineTitle = event.detail.preview;
+        // this.modalHeader = 'Add To Message Thread...';
+        return refreshApex(this.ticketSeenUsers);
         // publish(this.messageContext, TRADINGDESKMESSAGE, payload);
-        this.openModal(event);
     }  
     openModal(event) {
         this.isModalOpen = true;
@@ -411,52 +429,59 @@ export default class NotificationList extends LightningElement {
     }
     openTimelineView(event) {
         this.isLoading = true;
-        this.recordId = event.detail.id;
-        this.timelineTitle = event.detail.preview;
+        // this.recordId = event.detail.id;
+        // this.timelineTitle = event.detail.preview;
         const source = event.detail.source;
-        console.log(this.cashRequestMembers);
-        if (source === 'Raise Cash' || source === 'Account Setup' || source === 'Help Desk') {
-            switch (source) {
-                case 'Raise Cash':
-                    this.userTitle = 'Cash Request Members';
-                    this.showMembers = true;
-                    this.showCustom = false;
-                    this.isLoading = false;
-                    this.mainArea = false;
-                    this.objectName = 'raiseCash';
-                    refreshApex(this.membersKey);
-                    break;
-                case 'Account Setup':
-                    this.userTitle = 'Setup Members';
-                    this.showMembers = true;
-                    this.showCustom = false;
-                    this.isLoading = false;
-                    this.mainArea = false;
-                    this.objectName = 'acctSetup';
-                    refreshApex(this.membersKey);
-                    break;
-                case 'Help Desk':
-                    this.userTitle = 'Ticket Members';
-                    this.showMembers = true;
-                    this.showCustom = false;
-                    this.isLoading = false;
-                    this.mainArea = false;
-                    this.objectName = 'helpDesk';
-                    refreshApex(this.membersKey);
-                    break;
-                default:
-                    this.isLoading = false;
-                    break;
-            }
-        } else {
-            this.showMembers = false;
-            this.showCustom = true;
-            this.isLoading = false;
-            this.mainArea = false;
-        }
+        // if (source === 'Message Thread') {
+        //     this.handleOpenThread(event);
+        // } else {
+        //     this.handleOpenTimeline(event);
+        // }
+        // console.log(this.cashRequestMembers);
+        // if (source === 'Raise Cash' || source === 'Account Setup' || source === 'Help Desk') {
+        //     switch (source) {
+        //         case 'Raise Cash':
+        //             this.userTitle = 'Cash Request Members';
+        //             this.showMembers = true;
+        //             this.showCustom = false;
+        //             this.isLoading = false;
+        //             this.mainArea = false;
+        //             this.objectName = 'raiseCash';
+        //             refreshApex(this.membersKey);
+        //             break;
+        //         case 'Account Setup':
+        //             this.userTitle = 'Setup Members';
+        //             this.showMembers = true;
+        //             this.showCustom = false;
+        //             this.isLoading = false;
+        //             this.mainArea = false;
+        //             this.objectName = 'acctSetup';
+        //             refreshApex(this.membersKey);
+        //             break;
+        //         case 'Help Desk':
+        //             this.userTitle = 'Ticket Members';
+        //             this.showMembers = true;
+        //             this.showCustom = false;
+        //             this.isLoading = false;
+        //             this.mainArea = false;
+        //             this.objectName = 'helpDesk';
+        //             refreshApex(this.membersKey);
+        //             break;
+        //         default:
+        //             this.isLoading = false;
+        //             break;
+        //     }
+        // } else {
+        //     this.showMembers = false;
+        //     this.showCustom = true;
+        //     this.isLoading = false;
+        //     this.mainArea = false;
+        // }
     }
 
     goBack() {
+        console.log('refresh notifications list');
+        refreshApex(this.newMessages);
         refreshApex(this.recentMsgKey);
         refreshApex(this.recentOpenMsgKey);
         this.connectedCallback();
@@ -535,8 +560,7 @@ export default class NotificationList extends LightningElement {
             console.log('New message received: ', JSON.stringify(response));
             refreshApex(this.recentMsgKey);
             refreshApex(this.recentOpenMsgKey);
-            const el = this.template.querySelector('c-notification-list-tile');
-            el.refreshMe();
+            refreshApex(this.newMessages);
             // let updatedTicketId = response.data.payload.TicketId__c;
         };
 

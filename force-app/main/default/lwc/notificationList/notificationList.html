@@ -38,12 +38,12 @@
                             </div>
                         </div>
                     </template> -->
-                    <template if:false={showAll}>
+                    <template if:true={mainArea}>
                         <div class="slds-grid slds-wrap leftGridClass">
                             <div class="slds-col slds-size_1-of-1">
                                 <template if:true={openMsgs}>
                                     <template for:each={openMsgs} for:item="openPost">
-                                        <c-notification-list-tile key={openPost.Id} msg-status={openPost} ontimeline={openTimelineView} onthread={handleOpenThread} onopentimeline={handleOpenTimeline} unread-msgs={newMessages.data}></c-notification-list-tile>
+                                        <c-notification-list-tile key={openPost.Id} msg-status={openPost} onrefresh={goBack} onopenthread={handleThread} onopentimeline={handleOpenTimeline} unread-msgs={newMessages.data}></c-notification-list-tile>
                                     </template>
                                     <template if:true={noNewMsg}>
                                         <c-zz-desert message="0 Timelines with Unread Messages"></c-zz-desert>
@@ -54,7 +54,22 @@
                     </template>
                 </template>
                 <template if:false={mainArea}>
-                    <c-chat-timeline record-id={recordId} onrefresh={handleUserSuccess} show-timeline title={timelineTitle} show-members={showMembers} object-name={objectName} show-custom={showCustom} ticket-users={ticketUsers} user-title={userTitle}></c-chat-timeline>
+                    <template if:true={timelineView}>
+                        <c-chat-timeline record-id={recordId} onrefresh={handleUserSuccess} show-timeline title={timelineTitle} object-name={objectName} ticket-users={ticketUsers} user-title={userTitle}></c-chat-timeline>
+                    </template>
+                    <template if:true={showThread}>
+                        <c-thread-tile record-id={recordId} ticket-msg={ticketMsg} main-area ticket-users={ticketUsers} show-thread>
+                            <div slot="seen">
+                                <template if:true={ticketUsers}>
+                                    <template for:each={ticketUsers} for:item="ticketUser">
+                                        <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser} timeline-post-id={ticketMessageId}
+                                            show-seen show-likes>
+                                        </c-ticket-view-user-list>
+                                    </template>
+                                </template>
+                            </div>
+                        </c-thread-tile>
+                    </template>
                 </template>
             </div>
         </lightning-card>

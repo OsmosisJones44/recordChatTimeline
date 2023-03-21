@@ -2,6 +2,7 @@ import { LightningElement, api, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import getCurUser from '@salesforce/apex/BirthdayController.getCurUser';
 import initFiles from "@salesforce/apex/contentManager.initFiles";
+import getReadUsers from '@salesforce/apex/BirthdayController.getReadUsers';
 import queryFiles from "@salesforce/apex/contentManager.queryFiles";
 import loadFiles from "@salesforce/apex/contentManager.loadFiles";
 import USER_ID from '@salesforce/user/Id';
@@ -13,18 +14,20 @@ import PARENTID_FIELD from '@salesforce/schema/Ticket_Message__c.Id';
 import CLOSED_FIELD from '@salesforce/schema/Ticket_Message__c.Closed_Thread__c';
 import STATUS_OBJECT from '@salesforce/schema/Help_Desk_Message_Status__c';
 import HDOWNER_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.OwnerId';
-// import READ_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Read__c';
+import READ_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Read__c';
 import HDMESSAGE_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Ticket_Message__c';
 // import HIDDEN_FIELD from '@salesforce/schema/Ticket_Message__c.Hidden__c';
 import DOC_FIELD from '@salesforce/schema/Ticket_Message__c.DocumentId__c';
 import { createRecord, updateRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { refreshApex } from '@salesforce/apex';
+
 
 export default class ThreadTile extends NavigationMixin(LightningElement) {
     @api ticketMsg;
     @api recordId;
     @api mainArea;
-    @api ticketUsers;
+    // @api ticketUsers = [];
     @api customRecipients;
     @api showThread = false;
     @api threadBox = "slds-m-left_xx-large slds-box slds-box_xx-small";
@@ -37,6 +40,10 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
     adminMode;
     curName;
     error;
+    ticketMessageId;
+    ticketUsers;
+    ticketSeenUsers;
+    ticketMsg;
     moreLoaded = true;
     loaded = false;
     attachments = {};
@@ -79,6 +86,25 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
     get noRecords(){
         return this.totalFiles == 0;
     }
+
+    @wire(getReadUsers, { ticketMessageId: '$recordId' })
+    userSetup(result) {
+        this.ticketSeenUsers = result;
+        const { data, error } = result;
+        if (data) {
+            this.ticketUsers = JSON.parse(JSON.stringify(data));
+            this.error = undefined;
+        } else if (error) {
+            this.ticketUsers = undefined;
+            this.error = error;
+            console.error(JSON.stringify(error));
+        } else {
+            this.error = undefined;
+            this.ticketUsers = undefined;
+        }
+        this.lastSavedUserData = this.ticketUsers;
+        this.isLoading = false;
+    };
 
     connectedCallback() {
         this.closedThread = this.ticketMsg.Closed_Thread__c;
@@ -224,18 +250,32 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
         console.log(this.userNameValue);
     }
     handleAddUser() {
+        console.log('Testing Add user');
         // event.preventDefault();
         // event.stopPropagation();
-        this.ticketUsers.forEach(el => {
-            this.recipients.push(el.Id);
-        });
-        console.log('Recipients: '+this.recipients);
-        this.isLoading = true;
         if (this.userNameValue) {
-            if (!this.recipients.includes(this.userNameValue)) {
+            console.log('TicketUsers: '+JSON.stringify(this.ticketUsers));
+            // this.ticketUsers.forEach(el => {
+            //     this.recipients.push(el.Id);
+            // });
+            // console.log('Recipients: '+this.recipients);
+            // this.recipients = [this.userNameValue];
+            this.isLoading = true;
+            if (this.ticketUsers.some(el => el.Id === this.userNameValue)) {
+                this.template.querySelector('lightning-input-field[data-id="userUpdate"]').value = null;
+                this.isLoading = false;
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Error Adding User',
+                        message: 'User Already Being Notified about Updates in Thread - Contact your SF Admin with any Questions',
+                        variant: 'error',
+                    }),
+                );
+            } else {
                 const fields = {};
-                fields[HDMESSAGE_FIELD.fieldApiName] = this.userNameValue;
-                fields[HDOWNER_FIELD.fieldApiName] = this.ticketMsg.Id;
+                fields[HDOWNER_FIELD.fieldApiName] = this.userNameValue;
+                fields[HDMESSAGE_FIELD.fieldApiName] = this.ticketMsg.Id;
+                fields[READ_FIELD.fieldApiName] = true;
                 const recordInput = { apiName: STATUS_OBJECT.objectApiName, fields };
                 createRecord(recordInput)
                     .then(result => {
@@ -247,11 +287,14 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
                                 variant: 'success',
                             }),
                         );
+                        
                         this.template.querySelector('lightning-input-field[data-id="userUpdate"]').value = null;
-                        this.handleRefresh();
+                        this.isLoading = false;
+                        return refreshApex(this.ticketSeenUsers);
                     })
                     .catch(error => {
                         console.log(JSON.stringify(error));
+                        this.isLoading = false;
                         this.dispatchEvent(
                             new ShowToastEvent({
                                 title: 'Error Creating Custom Notifcations',
@@ -260,18 +303,13 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
                             }),
                         );
                     });
-                console.log('UserVal: '+this.userNameValue);
-                // console.log('RecipientArrayVal: '+this.customRecipients);
-            } else {
-                this.template.querySelector('lightning-input-field[data-id="userUpdate"]').value = null;
-                this.isLoading = false;
             }
         } else {
             this.isLoading = false;
             this.dispatchEvent(
                 new ShowToastEvent({
                     title: 'Error Adding User',
-                    message: 'Contact your Salesforce Admin',
+                    message: 'Please Select a User Below Clicking "Add"',
                     variant: 'error',
                 }),
             );

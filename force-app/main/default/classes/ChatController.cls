@@ -5,7 +5,7 @@ public with sharing class ChatController {
 
     @AuraEnabled(cacheable=true)
     public static List<Ticket_Message__c> getMessages(string parentId ){
-        // try{
+        // try{  
             return [SELECT Id, SeenBy__c, Thread__c, Icon_Name__c,CreatedDate,Record_Id_Form__c, Preview__c,Parent_Record_Id__c, DocumentId__c, Name, Message__c, OwnerId, OwnerName__c,Parent_Ticket__c,Owner_URL__c,timelineClassName__c, CloseMsg__c, Pinned__c
         FROM Ticket_Message__c WHERE Parent_Record_Id__c =:parentId OR Parent_Ticket__c = :parentId ORDER BY CreatedDate DESC];
         // }catch(system.QueryException e){

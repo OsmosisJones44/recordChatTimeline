@@ -108,6 +108,9 @@ export default class ChatTableContainer extends NavigationMixin(LightningElement
     handleRefresh() {
         return refreshApex(this.recentMsgKey);
     }
+    handleTrainingRedirect() {
+        window.open('https://trpg.my.trailhead.com/content/operations/trails/internal-process-hub--timelines', '_blank');
+    }
     handleSearch(event) {
         const searchKey = event.target.value.toLowerCase();
         console.log( 'Search String is ' + searchKey );

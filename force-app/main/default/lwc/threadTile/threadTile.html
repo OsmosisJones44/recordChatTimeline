@@ -43,7 +43,14 @@
                             <lightning-button label="Add" variant="brand" onclick={handleAddUser}></lightning-button>
                         </div>
                     </div>
-                    <slot name="seen"></slot>
+                    <template if:true={ticketUsers}>
+                        <template for:each={ticketUsers} for:item="ticketUser">
+                            <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser} timeline-post-id={ticketMessageId}
+                                show-seen show-likes>
+                            </c-ticket-view-user-list>
+                        </template>
+                    </template>
+                    <!-- <slot name="seen"></slot> -->
                     <!-- <div class="slds-col slds-size_1-of-1 slds-p-around_x-small">
                         <lightning-file-upload label="Attach file" name="fileUploader" record-id={ticketMsg.Parent_Record_Id__c}
                             onuploadfinished={handleUploadFinished} multiple>
