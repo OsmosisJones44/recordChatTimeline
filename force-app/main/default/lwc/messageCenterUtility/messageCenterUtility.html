@@ -8,7 +8,7 @@
             <c-thread-container thread-box="slds-m-left_medium slds-box slds-box_xx-small" show-thread-val parent-record-id={recordId}></c-thread-container>
         </lightning-tab>
         <lightning-tab label="Unread" icon-name="utility:chat">
-            <c-notification-list></c-notification-list>
+            <c-notification-list parent-record-id={recordId}></c-notification-list>
         </lightning-tab>
     </lightning-tabset>
 </template>

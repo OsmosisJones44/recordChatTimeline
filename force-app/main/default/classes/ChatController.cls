@@ -40,15 +40,16 @@ public with sharing class ChatController {
             }
             update foundStatus;
             return null;
-        }else{
-            Help_Desk_Message_Status__c newStatus = new Help_Desk_Message_Status__c();
-            newStatus.OwnerId = userId;
-            newStatus.Ticket_Message__c = ticketMessageId;
-            newStatus.Read__c = true;
+        }
+        else{
+            // Help_Desk_Message_Status__c newStatus = new Help_Desk_Message_Status__c();
+            // newStatus.OwnerId = userId;
+            // newStatus.Ticket_Message__c = ticketMessageId;
+            // newStatus.Read__c = true;
 
-            insert newStatus;
-            return newStatus.Id;
-            // return null;
+            // insert newStatus;
+            // return newStatus.Id;
+            return null;
         }
     }
     @AuraEnabled(cacheable=true)

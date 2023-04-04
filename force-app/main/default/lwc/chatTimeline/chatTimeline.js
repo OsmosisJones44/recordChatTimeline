@@ -28,7 +28,7 @@ import SOURCE_FIELD from '@salesforce/schema/Ticket_Message__c.Message_Source__c
 import PREVIEW_FIELD from '@salesforce/schema/Ticket_Message__c.Preview_Name__c';
 import STATUS_OBJECT from '@salesforce/schema/Help_Desk_Message_Status__c';
 import HDOWNER_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.OwnerId';
-// import READ_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Read__c';
+import READ_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Read__c';
 import HDMESSAGE_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Ticket_Message__c';
 import USER_ID from '@salesforce/user/Id';
 
@@ -393,6 +393,27 @@ export default class ChatTimeline extends LightningElement {
             })
         }
     }
+    createMessageStatus(resultId) {
+        const fields = {};
+        fields[HDMESSAGE_FIELD.fieldApiName] = resultId;
+        fields[HDOWNER_FIELD.fieldApiName] = this.userId;
+        fields[READ_FIELD.fieldApiName] = true;
+        const recordInput = { apiName: STATUS_OBJECT.objectApiName, fields };
+        createRecord(recordInput)
+            .then(result => {
+                console.log('Notification Sent');
+            })
+            .catch(error => {
+                console.log(JSON.stringify(error));
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Error Creating Custom Notifcations',
+                        message: 'Contact your Salesforce Admin',
+                        variant: 'error',
+                    }),
+                );
+            });
+    }
     createMessage() {
         this.disableButton = true;
         this.isLoading = true;
@@ -412,8 +433,9 @@ export default class ChatTimeline extends LightningElement {
                             message: 'Timeline Updated',
                             variant: 'success',
                         }),
-                        );
-                        this.sendCustomNotifications(result);
+                    );
+                    this.createMessageStatus(result.Id);
+                        // this.sendCustomNotifications(result);
                         refreshApex(this.timelinePostKey)
                         .then(() => {
                             this.isLoading = false;
