@@ -23,7 +23,7 @@ public with sharing class ChatController {
     }   
     @AuraEnabled
     public static string createReadStatus(string ticketMessageId, string userId){
-        List<Help_Desk_Message_Status__c> seenStatus = [SELECT Id, Ticket_Message__c, OwnerId, UserName__c FROM Help_Desk_Message_Status__c 
+        List<Help_Desk_Message_Status__c> seenStatus = [SELECT Id, Ticket_Message__c, Ticket_Message__r.OwnerId, OwnerId, UserName__c FROM Help_Desk_Message_Status__c 
         WHERE Ticket_Message__c =:ticketMessageId];
         Set<String> userIds = new Set<String>();
         for(Help_Desk_Message_Status__c u: seenStatus){
@@ -42,14 +42,18 @@ public with sharing class ChatController {
             return null;
         }
         else{
-            // Help_Desk_Message_Status__c newStatus = new Help_Desk_Message_Status__c();
-            // newStatus.OwnerId = userId;
-            // newStatus.Ticket_Message__c = ticketMessageId;
-            // newStatus.Read__c = true;
-
-            // insert newStatus;
-            // return newStatus.Id;
-            return null;
+            string msgOwner = [SELECT Id, OwnerId FROM Ticket_Message__c WHERE Id =:ticketMessageId].OwnerId;
+            if (userId == msgOwner) {
+                Help_Desk_Message_Status__c newStatus = new Help_Desk_Message_Status__c();
+                newStatus.OwnerId = userId;
+                newStatus.Ticket_Message__c = ticketMessageId;
+                newStatus.Read__c = true;
+    
+                insert newStatus;
+                return newStatus.Id;
+            } else {
+                return null;
+            }
         }
     }
     @AuraEnabled(cacheable=true)
