@@ -44,7 +44,7 @@
                     <template if:true={ticketUsers}>
                         <template for:each={ticketUsers} for:item="ticketUser">
                             <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser} timeline-post-id={ticketMessageId}
-                                show-seen show-likes>
+                                show-seen show-likes user-list>
                             </c-ticket-view-user-list>
                         </template>
                     </template>
