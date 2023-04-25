@@ -24,7 +24,7 @@ import { refreshApex } from '@salesforce/apex';
 
 
 export default class ThreadTile extends NavigationMixin(LightningElement) {
-    @api ticketMsg;
+    // @api ticketMsg;
     @api recordId;
     @api mainArea;
     // @api ticketUsers = [];

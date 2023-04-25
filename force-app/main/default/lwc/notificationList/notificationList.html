@@ -55,7 +55,7 @@
                 </template>
                 <template if:false={mainArea}>
                     <template if:true={timelineView}>
-                        <c-chat-timeline record-id={recordId} onrefresh={handleUserSuccess} show-timeline title={timelineTitle} object-name={objectName} ticket-users={ticketUsers} user-title={userTitle}></c-chat-timeline>
+                        <c-chat-timeline record-id={recordId} onrefresh={handleUserSuccess} show-timeline title={timelineTitle} object-name={objectName} ticket-users={ticketUsers} user-title={userTitle} show-thread show-pinned></c-chat-timeline>
                     </template>
                     <template if:true={showThread}>
                         <c-thread-tile record-id={recordId} ticket-msg={ticketMsg} main-area ticket-users={ticketUsers} show-thread>
