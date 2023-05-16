@@ -261,7 +261,28 @@ public with sharing class ChatController {
             throw new AuraHandledException(e.getMessage());
         }
     }    
-    
+    @AuraEnabled
+    public static string markAllRead(string userId){
+        try {
+            List<Help_Desk_Message_Status__c> msgStatuses = [SELECT Id, Ticket_Message__r.Message__c, Ticket_Message__r.Id, Ticket_Message__r.CreatedDate,Ticket_Message__r.DocumentId__c,Ticket_Message__r.OwnerName__c,Ticket_Message__r.Thread__c, Ticket_Message__r.Owner_URL__c,Ticket_Message__r.Message_Source__c, 
+            CreatedDate, Name, Ticket_Message__c,Ticket_Message__r.Record_Id_Form__c,Ticket_Message__r.Icon_Name__c,Ticket_Message__r.Parent_Record_Id__c,Ticket_Message__r.Parent_Ticket_Message__r.Record_Id_Form__c,Ticket_Message__r.Parent_Ticket_Message__r.Parent_Record_Id__c, OwnerId,Read__c,Liked__c 
+            FROM Help_Desk_Message_Status__c WHERE OwnerId = :userId AND Read__c = false];
+            list<Help_Desk_Message_Status__c> msgStatusesUpdate = new list<Help_Desk_Message_Status__c>();
+            for(Help_Desk_Message_Status__c a: msgStatuses){
+                if(msgStatusesUpdate.contains(a)){
+                    continue;
+                } else {
+                    // parentMsgIds.add(a.Ticket_Message__r.Record_Id_Form__c);
+                    a.Read__c = true;
+                    msgStatusesUpdate.add(a);
+                }
+            }
+            update msgStatusesUpdate;
+            return 'Success';
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+    }
     
     // // TODO Follow Up Task for Multiple People
     // @AuraEnabled

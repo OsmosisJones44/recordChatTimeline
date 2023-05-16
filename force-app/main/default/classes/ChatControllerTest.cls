@@ -18,10 +18,17 @@ public with sharing class ChatControllerTest {
         newStatus2.Read__c = true;
         insert newStatus2;
         
+        Help_Desk_Message_Status__c newStatus33 = new Help_Desk_Message_Status__c();
+        newStatus33.OwnerId = '0052E00000JfpsNQAR';
+        newStatus33.Ticket_Message__c = newstatus.Id;
+        newStatus33.Read__c = false;
+        insert newStatus33;
+        
         Test.startTest();
         List<Ticket_Message__c> conts = ChatController.getMessages('');
         List<Ticket_Message__c> conts2 = ChatController.getPinnedMessages('');
         List<Ticket_Message__c> conts11 = ChatController.getRecentThreadMsg('');
+        string conts44 = ChatController.markAllRead('0052E00000JfpsNQAR');
         string conts3 = ChatController.createReadStatus(newStatus.Id ,'0052E00000JfpsNQAR');
         string conts4 = ChatController.createReadStatus(newStatus3.Id ,'0052E00000JfpsNQAR');
         Help_Desk_Message_Status__c conts5 = ChatController.getUserMsgStatus('0052E00000JfpsNQAR','');

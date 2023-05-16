@@ -1,5 +1,5 @@
 import { LightningElement, wire, api } from 'lwc';
-// import findRecentTicketMessages from '@salesforce/apex/ChatController.findRecentTicketMessages';
+import markAllRead from '@salesforce/apex/ChatController.markAllRead';
 import findRecentOpenTicketMessages from '@salesforce/apex/ChatController.findRecentOpenTicketMessages';
 import findRecentOpenThreadTicketMessages from '@salesforce/apex/ChatController.findRecentOpenThreadTicketMessages';
 import getUnreadTimelineMessages from '@salesforce/apex/NASController.getUnreadTimelineMessages';
@@ -478,7 +478,21 @@ export default class NotificationList extends LightningElement {
         //     this.mainArea = false;
         // }
     }
-
+    markAllRead() {
+        this.isLoading = true;
+        markAllRead({userId: this.userId})
+            .then(result => {
+                this.isLoading = false;
+                console.log(result);
+                this.connectedCallback();
+            }
+        )
+            .catch(error => {
+                this.isLoading = false;
+                console.log(error);
+            }
+        );
+    }
     goBack() {
         console.log('refresh notifications list');
         refreshApex(this.newMessages);

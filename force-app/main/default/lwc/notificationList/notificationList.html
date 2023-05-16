@@ -4,7 +4,7 @@
             <div slot="actions">
                 <template if:true={mainArea}>
                     <lightning-button-group>
-                        <!-- <lightning-button-icon tooltip="Show All Timelines" onclick={showAllMsgs} icon-name="utility:list"></lightning-button-icon> -->
+                        <lightning-button-icon tooltip="Mark All As Read" onclick={markAllRead} icon-name="utility:email_open"></lightning-button-icon>
                         <lightning-button-icon icon-name="utility:search" onclick={toggleSearch} tooltip="Toggle Search"></lightning-button-icon>
                     </lightning-button-group>
                 </template>
