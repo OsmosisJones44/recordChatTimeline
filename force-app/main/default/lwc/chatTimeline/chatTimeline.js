@@ -55,6 +55,8 @@ export default class ChatTimeline extends LightningElement {
     @api inThread = false;
     @api timelineContainerClass = 'containerClass';
     // @api showTimeline = false;
+    aiContext;
+    aiCommand;
     showRecordThreads;
     customRecipients = [];
     customNotifications = [];
@@ -274,6 +276,17 @@ export default class ChatTimeline extends LightningElement {
             }
         });
         this.dispatchEvent(selectEvent);  
+    }
+    openAiPrompter() {
+        this.modalHeader = 'AI Prompter';
+        this.aiContext = '';
+        this.aiCommand = 'tldr';
+        this.isModalOpen = true;
+        this.aiModelOpen = true;
+    }
+    closeAiPrompter() {
+        this.aiModelOpen = false;
+        this.isModalOpen = false;
     }
     handleMessageChange(event) {
         this.messageValue = event.target.value;
@@ -686,7 +699,8 @@ export default class ChatTimeline extends LightningElement {
     // }
     openModal(event) {
         this.inThread = event.detail.inThread;
-        this.isModalOpen = true;
+        this.isModaclOpen = true;
+        this.showThreadModal = true; 
         this.ticketMessageId = event.detail.id;
         this.ticketMsg = event.detail.ticketMsg;
         const showInfo = event.detail.showInfo;
@@ -705,6 +719,7 @@ export default class ChatTimeline extends LightningElement {
     }
     closeModal() {
         this.isModalOpen = false;
+        this.aiModelOpen = false;
         this.refreshPosts();
         const el = this.template.querySelectorAll('c-chat-timeline-tile');
         el.forEach(elChild => elChild.refreshThread());  

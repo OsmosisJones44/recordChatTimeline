@@ -86,6 +86,9 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
     get noRecords(){
         return this.totalFiles == 0;
     }
+    get closedThread() {
+        return this.ticketMsg.Closed_Thread__c;
+    }
 
     @wire(getReadUsers, { ticketMessageId: '$recordId' })
     userSetup(result) {
@@ -107,7 +110,6 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
     };
 
     connectedCallback() {
-        this.closedThread = this.ticketMsg.Closed_Thread__c;
         this.runGetUser();    
     }
 

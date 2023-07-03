@@ -72,14 +72,14 @@
                     <div class="slds-col slds-size_11-of-12" data-id="selectRichText">
                         <lightning-input-rich-text variant="bottom-toolbar" value={messageValue}
                             placeholder="Enter Timeline Message..." onchange={handleMessageChange} formats={formats}>
-                            <!-- <lightning-rich-text-toolbar-button-group slot="toolbar"
+                            <lightning-rich-text-toolbar-button-group slot="toolbar"
                                 style="flex-grow:1;"></lightning-rich-text-toolbar-button-group>
                             <lightning-rich-text-toolbar-button-group slot="toolbar" data-id="richTextVal"
                                 aria-label="Template Button Group">
-                                <lightning-rich-text-toolbar-button icon-name="utility:send" data-id="richTextSelect"
-                                    icon-alternative-text="Insert Doc Template" onclick={createMessage}>
+                                <lightning-rich-text-toolbar-button icon-name="utility:einstein" data-id="richTextSelect"
+                                    icon-alternative-text="Ask an AI" onclick={openAiPrompter}>
                                 </lightning-rich-text-toolbar-button>
-                            </lightning-rich-text-toolbar-button-group> -->
+                            </lightning-rich-text-toolbar-button-group>
                         </lightning-input-rich-text>
                     </div>
                     <div class="slds-col slds-size_1-of-12">
@@ -233,28 +233,33 @@
                 </header>
 
                 <div class="slds-modal__content slds-p-around_medium userContainer" id="modal-content-id-1">
-                    <template if:false={inThread}>
-                        <c-thread-tile record-id={ticketMessageId} ticket-msg={ticketMsg} main-area
-                            ticket-users={ticketUsers} show-pinned onrefresh={refreshUsers}>
-                            <!-- <div slot="seen">
-                                <template if:true={ticketUsers}>
-                                    <template for:each={ticketUsers} for:item="ticketUser">
-                                        <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser}
-                                            timeline-post-id={ticketMessageId} show-seen show-likes>
-                                        </c-ticket-view-user-list>
+                    <template if:true={showThreadModal}>
+                        <template if:false={inThread}>
+                            <c-thread-tile record-id={ticketMessageId} ticket-msg={ticketMsg} main-area
+                                ticket-users={ticketUsers} show-pinned onrefresh={refreshUsers}>
+                                <!-- <div slot="seen">
+                                    <template if:true={ticketUsers}>
+                                        <template for:each={ticketUsers} for:item="ticketUser">
+                                            <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser}
+                                                timeline-post-id={ticketMessageId} show-seen show-likes>
+                                            </c-ticket-view-user-list>
+                                        </template>
                                     </template>
+                                </div> -->
+                            </c-thread-tile>
+                        </template>
+                        <template if:true={inThread}>
+                            <template if:true={ticketUsers}>
+                                <template for:each={ticketUsers} for:item="ticketUser">
+                                    <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser}
+                                        timeline-post-id={ticketMessageId} show-seen show-likes user-list>
+                                    </c-ticket-view-user-list>
                                 </template>
-                            </div> -->
-                        </c-thread-tile>
-                    </template>
-                    <template if:true={inThread}>
-                        <template if:true={ticketUsers}>
-                            <template for:each={ticketUsers} for:item="ticketUser">
-                                <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser}
-                                    timeline-post-id={ticketMessageId} show-seen show-likes user-list>
-                                </c-ticket-view-user-list>
                             </template>
                         </template>
+                    </template>
+                    <template if:true={aiModalOpen}>
+                        <c-ai-prompter context={aiContext} command={aiCommand} message={messageValue}></c-ai-prompter>
                     </template>
                 </div>
             </div>
