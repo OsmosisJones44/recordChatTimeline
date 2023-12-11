@@ -24,7 +24,7 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
     @api curUser;
     @api showConversation = false;
     @api showThread = false;
-    @api unreadMsgs;
+    @api unreadMsgs = [];
     userId = USER_ID;
     smallPhotoUrl;
     showTime;
@@ -36,7 +36,6 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
     showLikes = false;
     isLoading;
     disableButton;
-    // numMsgs;
     previewKey;
     varArr = [];
     vArr = [];

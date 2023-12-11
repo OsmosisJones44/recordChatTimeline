@@ -298,6 +298,7 @@ export default class NotificationList extends LightningElement {
         this.subscribeToMessageChannel();
         // this.getSetups();
     }
+
     disconnectedCallback() {
         this.unsubscribeToMessageChannel();
     }
