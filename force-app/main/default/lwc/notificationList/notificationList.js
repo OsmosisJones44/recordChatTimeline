@@ -66,7 +66,9 @@ export default class NotificationList extends LightningElement {
     openMsgs = [];
     mergedObj = {};
     numNewMsgs = 0;
-    newMessages;
+    newMessages = {
+        data: [],
+    };
     modalHeader;
     isModalOpen;
     ticketSeenUsers;
@@ -109,6 +111,7 @@ export default class NotificationList extends LightningElement {
     get ticketMessageId() {
         return this.tempTicketMessageId;
     }
+
     // get openMsgs() {
     //     if (this.recentMsgs && this.recentOpenMsgs) {
     //         return [...this.recentMsgs, ...this.recentOpenMsgs].map(obj => {

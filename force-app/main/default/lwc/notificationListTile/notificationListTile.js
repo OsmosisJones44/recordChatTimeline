@@ -6,6 +6,7 @@ import getCurrentUserPhoto from '@salesforce/apex/BirthdayController.getCurrentU
 import getCurUser from '@salesforce/apex/BirthdayController.getCurUser';
 import createReadStatus from '@salesforce/apex/ChatController.createReadStatus';
 import getUserMsgStatus from '@salesforce/apex/ChatController.getUserMsgStatus';
+import getUnreadTimelineMessagesNum from '@salesforce/apex/NASController.getUnreadTimelineMessagesNum';
 // import MESSAGE_OBJECT from '@salesforce/schema/Help_Desk_Message_Status__c';
 // import TICKET_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Ticket_Message__c';
 // import READ_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Read__c';
@@ -24,7 +25,7 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
     @api curUser;
     @api showConversation = false;
     @api showThread = false;
-    @api unreadMsgs = [];
+    // @api unreadMsgs = [];
     userId = USER_ID;
     smallPhotoUrl;
     showTime;
@@ -37,8 +38,9 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
     isLoading;
     disableButton;
     previewKey;
-    varArr = [];
-    vArr = [];
+    newMessages;
+    lastSavedNumData;
+    numMsgs;
 
     get avatarClass() {
         if (this.smallPhotoUrl) {
@@ -69,14 +71,12 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
         return this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.CreatedDate;
     }
 
-    get numMsgs() {
-        this.vArr = this.unreadMsgsVar.length;
-        return this.vArr;
-    }
-    get unreadMsgsVar() {
-        this.varArr = this.unreadMsgs.filter(obj => obj.Ticket_Message__r.Parent_Record_Id__c === this.msgStatus.Ticket_Message__r.Parent_Record_Id__c);
-        return this.varArr;
-    }
+    // get numMsgs() {
+    //     return this.unreadMsgsVar.length;
+    // }
+    // get unreadMsgsVar() {
+    //     return this.unreadMsgs.filter(obj => obj.Ticket_Message__r.Parent_Record_Id__c === this.msgStatus.Ticket_Message__r.Parent_Record_Id__c);
+    // }
     get msgOwnerURL() {
         return this.msgStatus.Ticket_Message__r.Owner_URL__c;
     }
@@ -114,6 +114,25 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
     //     let tempVar3 = tempVar.length;
     //     return tempVar3;
     // }
+    @wire(getUnreadTimelineMessagesNum, { userId: '$userId', parentRecId: '$msgStatus.Ticket_Message__r.Parent_Record_Id__c' })
+    numMsgSetup(result) {
+        this.newMessages = result;
+        const { data, error } = result;
+        if (data) {
+            this.numMsgs = JSON.parse(JSON.stringify(data));
+            this.error = undefined;
+        } else if (error) {
+            this.numMsgs = undefined;
+            this.error = error;
+            console.error(error);
+        } else {
+            this.error = undefined;
+            this.numMsgs = undefined;
+        }
+        this.lastSavedNumData = this.numMsgs;
+        this.isLoading = false;
+    };    
+    ;
 
     @wire(getCurrentUserPhoto, {
         userId: '$msgStatus.Ticket_Message__r.OwnerId'
