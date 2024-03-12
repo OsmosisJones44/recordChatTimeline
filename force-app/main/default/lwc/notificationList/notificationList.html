@@ -43,7 +43,7 @@
                             <div class="slds-col slds-size_1-of-1">
                                 <template if:true={openMsgs}>
                                     <template for:each={openMsgs} for:item="openPost">
-                                        <c-notification-list-tile key={openPost.Id} msg-status={openPost} onrefresh={goBack} onopenthread={handleThread} onopentimeline={handleOpenTimeline}></c-notification-list-tile>
+                                        <c-notification-list-tile key={openPost.Id} msg-status={openPost} onrefresh={goBack} onopentimeline={handleOpenTimeline}></c-notification-list-tile>
                                     </template>
                                     <template if:true={noNewMsg}>
                                         <c-zz-desert message="0 Timelines with Unread Messages"></c-zz-desert>

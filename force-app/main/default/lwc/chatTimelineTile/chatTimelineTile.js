@@ -369,12 +369,14 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
         this.dispatchEvent(selectEvent);  
     }
     handleOpenThread(event){
+        console.log('Thread Id: ' + this.timelinePost.Id);
         event.preventDefault();
         const selectEvent = new CustomEvent('thread', {
             detail: {
                 id: this.timelinePost.Id,
                 ticketMsg: this.timelinePost,
-                inThread: false
+                inThread: false,
+                showInfo: false
             }
         });
         this.dispatchEvent(selectEvent);  

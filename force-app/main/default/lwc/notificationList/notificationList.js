@@ -353,11 +353,12 @@ export default class NotificationList extends LightningElement {
         console.log(JSON.stringify(event.detail.source));
         this.messageSource = event.detail.source;
         this.recordId = event.detail.id;
+        this.ticketMessageId = event.detail.id;
         this.mainArea = false;
         this.ticketMsg = event.detail.ticketMsg;
         this.timelineTitle = event.detail.preview;
         // this.modalHeader = 'Add To Message Thread...';
-        return refreshApex(this.ticketSeenUsers);
+        // refreshApex(this.ticketSeenUsers);
         // publish(this.messageContext, TRADINGDESKMESSAGE, payload);
     }  
     openModal(event) {

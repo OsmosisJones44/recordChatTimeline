@@ -698,8 +698,9 @@ export default class ChatTimeline extends LightningElement {
     //     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     // }
     openModal(event) {
+        console.log('Event Detail: ' + JSON.stringify(event.detail));
         this.inThread = event.detail.inThread;
-        this.isModaclOpen = true;
+        this.isModalOpen = true;
         this.showThreadModal = true; 
         this.ticketMessageId = event.detail.id;
         this.ticketMsg = event.detail.ticketMsg;
@@ -839,33 +840,7 @@ export default class ChatTimeline extends LightningElement {
         // Callback invoked whenever a new event message is received
         const messageCallback = (response) => {
             console.log('New message received: ', JSON.stringify(response));
-            let updatedTicketId = response.data.payload.TicketId__c;
-            let seenMsg = response.data.payload.SeenStatus__c;
-            let seenUser = response.data.payload.Current_User_Id__c;
-;
-            if (seenMsg) {
-                console.log('Seen User: ' + seenUser);
-                console.log('Seen User: ' + this.userId);
-                if (seenUser != this.userId) {
-                    switch (this.currentPage) {
-                        case 'All':
-                            this.openAllTickets();
-                            break;
-                        case 'Projects':
-                            this.openProjectTickets();
-                            break;
-                        case 'Action':
-                            this.openActionTickets();
-                            break;
-                        case 'Idea':
-                            this.openIdeaTickets();
-                            break;
-                        case 'Timeline':
-                            this.refreshPosts();
-                            this.scrollToBottom();
-                    }
-                }
-            }
+            this.refreshPosts();
         };
 
         // Invoke subscribe method of empApi. Pass reference to messageCallback

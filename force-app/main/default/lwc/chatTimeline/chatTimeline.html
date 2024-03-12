@@ -3,21 +3,21 @@
         <div slot="actions">
             <lightning-button-group>
                 <template if:true={mainArea}>
-                    <!-- <template if:false={inThread}>
+                    <template if:false={inThread}>
                         <template if:true={mainArea}>
                             <lightning-button-icon style="float:right" variant="container" tooltip="See Record Threads"
                                 icon-name="utility:comments" onclick={openThreadView}>
                             </lightning-button-icon>
                         </template>
-                    </template> -->
+                    </template>
                     <lightning-button-icon style="float:right" variant="container" tooltip="Search Timeline Posts"
                         icon-name="utility:search" onclick={toggleListFilters}>
                     </lightning-button-icon>
                 </template>
                 <template if:false={mainArea}>
-                    <!-- <lightning-button-icon style="float:right" variant="brand" tooltip="See Record Threads"
+                    <lightning-button-icon style="float:right" variant="brand" tooltip="See Record Threads"
                         icon-name="utility:comments" onclick={closeThreadView}>
-                    </lightning-button-icon> -->
+                    </lightning-button-icon>
                     <lightning-button-icon variant="border-filled" icon-name="utility:back" onclick={connectedCallback}>
                     </lightning-button-icon>
                 </template>
@@ -258,9 +258,9 @@
                             </template>
                         </template>
                     </template>
-                    <template if:true={aiModalOpen}>
+                    <!-- <template if:true={aiModalOpen}>
                         <c-ai-prompter context={aiContext} command={aiCommand} message={messageValue}></c-ai-prompter>
-                    </template>
+                    </template> -->
                 </div>
             </div>
         </section>
