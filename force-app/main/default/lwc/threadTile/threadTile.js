@@ -32,6 +32,7 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
     @api showThread = false;
     @api threadBox = "slds-m-left_xx-large slds-box slds-box_xx-small";
     @api timelineContainerClass = 'threadTimelineClass';
+    @api ticketMsg;
     userId = USER_ID;
     closedThread;
     isLoading = false;
@@ -43,7 +44,6 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
     ticketMessageId;
     ticketUsers;
     ticketSeenUsers;
-    ticketMsg;
     moreLoaded = true;
     loaded = false;
     attachments = {};

@@ -28,41 +28,7 @@
                     <div class={threadBox}>
                         <c-chat-timeline record-id={recordId} title="Message Thread" ticket-users={ticketUsers} timeline-container-class={timelineContainerClass} in-thread recipients={customRecipients} notifications={ticketUsers}></c-chat-timeline>
                     </div>
-                    <h3 class="userList">Notifications</h3>
-                    <div class="slds-grid">
-                        <div class="slds-col slds-size_10-of-12 slds-align-bottom">
-                            <lightning-record-edit-form object-api-name="User_Ticket_Relationship__c" data-id="userSubmit">
-                                <lightning-input-field field-name="User__c" data-id="userUpdate" variant="label-hidden"
-                                    style="margin-bottom: 0;" onchange={handleUserChange}></lightning-input-field>
-                    
-                            </lightning-record-edit-form>
-                        </div>
-                        <div class="slds-col slds-size_1-of-12 slds-align-bottom slds-var-p-left_xx-small">
-                            <lightning-button label="Add" variant="brand" onclick={handleAddUser}></lightning-button>
-                        </div>
-                    </div>
-                    <template if:true={ticketUsers}>
-                        <template for:each={ticketUsers} for:item="ticketUser">
-                            <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser} timeline-post-id={ticketMessageId}
-                                show-seen show-likes user-list>
-                            </c-ticket-view-user-list>
-                        </template>
-                    </template>
                 </lightning-tab>
-                <!-- <lightning-tab label="Notified" icon-name="utility:people" value="info">
-                    <div class="slds-grid">
-                        <div class="slds-col slds-size_10-of-12 slds-align-bottom">
-                            <lightning-record-edit-form object-api-name="User_Ticket_Relationship__c" data-id="userSubmit">
-                                <lightning-input-field field-name="User__c" data-id="userUpdate" variant="label-hidden"
-                                    style="margin-bottom: 0;" onchange={handleUserChange}></lightning-input-field>
-                    
-                            </lightning-record-edit-form>
-                        </div>
-                        <div class="slds-col slds-size_1-of-12 slds-align-bottom slds-var-p-left_xx-small">
-                            <lightning-button label="Add" variant="brand" onclick={handleAddUser}></lightning-button>
-                        </div>
-                    </div>
-                </lightning-tab> -->
                 <lightning-tab label="Parent Timeline" icon-name="utility:chat" value="parent">
                     <c-chat-timeline record-id={ticketMsg.Parent_Record_Id__c} title="Timeline" source={source} show-pinned></c-chat-timeline>
                 </lightning-tab>

@@ -361,27 +361,6 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
         const eventElement = this.template.querySelector('lightning-formatted-date-time[data-id="hoverSelect"]');
         eventElement.classList.add('slds-hide');
     }
-    handleSelect(event){
-        // event.preventDefault();
-        // event.stopPropagation();
-        let parentMsgId = this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__c;
-        let msgId = this.msgStatus.Ticket_Message__r.Id;
-        let recId = this.msgStatus.Ticket_Message__r.Parent_Record_Id__c;
-        let msgSource = this.msgStatus.Ticket_Message__r.Message_Source__c;
-        let preview = this.msgStatus.Ticket_Message__r.Preview__c;
-        let ticketMsg = this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r
-        const selectEvent2 = new CustomEvent('opentimeline', {
-            detail: {
-                msgId: msgId,
-                parentMsgId: parentMsgId,
-                id: recId,
-                source: msgSource,
-                ticketMsg: ticketMsg,
-                preview: preview
-            }
-        });
-        this.dispatchEvent(selectEvent2);  
-    }
     openSeenBy(event){
         event.preventDefault();
         event.stopPropagation();
@@ -415,74 +394,50 @@ export default class NotificationListTile extends NavigationMixin(LightningEleme
             this.curUser = result;
             this.curName = result.Name;
             this.error = undefined;
-            // createReadStatus({
-            //     ticketMessageId: this.msgStatus.Ticket_Message__r.Id,
-            //     userId: this.userId
-            // })
-            // .then(result => {
-            //     //console.log(JSON.stringify(result));
-            //     this.statusId = result;
-            //     this.error = undefined;
-            // })
-            // .catch(error => {
-            //     this.statusId = undefined;
-            //     this.error = error;
-            // })
         })
         .catch((error) => {
             this.error = error;
             this.curUser = undefined;
         });
     }
-    handleOpenTimeline(event) {
-        event.preventDefault();
-        event.stopPropagation();
-        console.log(this.msgStatus.Ticket_Message__r.Message_Source__c);
-        if (this.msgStatus.Ticket_Message__r.Message_Source__c === "Message Thread") {
+    handleOpenTimeline() {
+        // event.preventDefault();custom event
+        // event.stopPropagation();
+        console.log("MsgStatus :"+this.msgStatus);
+        let parentId = this.msgStatus.Ticket_Message__r.Record_Id_Form__c;
+        let timelinePostThread = this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r;
+        let timelinePost = this.msgStatus.Ticket_Message__r;
+        let source = this.msgStatus.Ticket_Message__r.Message_Source__c;
+        let tempPreview = this.msgStatus.Ticket_Message__r.Preview__c;
+        let threadMsgId = this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__c;
+        let msgId = this.msgStatus.Ticket_Message__r.Id;
+        if(this.msgStatus.Ticket_Message__r.Message_Source__c === 'Message Thread'){
             const selectEvent = new CustomEvent('opentimeline', {
-            detail: {
-                    msgId: this.msgStatus.Ticket_Message__r.Id,
-                    id: this.msgStatus.Ticket_Message__r.Record_Id_Form__c,
-                    timelinePost: this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r
+                detail: {
+                        msgId: threadMsgId,
+                        id: parentId,
+                        timelinePost: timelinePostThread,
+                        source: source,
+                        preview: tempPreview
+                    }
                 }
-            });
-            this.dispatchEvent(selectEvent);  
-        } else {
-            const selectEvent = new CustomEvent('opentimeline', {
-            detail: {
-                    msgId: this.msgStatus.Ticket_Message__r.Id,
-                    id: this.msgStatus.Ticket_Message__r.Record_Id_Form__c,
-                    timelinePost: this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r
-                }
-            });
+            );
             this.dispatchEvent(selectEvent);  
         }
-    }   
-    handleOpenThread(event) {
-        event.preventDefault();
-        event.stopPropagation();
-        if (this.msgStatus.Ticket_Message__r.Message_Source__c === "Message Thread") {
-            const selectEvent = new CustomEvent('thread', {
-                bubbles: true,
+        else{
+            const selectEvent2 = new CustomEvent('opentimeline', {
                 detail: {
-                    msgId: this.msgStatus.Ticket_Message__r.Id,
-                    id: this.msgStatus.Ticket_Message__r.Record_Id_Form__c,
-                    source: this.msgStatus.Ticket_Message__r.Message_Source__c
+                        msgId: msgId,
+                        id: parentId,
+                        source: source,
+                        timelinePost: timelinePost,
+                        preview: tempPreview
+                    }
                 }
-            });
-            this.dispatchEvent(selectEvent); 
-        } else {
-            const selectEvent = new CustomEvent('thread', {
-                bubbles: true,
-                detail: {
-                    msgId: this.msgStatus.Ticket_Message__r.Id,
-                    id: this.msgStatus.Ticket_Message__r.Record_Id_Form__c,
-                    source: this.msgStatus.Ticket_Message__r.Message_Source__c
-                }
-            });
-            this.dispatchEvent(selectEvent);  
+            );
+            this.dispatchEvent(selectEvent2);  
         }
-    }  
+    }    
     handleMarkRead(event) {
         event.preventDefault();
         event.stopPropagation();

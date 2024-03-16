@@ -60,6 +60,9 @@ export default class NotificationList extends LightningElement {
     recentOpenMsgKey;
     showAll;
     mainArea;
+    showThread;
+    timelineView;
+    ticketMessageId;
     showSearch;
     error;
     timelineTitle;
@@ -93,59 +96,7 @@ export default class NotificationList extends LightningElement {
             return 'Unread Messages (-)'
         }
     }
-    get showThread() {
-        if (this.messageSource === "Message Thread") {
-            return true;
-        } else {
-            return false;
-        }
-    }
-    get timelineView() {
-        if (this.messageSource === "Message Thread") {
-            return false;
-        } else {
-            return true;
-        }
-    }
 
-    get ticketMessageId() {
-        return this.tempTicketMessageId;
-    }
-
-    // get openMsgs() {
-    //     if (this.recentMsgs && this.recentOpenMsgs) {
-    //         return [...this.recentMsgs, ...this.recentOpenMsgs].map(obj => {
-    //             return {
-    //                 ...obj,
-    //                 date: new Date(obj['CreatedDate'])
-    //             };
-    //         }).sort((a, b) => {
-    //             if (a.date && b.date) {
-    //                 return a.date.getTime() - b.date.getTime();
-    //             }
-    //         })
-    //     }
-    // }
-
-    // @wire(findRecentTicketMessages, { userId: '$userId' }) recentMsgs;
-    // @wire(findRecentTicketMessages, { userId: '$userId' })
-    // ticketSetup(result) {
-    //     this.recentMsgKey = result;
-    //     const { data, error } = result;
-    //     if (data) {
-    //         this.recentMsgs = JSON.parse(JSON.stringify(data));
-    //         this.error = undefined;
-    //     } else if (error) {
-    //         this.recentMsgs = undefined;
-    //         this.error = error;
-    //         console.error(error);
-    //     } else {
-    //         this.error = undefined;
-    //         this.recentMsgs = undefined;
-    //     }
-    //     this.lastSavedData = this.recentMsgs;
-    //     this.isLoading = false;
-    // }
     @wire(MessageContext)
     messageContext;
     @wire(getUnreadTimelineMessages, { userId: '$userId' }) newMessages;
@@ -171,6 +122,7 @@ export default class NotificationList extends LightningElement {
         }
         this.lastSavedData = this.recentMsgs;
         this.isLoading = false;
+        this.setOpenMsgs();
     }    
     @wire(findRecentOpenTicketMessages, { userId: '$userId' })
     notificationSetup(result) {
@@ -194,9 +146,9 @@ export default class NotificationList extends LightningElement {
         this.isLoading = false; 
         this.setOpenMsgs();
     }
-    // @wire(getRecordMembers, { ticketId: '$recordId', objectName: '$objectName' })
-    // memberSetup(result) {
-    //     this.membersKey = result;
+    // @wire(getReadUsers, { ticketMessageId: '$ticketMessageId' })
+    // userSetup(result) {
+    //     this.ticketSeenUsers = result;
     //     const { data, error } = result;
     //     if (data) {
     //         this.ticketUsers = JSON.parse(JSON.stringify(data));
@@ -204,93 +156,14 @@ export default class NotificationList extends LightningElement {
     //     } else if (error) {
     //         this.ticketUsers = undefined;
     //         this.error = error;
-    //         console.error(error);
+    //         console.error(JSON.stringify(error));
     //     } else {
     //         this.error = undefined;
     //         this.ticketUsers = undefined;
     //     }
-    //     this.lastSavedRecordData = this.ticketUsers;
+    //     this.lastSavedUserData = this.ticketUsers;
     //     this.isLoading = false;
-    //     this.setOpenMsgs();
-    // }
-    @wire(getReadUsers, { ticketMessageId: '$ticketMessageId' })
-    userSetup(result) {
-        this.ticketSeenUsers = result;
-        const { data, error } = result;
-        if (data) {
-            this.ticketUsers = JSON.parse(JSON.stringify(data));
-            this.error = undefined;
-        } else if (error) {
-            this.ticketUsers = undefined;
-            this.error = error;
-            console.error(JSON.stringify(error));
-        } else {
-            this.error = undefined;
-            this.ticketUsers = undefined;
-        }
-        this.lastSavedUserData = this.ticketUsers;
-        this.isLoading = false;
-    };
-    // @wire(getTicketMembers, { ticketId: '$recordId' })
-    // ticketMemberSetup(result) {
-    //     this.ticketMembersKey = result;
-    //     const { data, error } = result;
-    //     if (data) {
-    //         this.ticketMembers = JSON.parse(JSON.stringify(data));
-    //         this.error = undefined;
-    //     } else if (error) {
-    //         this.ticketMembers = undefined;
-    //         this.error = error;
-    //         console.error(error);
-    //     } else {
-    //         this.error = undefined;
-    //         this.ticketMembers = undefined;
-    //     }
-    //     this.ticketUsers = {
-    //         data: this.ticketMembers
-    //     }
-    //     this.isLoading = false;
-    // }
-    // @wire(getSetupMembers, { ticketId: '$recordId' })
-    // setupMemberSetup(result) {
-    //     this.setupMembersKey = result;
-    //     const { data, error } = result;
-    //     if (data) {
-    //         this.setupMembers = JSON.parse(JSON.stringify(data));
-    //         this.error = undefined;
-    //     } else if (error) {
-    //         this.setupMembers = undefined;
-    //         this.error = error;
-    //         console.error(error);
-    //     } else {
-    //         this.error = undefined;
-    //         this.setupMembers = undefined;
-    //     }
-    //     // this.ticketUsers.data = this.setupMembers;
-    //     this.isLoading = false;
-    // }
-    // @wire(getCashRequestMembers, { ticketId: '$recordId' })
-    // cashMemberSetup(result) {
-    //     this.cashRequestMembersKey = result;
-    //     const { data, error } = result;
-    //     if (data) {
-    //         this.cashRequestMembers = JSON.parse(JSON.stringify(data));
-    //         this.error = undefined;
-    //     } else if (error) {
-    //         this.cashRequestMembers = undefined;
-    //         this.error = error;
-    //         console.error(error);
-    //     } else {
-    //         this.error = undefined;
-    //         this.cashRequestMembers = undefined;
-    //     }
-    //     // this.ticketUsers.data = this.cashRequestMembers;
-    //     this.isLoading = false;
-    // }    
-    // @wire(getTicketMembers, {ticketId: '$recordId'}) ticketMembers;
-    // @wire(getSetupMembers, {ticketId: '$recordId'}) setupMembers;
-    // @wire(getCashRequestMembers, {ticketId: '$recordId'}) cashRequestMembers;
-
+    // };
 
     connectedCallback() {
         this.showAll = false;
@@ -309,12 +182,7 @@ export default class NotificationList extends LightningElement {
         unsub(this.subscription);
         this.subscription = null;
     } 
-    // TODO Change publish behavior below to remove read messages clicked from Respond to UI event by publishing message
-    // handleEditSelect(event) {
-    //     const payload = { recordId: event.target.message.Id };
 
-    //     publish(this.messageContext, TRADINGDESKMESSAGE, payload);
-    // }
     subscribeToMessageChannel() {
         this.subscription = sub(
             this.messageContext,
@@ -343,23 +211,25 @@ export default class NotificationList extends LightningElement {
                 })
         }
     }
-    // Respond to UI event by publishing message
     handleOpenTimeline(event) {
-        // const payload = {
-        //     recordId: event.detail.recordId,
-        //     source: event.detail.source
-        // };
         console.log(JSON.stringify(event.detail));
         console.log(JSON.stringify(event.detail.source));
-        this.messageSource = event.detail.source;
-        this.recordId = event.detail.id;
-        this.ticketMessageId = event.detail.id;
         this.mainArea = false;
-        this.ticketMsg = event.detail.ticketMsg;
+        this.messageSource = event.detail.source;
         this.timelineTitle = event.detail.preview;
-        // this.modalHeader = 'Add To Message Thread...';
-        // refreshApex(this.ticketSeenUsers);
-        // publish(this.messageContext, TRADINGDESKMESSAGE, payload);
+        const source = event.detail.source;
+        if (source === 'Message Thread') {
+            this.ticketMsg = event.detail.timelinePost;
+            this.recordId = event.detail.msgId;
+            this.ticketMessageId = event.detail.id;
+            this.showThread = true;
+            this.timelineView = false;
+        } else {
+            this.recordId = event.detail.id;
+            this.ticketMsg = event.detail.timelinePost;
+            this.showThread = false;
+            this.timelineView = true;
+        }
     }  
     openModal(event) {
         this.isModalOpen = true;
@@ -432,57 +302,6 @@ export default class NotificationList extends LightningElement {
     handleUserSuccess(event) {
         return refreshApex(this.membersKey);
     }
-    openTimelineView(event) {
-        this.isLoading = true;
-        // this.recordId = event.detail.id;
-        // this.timelineTitle = event.detail.preview;
-        const source = event.detail.source;
-        // if (source === 'Message Thread') {
-        //     this.handleOpenThread(event);
-        // } else {
-        //     this.handleOpenTimeline(event);
-        // }
-        // console.log(this.cashRequestMembers);
-        // if (source === 'Raise Cash' || source === 'Account Setup' || source === 'Help Desk') {
-        //     switch (source) {
-        //         case 'Raise Cash':
-        //             this.userTitle = 'Cash Request Members';
-        //             this.showMembers = true;
-        //             this.showCustom = false;
-        //             this.isLoading = false;
-        //             this.mainArea = false;
-        //             this.objectName = 'raiseCash';
-        //             refreshApex(this.membersKey);
-        //             break;
-        //         case 'Account Setup':
-        //             this.userTitle = 'Setup Members';
-        //             this.showMembers = true;
-        //             this.showCustom = false;
-        //             this.isLoading = false;
-        //             this.mainArea = false;
-        //             this.objectName = 'acctSetup';
-        //             refreshApex(this.membersKey);
-        //             break;
-        //         case 'Help Desk':
-        //             this.userTitle = 'Ticket Members';
-        //             this.showMembers = true;
-        //             this.showCustom = false;
-        //             this.isLoading = false;
-        //             this.mainArea = false;
-        //             this.objectName = 'helpDesk';
-        //             refreshApex(this.membersKey);
-        //             break;
-        //         default:
-        //             this.isLoading = false;
-        //             break;
-        //     }
-        // } else {
-        //     this.showMembers = false;
-        //     this.showCustom = true;
-        //     this.isLoading = false;
-        //     this.mainArea = false;
-        // }
-    }
     markAllRead() {
         this.isLoading = true;
         markAllRead({userId: this.userId})
@@ -498,11 +317,11 @@ export default class NotificationList extends LightningElement {
             }
         );
     }
-    goBack() {
+    async goBack() {
         console.log('refresh notifications list');
-        refreshApex(this.newMessages);
-        refreshApex(this.recentMsgKey);
-        refreshApex(this.recentOpenMsgKey);
+        await refreshApex(this.newMessages);
+        await refreshApex(this.recentMsgKey);
+        await refreshApex(this.recentOpenMsgKey);
         this.connectedCallback();
     }
 
@@ -573,13 +392,13 @@ export default class NotificationList extends LightningElement {
             this.recentOpenMsgs = this.lastSavedOpenData;
         }        
     }  
-    handleSubscribe() {
+    async handleSubscribe() {
         // Callback invoked whenever a new event message is received
-        const messageCallback = (response) => {
+        const messageCallback = async (response) => {
             console.log('New message received: ', JSON.stringify(response));
-            refreshApex(this.recentMsgKey);
-            refreshApex(this.recentOpenMsgKey);
-            refreshApex(this.newMessages);
+            await refreshApex(this.recentMsgKey);
+            await refreshApex(this.recentOpenMsgKey);
+            await refreshApex(this.newMessages);
             // let updatedTicketId = response.data.payload.TicketId__c;
         };
 

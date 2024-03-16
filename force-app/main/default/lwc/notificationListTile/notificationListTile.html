@@ -1,147 +1,34 @@
 <template>
     <template if:true={msgStatus}>
-        <div class="containerClass slds-p-around_xxx-small" onclick={handleSelect}>
+        <div class="containerClass slds-p-around_xxx-small">
             <template if:true={isLoading}>
                 <lightning-spinner alternative-text="Loading">
                 </lightning-spinner>
             </template>
-            <template if:true={showConversation}>
-                <lightning-card title={preview} variant="narrow"
-                    icon-name={msgIconName}>
-                    <div slot="actions">
-                        <lightning-button-group>
-                            <template if:true={msgStatus.Ticket_Message__r.DocumentId__c}>
-                                <lightning-button-icon icon-name="utility:file" variant="brand"
-                                    tooltip="Open File Preview" onclick={openPreview}
-                                    size="small"></lightning-button-icon>
-                            </template>
-                            <lightning-button-icon icon-name="utility:email_open" onclick={handleMarkRead} size="medium" variant="border-filled"
-                                tooltip="Mark Read"></lightning-button-icon>
-                                <!-- <lightning-button-icon icon-name="utility:comments" onclick={handleOpenThread} size="medium" variant="border-filled"
-                                    tooltip="Open Post Thread"></lightning-button-icon>
-                            <lightning-button-icon icon-name="utility:chat" onclick={handleOpenTimeline} size="medium" variant="border-filled"
-                                tooltip="Open Timeline"></lightning-button-icon> -->
-                            <lightning-button-icon onclick={handleOpen} icon-name="utility:new_window"
-                            tooltip="Open Parent Record" size="medium" variant="border-filled"
-                            disabled={disableButton}></lightning-button-icon>
-                        </lightning-button-group>
-                    </div>
-                    <!-- <p class="previewClass">{msgStatus.Ticket_Message__r.Preview__c}</p> -->
-                    <!-- <div class={msgStatus.tableTimelineClass__c}> -->
-                    <div class="slds-grid">
-                        <div class="slds-col slds-size_2-of-12 slds-p-around_xx-small justifyCenter">
-                            <div class={msgTableTimelineClass}></div>
-                            <div class="slds-m-left_x-small">
-                                <div class="avatarBorder">
-                                    <lightning-avatar size="large" variant="circle" src={smallPhotoUrl}
-                                        fallback-icon-name="standard:user">
-                                    </lightning-avatar>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="slds-col slds-size_10-of-12">
-                            <div class="slds-grid slds-wrap">
-                                <div class="slds-col slds-size_1-of-1">
-                                    <a href={msgOwnerURL}
-                                        class="nameLinkClass">{msgOwnerName}</a>
-                                </div>
-                                <div class="slds-col slds-size_1-of-1">
-                                    <div class="slds-line-clamp_x-small slds-p-vertical_xx-small">
-                                        <lightning-formatted-rich-text value={msgValue}>
-                                        </lightning-formatted-rich-text>
-                                    </div>
-                                    <!-- <br> -->
-                                    <div class="slds-grid timeClass">
-                                        <!-- <div class="slds-col slds-size_1-of-1">
-                                                <lightning-formatted-date-time class="animateFade opacityClass"
-                                                    value={msgStatus.Ticket_Message__r.CreatedDate} year="numeric" month="short"
-                                                    day="2-digit" weekday="long" hour="2-digit" minute="2-digit" hour12="true">
-                                                </lightning-formatted-date-time>
-                                            </div> -->
-                                        <div class="slds-col flexNone">
-                                            <lightning-formatted-date-time data-id="hoverSelect"
-                                                class="animateFade opacityClass"
-                                                value={createdDateVal} year="numeric"
-                                                month="short" day="2-digit" hour="2-digit" minute="2-digit"
-                                                hour12="true">
-                                            </lightning-formatted-date-time>
-                                        </div>
-                                        <div class="slds-col flexNone opacityClass slds-m-horizontal_xx-small">|</div>
-                                        <div class="slds-col flexNone">
-                                            <lightning-relative-date-time value={createdDate}
-                                                class="opacityClass"></lightning-relative-date-time>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- </div> -->
-                </lightning-card>
-            </template>
-            <template if:true={showThread}>
-                <lightning-card title={threadPreview} variant="narrow"
-                    icon-name={msgParentIconName}>
-                    <div slot="actions">
-                        <template if:true={msgDocumentId}>
-                            <lightning-button-icon icon-name="utility:file" onclick={openPreview}
-                            size="small"></lightning-button-icon>
-                        </template>
-                        <!-- <div class="slds-p-horizontal_xx-small">
-                            <template if:false={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Closed_Thread__c}>
-                                <lightning-button-icon onclick={handleResolve} icon-name="utility:success"
-                                tooltip="Resolve Thread" variant="brand" size="small"
-                                disabled={disableButton}></lightning-button-icon>
-                            </template>
-                            <template if:true={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Closed_Thread__c}>
-                                <lightning-button-icon onclick={handleReopen} icon-name="utility:email_open"
-                                tooltip="Re-Open Closed Thread" size="small"
-                                disabled={disableButton}></lightning-button-icon>
-                            </template>
-                        </div> -->
-                        <lightning-button-group>
-                            <lightning-button-icon icon-name="utility:email_open" onclick={handleMarkRead} size="medium"
-                            tooltip="Mark Read" variant="border-filled"></lightning-button-icon>
-                            <!-- <lightning-button-icon icon-name="utility:comments" onclick={handleOpenThread} size="medium"
-                            tooltip="Open Thread" variant="border-filled"></lightning-button-icon>
-                            <lightning-button-icon icon-name="utility:chat" onclick={handleOpenTimeline} size="medium"
-                                tooltip="Open Timeline" variant="border-filled"></lightning-button-icon> -->
-                            <lightning-button-icon onclick={handleOpen} icon-name="utility:new_window"
+            <div onclick={handleOpenTimeline}>
+                <template if:true={showConversation}>
+                    <lightning-card title={preview} variant="narrow"
+                        icon-name={msgIconName}>
+                        <div slot="actions">
+                            <lightning-button-group>
+                                <template if:true={msgStatus.Ticket_Message__r.DocumentId__c}>
+                                    <lightning-button-icon icon-name="utility:file" variant="brand"
+                                        tooltip="Open File Preview" onclick={openPreview}
+                                        size="small"></lightning-button-icon>
+                                </template>
+                                <lightning-button-icon icon-name="utility:email_open" onclick={handleMarkRead} size="medium" variant="border-filled"
+                                    tooltip="Mark Read"></lightning-button-icon>
+                                    <!-- <lightning-button-icon icon-name="utility:comments" onclick={handleOpenThread} size="medium" variant="border-filled"
+                                        tooltip="Open Post Thread"></lightning-button-icon>
+                                <lightning-button-icon icon-name="utility:chat" onclick={handleOpenTimeline} size="medium" variant="border-filled"
+                                    tooltip="Open Timeline"></lightning-button-icon> -->
+                                <lightning-button-icon onclick={handleOpen} icon-name="utility:new_window"
                                 tooltip="Open Parent Record" size="medium" variant="border-filled"
                                 disabled={disableButton}></lightning-button-icon>
-                        </lightning-button-group>
-                    </div>
-                    <div class="slds-border_bottom slds-m-bottom_xx-small">
-                        <!-- <p class="previewClass">{msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Preview__c}</p> -->
-                        <div class="previewClassLight slds-line-clamp_small slds-p-around_xx-small">
-                            <lightning-formatted-rich-text
-                                value={msgParentValue}></lightning-formatted-rich-text>
+                            </lightning-button-group>
                         </div>
-                        <div class="slds-grid timeClass slds-p-left_xx-small">
-                            <!-- <div class="slds-col slds-size_1-of-1">
-                                <lightning-formatted-date-time class="animateFade opacityClass"
-                                    value={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.CreatedDate}
-                                    year="numeric" month="short" day="2-digit" weekday="long" hour="2-digit"
-                                    minute="2-digit" hour12="true">
-                                </lightning-formatted-date-time>
-                            </div> -->
-                            <div class="slds-col flexNone">
-                                <lightning-formatted-date-time data-id="hoverSelect" class="animateFade opacityClass"
-                                    value={createdDateParentVal} year="numeric" month="short" day="2-digit" hour="2-digit"
-                                    minute="2-digit" hour12="true">
-                                </lightning-formatted-date-time>
-                            </div>
-                            <div class="slds-col flexNone opacityClass slds-m-horizontal_xx-small">|</div>
-                            <div class="slds-col flexNone">
-                                <lightning-relative-date-time value={createdDateParent} class="opacityClass"></lightning-relative-date-time>
-                            </div>
-                            <div class="slds-col flexNone opacityClass slds-m-horizontal_xx-small">|</div>
-                            <div class="slds-col flexNone">
-                                <p class="opacityClass">sent by {msgParentOwnerName}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <template if:false={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Closed_Thread__c}>
+                        <!-- <p class="previewClass">{msgStatus.Ticket_Message__r.Preview__c}</p> -->
+                        <!-- <div class={msgStatus.tableTimelineClass__c}> -->
                         <div class="slds-grid">
                             <div class="slds-col slds-size_2-of-12 slds-p-around_xx-small justifyCenter">
                                 <div class={msgTableTimelineClass}></div>
@@ -160,37 +47,154 @@
                                             class="nameLinkClass">{msgOwnerName}</a>
                                     </div>
                                     <div class="slds-col slds-size_1-of-1">
-                                        <div class="slds-line-clamp_large slds-p-vertical_xx-small">
-                                            <lightning-formatted-rich-text
-                                                value={msgValue}>
+                                        <div class="slds-line-clamp_x-small slds-p-vertical_xx-small">
+                                            <lightning-formatted-rich-text value={msgValue}>
                                             </lightning-formatted-rich-text>
                                         </div>
+                                        <!-- <br> -->
                                         <div class="slds-grid timeClass">
                                             <!-- <div class="slds-col slds-size_1-of-1">
-                                                <lightning-formatted-date-time class="animateFade opacityClass"
-                                                    value={msgStatus.Ticket_Message__r.CreatedDate} year="numeric"
-                                                    month="short" day="2-digit" weekday="long" hour="2-digit"
-                                                    minute="2-digit" hour12="true">
-                                                </lightning-formatted-date-time>
-                                            </div> -->
+                                                    <lightning-formatted-date-time class="animateFade opacityClass"
+                                                        value={msgStatus.Ticket_Message__r.CreatedDate} year="numeric" month="short"
+                                                        day="2-digit" weekday="long" hour="2-digit" minute="2-digit" hour12="true">
+                                                    </lightning-formatted-date-time>
+                                                </div> -->
                                             <div class="slds-col flexNone">
-                                                <lightning-formatted-date-time data-id="hoverSelect" class="animateFade opacityClass"
-                                                    value={createdDateVal} year="numeric" month="short" day="2-digit" hour="2-digit"
-                                                    minute="2-digit" hour12="true">
+                                                <lightning-formatted-date-time data-id="hoverSelect"
+                                                    class="animateFade opacityClass"
+                                                    value={createdDateVal} year="numeric"
+                                                    month="short" day="2-digit" hour="2-digit" minute="2-digit"
+                                                    hour12="true">
                                                 </lightning-formatted-date-time>
                                             </div>
                                             <div class="slds-col flexNone opacityClass slds-m-horizontal_xx-small">|</div>
                                             <div class="slds-col flexNone">
-                                                <lightning-relative-date-time value={createdDate} class="opacityClass"></lightning-relative-date-time>
+                                                <lightning-relative-date-time value={createdDate}
+                                                    class="opacityClass"></lightning-relative-date-time>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </template>
-                </lightning-card>
-            </template>
+                        <!-- </div> -->
+                    </lightning-card>
+                </template>
+            </div>
+            <div onclick={handleOpenTimeline}>
+                <template if:true={showThread}>
+                    <lightning-card title={threadPreview} variant="narrow"
+                        icon-name={msgParentIconName}>
+                        <div slot="actions">
+                            <template if:true={msgDocumentId}>
+                                <lightning-button-icon icon-name="utility:file" onclick={openPreview}
+                                size="small"></lightning-button-icon>
+                            </template>
+                            <!-- <div class="slds-p-horizontal_xx-small">
+                                <template if:false={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Closed_Thread__c}>
+                                    <lightning-button-icon onclick={handleResolve} icon-name="utility:success"
+                                    tooltip="Resolve Thread" variant="brand" size="small"
+                                    disabled={disableButton}></lightning-button-icon>
+                                </template>
+                                <template if:true={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Closed_Thread__c}>
+                                    <lightning-button-icon onclick={handleReopen} icon-name="utility:email_open"
+                                    tooltip="Re-Open Closed Thread" size="small"
+                                    disabled={disableButton}></lightning-button-icon>
+                                </template>
+                            </div> -->
+                            <lightning-button-group>
+                                <lightning-button-icon icon-name="utility:email_open" onclick={handleMarkRead} size="medium"
+                                tooltip="Mark Read" variant="border-filled"></lightning-button-icon>
+                                <!-- <lightning-button-icon icon-name="utility:comments" onclick={handleOpenThread} size="medium"
+                                tooltip="Open Thread" variant="border-filled"></lightning-button-icon>
+                                <lightning-button-icon icon-name="utility:chat" onclick={handleOpenTimeline} size="medium"
+                                    tooltip="Open Timeline" variant="border-filled"></lightning-button-icon> -->
+                                <lightning-button-icon onclick={handleOpen} icon-name="utility:new_window"
+                                    tooltip="Open Parent Record" size="medium" variant="border-filled"
+                                    disabled={disableButton}></lightning-button-icon>
+                            </lightning-button-group>
+                        </div>
+                        <div class="slds-border_bottom slds-m-bottom_xx-small">
+                            <!-- <p class="previewClass">{msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Preview__c}</p> -->
+                            <div class="previewClassLight slds-line-clamp_small slds-p-around_xx-small">
+                                <lightning-formatted-rich-text
+                                    value={msgParentValue}></lightning-formatted-rich-text>
+                            </div>
+                            <div class="slds-grid timeClass slds-p-left_xx-small">
+                                <!-- <div class="slds-col slds-size_1-of-1">
+                                    <lightning-formatted-date-time class="animateFade opacityClass"
+                                        value={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.CreatedDate}
+                                        year="numeric" month="short" day="2-digit" weekday="long" hour="2-digit"
+                                        minute="2-digit" hour12="true">
+                                    </lightning-formatted-date-time>
+                                </div> -->
+                                <div class="slds-col flexNone">
+                                    <lightning-formatted-date-time data-id="hoverSelect" class="animateFade opacityClass"
+                                        value={createdDateParentVal} year="numeric" month="short" day="2-digit" hour="2-digit"
+                                        minute="2-digit" hour12="true">
+                                    </lightning-formatted-date-time>
+                                </div>
+                                <div class="slds-col flexNone opacityClass slds-m-horizontal_xx-small">|</div>
+                                <div class="slds-col flexNone">
+                                    <lightning-relative-date-time value={createdDateParent} class="opacityClass"></lightning-relative-date-time>
+                                </div>
+                                <div class="slds-col flexNone opacityClass slds-m-horizontal_xx-small">|</div>
+                                <div class="slds-col flexNone">
+                                    <p class="opacityClass">sent by {msgParentOwnerName}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <template if:false={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Closed_Thread__c}>
+                            <div class="slds-grid">
+                                <div class="slds-col slds-size_2-of-12 slds-p-around_xx-small justifyCenter">
+                                    <div class={msgTableTimelineClass}></div>
+                                    <div class="slds-m-left_x-small">
+                                        <div class="avatarBorder">
+                                            <lightning-avatar size="large" variant="circle" src={smallPhotoUrl}
+                                                fallback-icon-name="standard:user">
+                                            </lightning-avatar>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="slds-col slds-size_10-of-12">
+                                    <div class="slds-grid slds-wrap">
+                                        <div class="slds-col slds-size_1-of-1">
+                                            <a href={msgOwnerURL}
+                                                class="nameLinkClass">{msgOwnerName}</a>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-1">
+                                            <div class="slds-line-clamp_large slds-p-vertical_xx-small">
+                                                <lightning-formatted-rich-text
+                                                    value={msgValue}>
+                                                </lightning-formatted-rich-text>
+                                            </div>
+                                            <div class="slds-grid timeClass">
+                                                <!-- <div class="slds-col slds-size_1-of-1">
+                                                    <lightning-formatted-date-time class="animateFade opacityClass"
+                                                        value={msgStatus.Ticket_Message__r.CreatedDate} year="numeric"
+                                                        month="short" day="2-digit" weekday="long" hour="2-digit"
+                                                        minute="2-digit" hour12="true">
+                                                    </lightning-formatted-date-time>
+                                                </div> -->
+                                                <div class="slds-col flexNone">
+                                                    <lightning-formatted-date-time data-id="hoverSelect" class="animateFade opacityClass"
+                                                        value={createdDateVal} year="numeric" month="short" day="2-digit" hour="2-digit"
+                                                        minute="2-digit" hour12="true">
+                                                    </lightning-formatted-date-time>
+                                                </div>
+                                                <div class="slds-col flexNone opacityClass slds-m-horizontal_xx-small">|</div>
+                                                <div class="slds-col flexNone">
+                                                    <lightning-relative-date-time value={createdDate} class="opacityClass"></lightning-relative-date-time>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </lightning-card>
+                </template>
+            </div>
         </div>
     </template>
 </template>
