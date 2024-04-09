@@ -18,3 +18,12 @@
 .gridClass::-webkit-scrollbar {
     display: none;
 }
+.userList{
+    font-weight: bold; 
+    font-size: 1rem;
+    color: #3C648D;
+    text-align: left;
+    width: 97%;
+    padding-bottom: 6px;
+    padding-top: 12px;
+}

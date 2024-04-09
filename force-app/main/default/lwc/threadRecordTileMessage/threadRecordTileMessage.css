@@ -1,0 +1,89 @@
+.messageClass{
+    padding:none;
+}
+.rightClass{
+    text-align: left;
+    background-color: rgba(226, 226, 226, 0.89);
+    border-bottom: 2px solid #cccccc;
+}
+.titleClass{
+    font-size: 1rem;
+    font-weight: bold;
+}
+.rightClass:hover{
+    text-align: left;
+    background-color: rgb(209, 209, 209);
+    border-bottom: 2px solid #cccccc;
+}
+.leftClass{
+    text-align: left;
+    background-color: white;
+    border-bottom: 2px solid #cccccc;
+}
+.leftClass:hover{
+    text-align: left;
+    background-color: rgb(243, 243, 243);
+    border-bottom: 2px solid #ededed;
+}
+.timeClass{
+    font-size: smaller;
+    height: 21px;
+}
+.opacityClass{
+    opacity: .4;
+    font-size: .75rem;
+}
+.animateFade{
+    animation: fadeIn .25s;
+}
+.borderClass{
+    border: 1px solid transparent;
+}
+.borderClass:hover{
+    border-radius: .25rem;
+    border: 1px solid rgb(158, 158, 158);
+    background-color: white;
+    cursor: pointer;
+}
+.displayIt{
+    display: none;
+}
+.displayIt:hover{
+    display: block;
+}
+.marginVert{
+    margin-top: auto;
+    margin-bottom: auto;
+}
+.smallFont{
+    font-size:smaller;
+}
+.marginRight{
+    margin-right:auto;
+}
+.marginRight{
+    margin-left:auto;
+}
+.overFlow{
+    overflow: hidden;
+}
+.widthClass{
+    width: 58.33%
+}
+.flexNone{
+    flex:none;
+}
+
+.setThreadWidth{
+    width: min(100%,600px)
+}
+
+
+@keyframes fadeIn {
+    from {
+        transform: scale(.99) translateY(-.05rem);
+    }
+    to {
+        transform: scale(1.0) translateY(0);
+    }
+}

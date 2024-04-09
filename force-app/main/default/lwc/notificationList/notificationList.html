@@ -1,9 +1,13 @@
 <template>
     <div class="slds-p-horizontal_xx-small">
-        <lightning-card title={pageTitle} icon-name="standard:past_chat">
+        <lightning-card icon-name={iconName}>
+            <div slot="title">
+                <span class="userList">{pageTitle}</span>
+            </div>
             <div slot="actions">
                 <template if:true={mainArea}>
                     <lightning-button-group>
+                        <lightning-button-icon tooltip="See All Bookmarked" onclick={handleOpenBookmarked} icon-name="utility:bookmark_alt"></lightning-button-icon>
                         <lightning-button-icon tooltip="Mark All As Read" onclick={markAllRead} icon-name="utility:email_open"></lightning-button-icon>
                         <lightning-button-icon icon-name="utility:search" onclick={toggleSearch} tooltip="Toggle Search"></lightning-button-icon>
                     </lightning-button-group>
@@ -38,29 +42,47 @@
                             </div>
                         </div>
                     </template> -->
-                    <template if:true={mainArea}>
-                        <div class="slds-grid slds-wrap leftGridClass">
-                            <div class="slds-col slds-size_1-of-1">
-                                <template if:true={openMsgs}>
-                                    <template for:each={openMsgs} for:item="openPost">
-                                        <c-notification-list-tile key={openPost.Id} msg-status={openPost} onrefresh={goBack} onopentimeline={handleOpenTimeline}></c-notification-list-tile>
-                                    </template>
-                                    <template if:true={noNewMsg}>
-                                        <c-zz-desert message="0 Timelines with Unread Messages"></c-zz-desert>
-                                    </template>
+                    <div class="slds-grid slds-wrap leftGridClass">
+                        <div class="slds-col slds-size_1-of-1">
+                            <template if:true={openMsgs}>
+                                <template for:each={openMsgs} for:item="openPost">
+                                    <c-notification-list-tile key={openPost.Id} msg-status={openPost} onrefresh={goBack} onopentimeline={handleOpenTimeline}></c-notification-list-tile>
                                 </template>
-                            </div>
+                                <template if:true={noNewMsg}>
+                                    <c-zz-desert message="0 Timelines with Unread Messages"></c-zz-desert>
+                                </template>
+                            </template>
                         </div>
-                    </template>
+                    </div>
                 </template>
-                <template if:false={mainArea}>
+                <template if:true={responseView}>
                     <template if:true={timelineView}>
                         <c-chat-timeline record-id={recordId} onrefresh={handleUserSuccess} show-timeline title={timelineTitle} object-name={objectName} ticket-users={ticketUsers} user-title={userTitle} show-thread show-pinned></c-chat-timeline>
                     </template>
                     <template if:true={showThread}>
-                        <c-thread-tile record-id={recordId} ticket-msg={ticketMsg} main-area show-thread>
-                        </c-thread-tile>
+                        <c-thread-tile record-id={recordId} parent-record-id={ticketMsg.Record_Id_Form__c} thread-id={recordId} ticket-msg={ticketMsg} main-area
+                                show-pinned onrefresh={handleRefresh} show-msg>
+                            </c-thread-tile>
                     </template>
+                </template>
+                <template if:true={showBookmarked}>
+                    <div class="slds-p-horizontal_small">
+                        <template if:true={isBookmarkedLoading}>
+                            <lightning-spinner alternative-text="Content Loading"></lightning-spinner>
+                        </template>
+                        <template if:true={bookmarkedMsgs}>
+                            <template for:each={bookmarkedMsgs} for:item="post">
+                                <c-thread-record-tile key={post.Id} record-id={post.Id} ticket-msg={post} parent-record-id={post.Parent_Record_Id__c} main-area thread-box={threadBox} onrefresh={handleThreadRefresh}></c-thread-record-tile>
+                            </template>
+                            <template if:true={noBookmarkedMsg}>
+                                <c-zz-open-road>
+                                    <div slot="message" class="slds-align_absolute-center">
+                                        <span>0 Bookmarked Messages</span>
+                                    </div>
+                                </c-zz-open-road>
+                            </template>
+                        </template>
+                    </div>
                 </template>
             </div>
         </lightning-card>

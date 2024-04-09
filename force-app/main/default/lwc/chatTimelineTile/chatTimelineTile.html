@@ -1,171 +1,150 @@
 <template>
     <template if:true={timelinePost}>
-        <div class={timelinePost.timelineClassName__c} onclick={handleSelect} onmouseover={handleHover}
-            onmouseout={handleNoHover}>
-            <lightning-tile label={timelinePost.OwnerName__c} type="media" href={timelinePost.Owner_URL__c}>
-                <template if:true={isLoading}>
-                    <lightning-spinner alternative-text="content loading"></lightning-spinner>
-                </template>
-                <div slot="media">
-                    <lightning-avatar slot="media" src={smallPhotoUrl} fallback-icon-name="standard:user">
+        <div class={timelineClassName} onclick={handleSelect} onmouseover={handleHover} onmouseout={handleNoHover}>
+            <div class="slds-grid">
+                <div class="slds-col slds-size_1-of-12 slds-align_absolute-center">
+                    <lightning-avatar slot="media" size={avatarSize} src={smallPhotoUrl} fallback-icon-name="standard:user">
                     </lightning-avatar>
                 </div>
-                    <template if:false={editMsg}>
-                        <lightning-formatted-rich-text value={timelinePost.Message__c}>
-                        </lightning-formatted-rich-text>
-                    </template>
-                    <template if:true={editMsg}>
-                        <lightning-record-edit-form record-id={timelinePost.Id} object-api-name="Ticket_Message__c" onsubmit={handleSubmit}
-                            onsuccess={handleSuccess}>
-                            <lightning-input-field field-name="Message__c" onchange={handleMessageChange}>
-                            </lightning-input-field>
-                            <div class="slds-align_absolute-center">
-                                <lightning-button-group>
-                                    <lightning-button type="submit" label="Cancel" onclick={cancelEdit}></lightning-button>
-                                    <lightning-button type="submit" label="Save" variant="brand"></lightning-button>
-                                </lightning-button-group>
-                            </div>
-                        </lightning-record-edit-form>
-                    </template>
-                <template if:true={timelinePost.DocumentId__c}>
-                    <div class="slds-p-vertical_x-small slds-p-left_x-small animateFade">
-                        <lightning-button icon-name="utility:preview" variant="Neutral" onclick={openPreview}
-                            label="Preview File" icon-position="right" size="small"></lightning-button>
-                    </div>
-                    <!-- <li key={attachment.Id} class="forceContentVirtualRelatedListStencil forceRecordLayout">
-                        <div class="slds-list_horizontal slds-media_center slds-var-p-bottom_xx-small">
-                            <div class="slds-show_inline-block slds-align-middle thumbnailImg">
-                                <lightning-icon icon-name={attachment.icon} alternative-text="Doctype file" data-id={attachment.Id}
-                                    title="Doctype"></lightning-icon>
-                                <img src={attachment.src} class="thumbnailImg slds-hide" data-id={attachment.Id} onload={handleLoad} />
-                            </div>
-                            <div class="slds-show_inline-block slds-var-p-left_x-small slds-truncate slds-var-m-right_x-small">
-                                <a class="itemTitle uiOutputText" onclick={openPreview}
-                                    data-id={attachment.ContentDocumentId}>{attachment.ContentDocument.Title}</a>
-                                <p class="slds-m-around_none secondaryFields slds-text-body_small slds-truncate">
-                                    <span>
-                                        <lightning-formatted-date-time value={attachment.ContentDocument.CreatedDate}>
-                                        </lightning-formatted-date-time>
-                                    </span>
-                                    <span>{attachment.size}</span>
-                                    <span>{attachment.ContentDocument.FileExtension}</span>
-                                </p>
-                            </div>
+                <div class="slds-col slds-size_6-of-12 slds-m-left_x-small">
+                    <a href={timelinePost.Owner_URL__c} class="titleClass">{timelinePost.OwnerName__c}</a>
+                    <div class="slds-grid">
+                        <div class="slds-col flexNone">
+                            <lightning-relative-date-time value={createdDateParent}
+                                class="opacityClass fontSize"></lightning-relative-date-time>
                         </div>
-                    </li> -->
-                </template>
-                <template if:true={showThread}>
-                    <template if:true={openThread}>
-                        <div class="slds-m-horizontal_xxx-small slds-m-top_xx-small">
-                            <div class="setThreadWidth">
-                                <div class="slds-grid borderClass marginVert slds-p-around_xxx-small" onmouseover={handleHoverThread} onmouseout={handleNoHoverThread} onclick={handleOpenThread}>
-                                    <div class="slds-col flexNone">
-                                        <div class="slds-grid">
-                                            <template for:each={smallPhotoThreadsList} for:item="photo" for:index="index">
+                        <div
+                            class="slds-col flexNone opacityClass fontSize slds-m-horizontal_xx-small slds-align_absolute-center">
+                            |</div>
+                        <div class="slds-col flexNone">
+                            <lightning-formatted-date-time data-id="hoverSelect" class="animateFade opacityClass fontSize"
+                                value={timelinePost.CreatedDate} year="numeric" month="short" day="2-digit"
+                                hour="2-digit" minute="2-digit" hour12="true">
+                            </lightning-formatted-date-time>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_5-of-12 slds-text-align_right slds-m-right_x-small marginVert moveUpTop"
+                    data-id="seenSelect">
+                    <lightning-button-group data-id="hoverSelectButtons" class="slds-hide">
+                        <lightning-button-icon variant="border-filled" onclick={handleOpenThreadIndividually}
+                            size="small" tooltip="Open/Start Thread In New Window"
+                            icon-name="utility:new_window"></lightning-button-icon>
+                        <lightning-button-icon variant="border-filled" onclick={editMessage} size="small"
+                            tooltip="Edit Message" icon-name="utility:edit"></lightning-button-icon>
+                        <lightning-button-icon variant="border-filled" onclick={openSeenBy} size="small"
+                            tooltip="Open Info" icon-name="utility:info"></lightning-button-icon>
+                        <template if:true={showThread}>
+                            <lightning-button-icon-stateful variant="border-filled" icon-name="utility:comments"
+                                size="small" tooltip="Reply in thread" selected={timelinePost.Thread__c}
+                                alternative-text="Message thread"
+                                onclick={handleOpenThread}></lightning-button-icon-stateful>
+                        </template>
+                        <template if:true={showLikes}>
+                            <lightning-button-icon-stateful variant="border-filled" icon-name="utility:like"
+                                size="small" selected={liked} tooltip="Like Message" alternative-text="Like"
+                                onclick={handleLiked}>
+                            </lightning-button-icon-stateful>
+                        </template>
+                        <template if:true={showPinned}>
+                            <lightning-button-icon-stateful variant="border-filled" icon-name={pinIcon} size="small"
+                                selected={pinned} tooltip="Pin Message" alternative-text="Pin" onclick={handlePinned}>
+                            </lightning-button-icon-stateful>
+                            <lightning-button-icon-stateful variant="border-filled" icon-name={bookmarkedIcon}
+                                size="small" selected={bookmarked} tooltip="Bookmark Message"
+                                alternative-text="Bookmark" onclick={handleBookmarked}>
+                            </lightning-button-icon-stateful>
+                        </template>
+                    </lightning-button-group>
+                </div>
+
+            </div>
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="content loading"></lightning-spinner>
+            </template>
+            <template if:false={editMsg}>
+                <div class="slds-p-vertical_x-small slds-p-horizontal_x-small">
+                    <lightning-formatted-rich-text value={timelinePost.Message__c}>
+                    </lightning-formatted-rich-text>
+                </div>
+            </template>
+            <template if:true={editMsg}>
+                <lightning-record-edit-form record-id={timelinePost.Id} object-api-name="Ticket_Message__c"
+                    onload={handleLoad} onsubmit={handleSubmit} onsuccess={handleSuccess}>
+                    <lightning-input-field field-name="Message__c" onchange={handleMessageChange}>
+                    </lightning-input-field>
+                    <div class="slds-align_absolute-center">
+                        <lightning-button-group>
+                            <lightning-button label="Cancel" onclick={cancelEdit}></lightning-button>
+                            <lightning-button type="submit" label="Save" variant="brand"></lightning-button>
+                        </lightning-button-group>
+                    </div>
+                </lightning-record-edit-form>
+                <lightning-file-upload name="fileUploader" record-id={timelinePost.Id}
+                    onuploadfinished={handleUploadFinished} multiple>
+                </lightning-file-upload>
+            </template>
+            <c-record-chat-file-container record-id={timelinePost.Id} lwc:ref="fileContainer"></c-record-chat-file-container>
+            <template if:true={showThread}>
+                <template if:true={openThread}>
+                    <div class="slds-m-horizontal_x-small slds-m-top_xx-small">
+                        <div class="setThreadWidth slds-truncate">
+                            <div class="slds-grid borderClass marginVert slds-p-around_xxx-small"
+                                onmouseover={handleHoverThread} onmouseout={handleNoHoverThread}
+                                onclick={handleOpenThread}>
+                                <div class="slds-col flexNone">
+                                    <div class="slds-grid">
+                                        <template for:each={smallPhotoThreadsList} for:item="photo" for:index="index">
                                             <!-- <div class="slds-col flexNone slds-m-horizontal_xxx-small" key={photo.id}>
                                                 <lightning-avatar slot="media" size="small" src={photo.threadSmallPhotoUrl} fallback-icon-name="standard:user">
                                                 </lightning-avatar>
                                             </div> -->
-                                            <c-chat-avatar size="small" photo={photo} key={photo.id} container-class="slds-col flexNone slds-m-horizontal_xxx-small"></c-chat-avatar>
-                                        </template>
-                                        </div>
-                                        <!-- <lightning-avatar slot="media" size="small" src={threadSmallPhotoUrl} fallback-icon-name="standard:user">
-                                        </lightning-avatar>
-                                        <lightning-avatar slot="media" size="small" src={threadSmallPhotoUrl} fallback-icon-name="standard:user">
-                                        </lightning-avatar>
-                                        <lightning-avatar slot="media" size="small" src={threadSmallPhotoUrl} fallback-icon-name="standard:user">
-                                        </lightning-avatar> -->
-                                    </div>
-                                    <div class="slds-col flexNone marginVert slds-m-horizontal_x-small smallFont">
-                                        <a class="slds-truncate" onclick={handleOpenThread}>{numReplies}</a>
-                                    </div>
-                                    <div class="slds-col flexNone marginVert smallFont overFlow slds-truncate">
-                                        <template if:true={showRelDate}>
-                                            <span class="slds-truncate">{lastReply}<lightning-relative-date-time value={createdDate} class="slds-truncate"></lightning-relative-date-time></span>
-                                        </template>
-                                        <template if:false={showRelDate}>
-                                            View Thread
+                                            <c-chat-avatar size="small" photo={photo.SmallPhotoUrl} key={photo.id}
+                                                container-class="slds-col flexNone slds-m-horizontal_xxx-small"></c-chat-avatar>
                                         </template>
                                     </div>
-                                    <div class="slds-col_bump-left marginLeft smallFont">
-                                        <lightning-button-icon icon-name="utility:chevronright" class="slds-hide" data-id="hoverSelect" variant="container" size="small" tooltip="Open Thread"></lightning-button-icon>
-                                    </div>
-                                </div> 
-                            </div>
-                        </div>
-                    </template>
-                </template>
-                <div class="slds-grid slds-wrap timeClass slds-p-top_xx-small">
-                    <div class="slds-col slds-size_8-of-12">
-                        <div class="slds-grid">
-                            <div class="slds-col flexNone">
-                                <lightning-formatted-date-time data-id="hoverSelect" class="animateFade opacityClass"
-                                    value={timelinePost.CreatedDate} year="numeric" month="short" day="2-digit"
-                                    hour="2-digit" minute="2-digit" hour12="true">
-                                </lightning-formatted-date-time>
-                            </div>
-                            <div class="slds-col flexNone opacityClass slds-m-horizontal_xx-small">|</div>
-                            <div class="slds-col flexNone">
-                                <lightning-relative-date-time value={createdDateParent} class="opacityClass"></lightning-relative-date-time>
+                                </div>
+                                <div class="slds-col flexNone marginVert slds-m-horizontal_x-small smallFont">
+                                    <a class="slds-truncate" onclick={handleOpenThread}>{numReplies}</a>
+                                </div>
+                                <div class="slds-col flexNone marginVert smallFont overFlow slds-truncate">
+                                    <template if:true={showRelDate}>
+                                        <span class={threadStatusClass}>{lastReply}<lightning-relative-date-time
+                                                value={createdDate}
+                                                class="slds-truncate"></lightning-relative-date-time> -
+                                            {threadStatus}</span>
+                                    </template>
+                                    <template if:false={showRelDate}>
+                                        {viewThreadVal}
+                                    </template>
+                                </div>
+                                <div class="slds-col_bump-left marginLeft smallFont">
+                                    <lightning-button-icon icon-name="utility:chevronright" class="slds-hide"
+                                        data-id="hoverSelect" variant="container" size="small"
+                                        tooltip="Open Thread"></lightning-button-icon>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="slds-col slds-size_4-of-12 slds-text-align_right slds-p-right_xxx-small marginVert"
-                        data-id="seenSelect">
-                        <!-- <div class="slds-grid">
-                            <div class="slds-col">
-                                <lightning-button-icon variant="container" onclick={editMessage} size="x-small"
-                                icon-name="utility:edit"></lightning-button-icon>
-                            </div>
-                            <div class="slds-col">
-                                <lightning-button-icon variant="container" onclick={openSeenBy} size="x-small"
-                                icon-name="utility:info"></lightning-button-icon>
-                            </div>
-                            <template if:true={showThread}>
-                                <div class="slds-col">
-                                    <lightning-button-icon-stateful variant="outline" icon-name="utility:comments"
-                                            size="x-small" selected={thread} alternative-text="Message thread" onclick={handleOpenThread}></lightning-button-icon-stateful>
-                                </div>
-                            </template>
-                            <template if:true={showLikes}>
-                                <div class="slds-col">
-                                    <lightning-button-icon-stateful variant="outline" icon-name="utility:like"
-                                        size="x-small" selected={liked} alternative-text="Like" onclick={handleLiked}>
-                                    </lightning-button-icon-stateful>
-                                </div>
-                            </template>
-                            <template if:true={showPinned}>
-                                <div class="slds-col">
-                                    <lightning-button-icon-stateful variant="outline" icon-name={pinIcon} size="x-small" selected={pinned}
-                                        alternative-text="Pin" onclick={handlePinned}>
-                                    </lightning-button-icon-stateful>
-                                </div>
-                            </template>
-                        </div> -->
-                        <lightning-button-group data-id="hoverSelectButtons" class="slds-hide">
-                            <lightning-button-icon variant="border-filled" onclick={editMessage} size="small" tooltip="Edit Message"
-                                icon-name="utility:edit"></lightning-button-icon>
-                            <lightning-button-icon variant="border-filled" onclick={openSeenBy} size="small" tooltip="Open Info"
-                                icon-name="utility:info"></lightning-button-icon>
-                        <template if:true={showThread}>
-                                <lightning-button-icon-stateful variant="border-filled" icon-name="utility:comments" size="small" tooltip="Reply in thread"
-                                    selected={timelinePost.Thread__c} alternative-text="Message thread"
-                                    onclick={handleOpenThread}></lightning-button-icon-stateful>
-                        </template>
-                        <template if:true={showLikes}>
-                                <lightning-button-icon-stateful variant="border-filled" icon-name="utility:like" size="small" selected={liked} tooltip="Like Message"
-                                    alternative-text="Like" onclick={handleLiked}>
-                                </lightning-button-icon-stateful>
-                        </template>
-                        <template if:true={showPinned}>
-                                <lightning-button-icon-stateful variant="border-filled" icon-name={pinIcon} size="small" selected={pinned} tooltip="Pin Message"
-                                    alternative-text="Pin" onclick={handlePinned}>
-                                </lightning-button-icon-stateful>
-                        </template>
-                        </lightning-button-group>
+                </template>
+            </template>
+            <!-- <div class="slds-grid slds-wrap timeClass slds-p-top_xx-small slds-p-horizontal_small">
+                <div class="slds-col slds-size_8-of-12">
+                    <div class="slds-grid">
+                        <div class="slds-col flexNone">
+                            <lightning-relative-date-time value={createdDateParent}
+                                class="opacityClass"></lightning-relative-date-time>
+                        </div>
+                        <div class="slds-col flexNone opacityClass slds-m-horizontal_xx-small">|</div>
+                        <div class="slds-col flexNone">
+                            <lightning-formatted-date-time data-id="hoverSelect" class="animateFade opacityClass"
+                                value={timelinePost.CreatedDate} year="numeric" month="numeric" day="numeric"
+                                hour="2-digit" minute="2-digit" time-zone-name="short">
+                            </lightning-formatted-date-time>
+                        </div>
                     </div>
                 </div>
-            </lightning-tile>
+            </div> -->
         </div>
     </template>
 </template>

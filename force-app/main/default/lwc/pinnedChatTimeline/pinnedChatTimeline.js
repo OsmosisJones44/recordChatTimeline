@@ -26,6 +26,7 @@ import PARENT_FIELD from '@salesforce/schema/Ticket_Message__c.Parent_Record_Id_
 import DOC_FIELD from '@salesforce/schema/Ticket_Message__c.DocumentId__c';
 import SOURCE_FIELD from '@salesforce/schema/Ticket_Message__c.Message_Source__c';
 import PREVIEW_FIELD from '@salesforce/schema/Ticket_Message__c.Preview_Name__c';
+// import PINNED_FIELD from '@salesforce/schema/Ticket_Message__c.Pinned__c';
 import USER_ID from '@salesforce/user/Id';
 
 const MAX_FILE_SIZE = 4500000;
@@ -188,11 +189,11 @@ export default class PinnedChatTimeline extends LightningElement {
         this.registerErrorListener();
         this.handleSubscribe();
         // console.log(this.recordId);
+        // refreshApex(this.timelinePosts)
         Promise.all([
             loadScript(this, CONFETTI + '/confetti.browser.min.js'),
             loadScript(this, PARTY + '/party.min.js'),
             loadScript(this, SWEETALERT + '/sweetalert.min.js'),
-            refreshApex(this.timelinePosts)
         ])
             .then(() => {
                 console.log('Dependencies Loaded Successfully');
@@ -218,11 +219,16 @@ export default class PinnedChatTimeline extends LightningElement {
     }
 
     renderedCallback() {
-        if (!this.timelinePosts || this.timelinePosts === "" || this.timelinePosts === [] || this.timelinePosts === {} || this.timelinePosts === undefined || this.timelinePosts === null || this.timelinePosts === '') {
+        refreshApex(this.timelinePostKey);
+        if (!this.timelinePosts || this.timelinePosts === "" && this.timelinePosts === undefined || this.timelinePosts === null || this.timelinePosts === '') {
             this.noData = true;
         } else {
             this.noData = false;
         }
+    }
+
+    disconnectedCallback(){
+        this.handleUnsubscribe();
     }
 
     runGetUser(){
@@ -700,33 +706,7 @@ export default class PinnedChatTimeline extends LightningElement {
         // Callback invoked whenever a new event message is received
         const messageCallback = (response) => {
             console.log('New message received: ', JSON.stringify(response));
-            let updatedTicketId = response.data.payload.TicketId__c;
-            let seenMsg = response.data.payload.SeenStatus__c;
-            let seenUser = response.data.payload.Current_User_Id__c;
-;
-            if (seenMsg) {
-                console.log('Seen User: ' + seenUser);
-                console.log('Seen User: ' + this.userId);
-                if (seenUser != this.userId) {
-                    switch (this.currentPage) {
-                        case 'All':
-                            this.openAllTickets();
-                            break;
-                        case 'Projects':
-                            this.openProjectTickets();
-                            break;
-                        case 'Action':
-                            this.openActionTickets();
-                            break;
-                        case 'Idea':
-                            this.openIdeaTickets();
-                            break;
-                        case 'Timeline':
-                            this.refreshPosts();
-                            this.scrollToBottom();
-                    }
-                }
-            }
+            this.refreshPosts();
         };
 
         // Invoke subscribe method of empApi. Pass reference to messageCallback
@@ -737,7 +717,6 @@ export default class PinnedChatTimeline extends LightningElement {
                 JSON.stringify(response)
             );
             this.subscription = response;
-            //this.toggleSubscribeButton(true);
         });
     }
     registerErrorListener() {
@@ -747,6 +726,16 @@ export default class PinnedChatTimeline extends LightningElement {
             // Error contains the server-side error
         });
     }    
+
+    handleUnsubscribe() {
+        // Invoke unsubscribe method of empApi
+        unsubscribe(this.subscription, (response) => {
+            console.log('unsubscribe() response: ', JSON.stringify(response));
+            // Response is true for successful unsubscribe
+        });
+    }
+
+
 
     handleSearch(event) {
         const searchKey = event.target.value.toLowerCase();
@@ -778,30 +767,4 @@ export default class PinnedChatTimeline extends LightningElement {
             this.timelinePosts = this.lastSavedData;
         }        
     }     
-    handleSubscribe() {
-        // Callback invoked whenever a new event message is received
-        const messageCallback = (response) => {
-            console.log('New message received: ', JSON.stringify(response));
-            refreshApex(this.timelinePostKey);
-            // let updatedTicketId = response.data.payload.TicketId__c;
-        };
-
-        // Invoke subscribe method of empApi. Pass reference to messageCallback
-        subscribe('/event/Help_Desk_Message__e', -1, messageCallback).then((response) => {
-            // Response contains the subscription information on subscribe call
-            console.log(
-                'Subscription request sent to: ',
-                JSON.stringify(response)
-            );
-            this.subscription = response;
-            //this.toggleSubscribeButton(true);
-        });
-    }
-    registerErrorListener() {
-        // Invoke onError empApi method
-        onError((error) => {
-            console.log('Received error from server: ', JSON.stringify(error));
-            // Error contains the server-side error
-        });
-    }  
 }

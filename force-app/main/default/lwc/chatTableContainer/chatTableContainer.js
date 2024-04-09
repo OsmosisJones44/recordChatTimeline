@@ -63,6 +63,7 @@ export default class ChatTableContainer extends NavigationMixin(LightningElement
         this.recentMsgKey = result;
         const { data, error } = result;
         if (data) {
+            console.log(JSON.stringify(data));
             this.recentMsgs = JSON.parse(JSON.stringify(data));
             if (this.parentRecordId) {
                 this.recentMsgs = this.recentMsgs.filter(msg => msg.Parent_Record_Id__c === this.parentRecordId);

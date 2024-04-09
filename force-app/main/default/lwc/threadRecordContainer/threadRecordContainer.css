@@ -1,0 +1,44 @@
+.userList{
+    font-weight: bold; 
+    font-size: max(.65vw, 14px);
+    color: #3C648D;
+    text-align: left;
+    width: 97%;
+    padding-bottom: 6px;
+    padding-top: 6px;
+}
+.gridClass{
+    overflow:scroll;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+/* Hide scrollbar for Chrome, Safari and Opera */
+.gridClass::-webkit-scrollbar {
+    display: none;
+}
+/* .leftGridClass{
+    max-height: 100vh;
+    overflow-y: scroll;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}  */
+/* Hide scrollbar for Chrome, Safari and Opera */
+/* .leftGridClass::-webkit-scrollbar {
+    display: none;
+} */
+
+.overrideRichTextHeight{
+    --slds-c-textarea-sizing-min-height: 2rem;
+    --slds-c-textarea-sizing-max-height: 30rem;
+}
+.overrideColor{
+    --slds-g-color-neutral-base-100: #3C648D;
+    --slds-g-color-neutral-base-50: rgb(255, 255, 255);
+    --slds-c-button-text-color-hover: rgb(215, 215, 215);
+}
+.overrideButtonSpacing{
+    --slds-c-button-brand-spacing-inline-start: 5px;
+    --slds-c-button-brand-spacing-inline-end: 5px;
+    --slds-c-button-neutral-spacing-inline-start: 5px;
+    --slds-c-button-neutral-spacing-inline-end: 5px;
+}

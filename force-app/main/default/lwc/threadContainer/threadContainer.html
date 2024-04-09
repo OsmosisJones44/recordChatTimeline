@@ -25,7 +25,7 @@
                             </template>
                             <template if:true={chatToggle}>
                                 <template for:each={recentThreadMsgs} for:item="post" for:index="index">
-                                    <c-chat-table-tile msg-status={post} key={post.Id} show-thread onrefresh={handleThreadRefresh}
+                                    <c-chat-table-tile msg-status={post} key={post.Id} data-id={post.Id} show-thread onrefresh={handleThreadRefresh}
                                         ontimeline={handleTimelineView}></c-chat-table-tile>
                                 </template>
                             </template>
@@ -69,31 +69,7 @@
                         </c-zz-open-road>
                     </template>
                     <template if:true={showTimeline}>
-                        <c-thread-tile record-id={recordId} ticket-msg={ticketMsg} main-area ticket-users={ticketUsers} thread-box={threadBox} onrefresh={handleRefresh}>
-                            <div slot="seen">
-                                <h3 class="userList">Thread Members</h3>
-                                <div class="slds-grid">
-                                    <div class="slds-col slds-size_10-of-12 slds-align-bottom">
-                                        <lightning-record-edit-form object-api-name="User_Ticket_Relationship__c" data-id="userSubmit">
-                                            <lightning-input-field field-name="User__c" data-id="userUpdate" variant="label-hidden"
-                                                style="margin-bottom: 0;" onchange={handleUserChange}></lightning-input-field>
-                                
-                                        </lightning-record-edit-form>
-                                    </div>
-                                    <div class="slds-col slds-size_1-of-12 slds-align-bottom slds-var-p-left_xx-small">
-                                        <lightning-button label="Add" variant="brand" onclick={handleUserSubmit}></lightning-button>
-                                    </div>
-                                </div>
-                                <div class="slds-p-horizontal_x-small slds-p-top_x-small ticketUserContainer">
-                                    <template if:true={ticketUsers}>
-                                        <template for:each={ticketUsers} for:item="ticketUser">
-                                            <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser} show-seen show-likes>
-                                            </c-ticket-view-user-list>
-                                        </template>
-                                    </template>
-                                </div>
-                            </div>
-                        </c-thread-tile>
+                        <c-thread-record-tile record-id={recordId} thread-view={seeAllThreads} ticket-msg={ticketMsg} parent-record-id={ticketMsg.Parent_Record_Id__c} main-area thread-box={threadBox} onrefresh={handleRefresh}></c-thread-record-tile>
                     </template>
                 </div>
             </template>

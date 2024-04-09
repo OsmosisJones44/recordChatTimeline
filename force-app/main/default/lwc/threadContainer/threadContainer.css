@@ -17,7 +17,7 @@
     display: none;
 }
 .leftGridClass{
-    max-height: 75vh;
+    max-height: 85vh;
     overflow-y: scroll;
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */

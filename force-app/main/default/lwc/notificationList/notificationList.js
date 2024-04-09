@@ -1,9 +1,10 @@
-import { LightningElement, wire, api } from 'lwc';
+import { LightningElement, wire } from 'lwc';
 import markAllRead from '@salesforce/apex/ChatController.markAllRead';
 import findRecentOpenTicketMessages from '@salesforce/apex/ChatController.findRecentOpenTicketMessages';
 import findRecentOpenThreadTicketMessages from '@salesforce/apex/ChatController.findRecentOpenThreadTicketMessages';
+import findRecentBookmarkedTicketMessages from '@salesforce/apex/ChatController.findRecentBookmarkedTicketMessages';
 import getUnreadTimelineMessages from '@salesforce/apex/NASController.getUnreadTimelineMessages';
-import getReadUsers from '@salesforce/apex/BirthdayController.getReadUsers';
+// import getReadUsers from '@salesforce/apex/BirthdayController.getReadUsers';
 // import getTicketMembers from '@salesforce/apex/BirthdayController.getTicketMembers';
 // import getSetupMembers from '@salesforce/apex/BirthdayController.getSetupMembers';
 // import getCashRequestMembers from '@salesforce/apex/BirthdayController.getCashRequestMembers';
@@ -37,17 +38,24 @@ const columns = [
 ];
 
 export default class NotificationList extends LightningElement {
+    iconName;
     recordId;
     userId = USER_ID;
     columns = columns;
     officeSpacePic = OFFICE_SPACE;
     showTimeline;
+    responseView = false;
     trueValue = true;
     isLoading = false;
+    isBookmarkedLoading = false;
+    lastSavedBookmarkedData;
     lastSavedData;
     lastSavedOpenData;
     showMembers = false;
     showCustom = false;
+    showBookmarked = false;
+    bookmarkedMsgs = [];
+    bookmarkedMsgsKey;
     ticketMembers;
     setupMembers;
     cashRequestMembers;
@@ -89,9 +97,20 @@ export default class NotificationList extends LightningElement {
             return true;
         }
     }   
+    get noBookmarkedMsg() {
+        if (this.bookmarkedMsgs.length > 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }   
     get pageTitle() {
         if (this.newMessages.data) {
-            return 'Unread Messages ('+this.newMessages.data.length+')';
+            if(!this.showBookmarked){
+                return 'Unread Messages ('+this.newMessages.data.length+')';
+            } else {
+                return 'Bookmarked Timeline Messages'
+            }
         } else {
             return 'Unread Messages (-)'
         }
@@ -99,6 +118,7 @@ export default class NotificationList extends LightningElement {
 
     @wire(MessageContext)
     messageContext;
+    //TODO: Update to Return Into
     @wire(getUnreadTimelineMessages, { userId: '$userId' }) newMessages;
     @wire(findRecentOpenThreadTicketMessages, {
         userId: '$userId'
@@ -129,10 +149,7 @@ export default class NotificationList extends LightningElement {
         this.recentOpenMsgKey = result;
         const { data, error } = result;
         if (data) {
-            console.log("Open: "+JSON.stringify(data));
             this.recentOpenMsgs = JSON.parse(JSON.stringify(data));
-            console.log(JSON.stringify(this.recentOpenMsgs));
-            // this.recentOpenMsgs = data;
             this.error = undefined;
         } else if (error) {
             this.recentOpenMsgs = undefined;
@@ -145,6 +162,25 @@ export default class NotificationList extends LightningElement {
         this.lastSavedOpenData = this.recentOpenMsgs;
         this.isLoading = false; 
         this.setOpenMsgs();
+    }
+    @wire(findRecentBookmarkedTicketMessages, { userId: '$userId' })
+    bookmarkedSetup(result) {
+        this.bookmarkedMsgsKey = result;
+        const { data, error } = result;
+        if (data) {
+            this.bookmarkedMsgs = JSON.parse(JSON.stringify(data));
+            console.log("Bookmarked: "+JSON.stringify(this.bookmarkedMsgs));
+            this.error = undefined;
+        } else if (error) {
+            this.bookmarkedMsgs = undefined;
+            this.error = error;
+            console.error(error);
+        } else {
+            this.error = undefined;
+            this.bookmarkedMsgs = undefined;
+        }
+        this.lastSavedBookmarkedData = this.bookmarkedMsgs;
+        this.isBookmarkedLoading = false; 
     }
     // @wire(getReadUsers, { ticketMessageId: '$ticketMessageId' })
     // userSetup(result) {
@@ -168,6 +204,9 @@ export default class NotificationList extends LightningElement {
     connectedCallback() {
         this.showAll = false;
         this.mainArea = true;
+        this.showBookmarked = false;
+        this.iconName = 'utility:alert';
+        this.responseView = false;
         // this.setOpenMsgs();
         this.registerErrorListener();
         this.handleSubscribe();
@@ -177,6 +216,7 @@ export default class NotificationList extends LightningElement {
 
     disconnectedCallback() {
         this.unsubscribeToMessageChannel();
+        this.handleUnsubscribe();
     }
     unsubscribeToMessageChannel() {
         unsub(this.subscription);
@@ -215,6 +255,8 @@ export default class NotificationList extends LightningElement {
         console.log(JSON.stringify(event.detail));
         console.log(JSON.stringify(event.detail.source));
         this.mainArea = false;
+        this.responseView = true;
+        this.showBookmarked = false;
         this.messageSource = event.detail.source;
         this.timelineTitle = event.detail.preview;
         const source = event.detail.source;
@@ -231,6 +273,16 @@ export default class NotificationList extends LightningElement {
             this.timelineView = true;
         }
     }  
+    handleOpenBookmarked(){
+        this.mainArea = false;
+        this.responseView = false;
+        this.showBookmarked = true;
+        this.iconName = 'utility:bookmark_alt';
+        this.handleThreadRefresh();
+    }
+    async handleThreadRefresh() {
+        await refreshApex(this.bookmarkedMsgsKey);
+    }
     openModal(event) {
         this.isModalOpen = true;
         this.mainArea = false;
@@ -322,7 +374,16 @@ export default class NotificationList extends LightningElement {
         await refreshApex(this.newMessages);
         await refreshApex(this.recentMsgKey);
         await refreshApex(this.recentOpenMsgKey);
+        // await refreshApex(this.bookmarkedMsgsKey);
         this.connectedCallback();
+    }
+    async handleRefresh() {
+        console.log('refresh notifications list');
+        await refreshApex(this.newMessages);
+        await refreshApex(this.recentMsgKey);
+        await refreshApex(this.recentOpenMsgKey);
+        await refreshApex(this.bookmarkedMsgsKey);
+        // this.connectedCallback();
     }
 
     handleTimelineView(event) {
@@ -395,7 +456,7 @@ export default class NotificationList extends LightningElement {
     async handleSubscribe() {
         // Callback invoked whenever a new event message is received
         const messageCallback = async (response) => {
-            console.log('New message received: ', JSON.stringify(response));
+            // console.log('New message received: ', JSON.stringify(response));
             await refreshApex(this.recentMsgKey);
             await refreshApex(this.recentOpenMsgKey);
             await refreshApex(this.newMessages);
@@ -411,6 +472,13 @@ export default class NotificationList extends LightningElement {
             );
             this.subscription = response;
             //this.toggleSubscribeButton(true);
+        });
+    }
+    handleUnsubscribe() {
+        // Invoke unsubscribe method of empApi
+        unsubscribe(this.subscription, (response) => {
+            console.log('unsubscribe() response: ', JSON.stringify(response));
+            // Response is true for successful unsubscribe
         });
     }
     registerErrorListener() {

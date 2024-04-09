@@ -25,8 +25,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- <p class="previewClass">{msgStatus.Ticket_Message__r.Preview__c}</p> -->
-                    <!-- <div class={msgStatus.tableTimelineClass__c}> -->
                         <div class="slds-grid">
                             <div class="slds-col slds-size_2-of-12 slds-p-around_xx-small justifyCenter">
                                 <div class={msgStatus.tableTimelineClass__c}></div>
@@ -74,8 +72,8 @@
                 </lightning-card>
             </template>
             <template if:true={showThread}>
-                <lightning-card title={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Preview__c} variant="narrow"
-                    icon-name={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Icon_Name__c}>
+                <lightning-card title={threadPreview} variant="narrow"
+                    icon-name={threadIcon}>
                     <div slot="actions">
                         <template if:true={msgStatus.Ticket_Message__r.DocumentId__c}>
                             <div class="slds-p-horizontal_x-small">
@@ -86,12 +84,12 @@
                             <lightning-button-icon onclick={handleOpenThread} icon-name="utility:new_window"
                                 tooltip="Open Parent Record" size="small"
                                 disabled={disableButton}></lightning-button-icon>
-                            <template if:false={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Closed_Thread__c}>
+                            <template if:false={threadClosed}>
                                 <lightning-button-icon onclick={handleResolve} icon-name="utility:success"
                                     tooltip="Resolve Thread" variant="brand" size="small"
                                     disabled={disableButton}></lightning-button-icon>
                             </template>
-                            <template if:true={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Closed_Thread__c}>
+                            <template if:true={threadClosed}>
                                 <lightning-button-icon onclick={handleReopen} icon-name="utility:email_open"
                                     tooltip="Re-Open Closed Thread" size="small"
                                     disabled={disableButton}></lightning-button-icon>
@@ -102,7 +100,7 @@
                         <!-- <p class="previewClass">{msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Preview__c}</p> -->
                         <div class="previewClassLight slds-line-clamp_small slds-p-around_xx-small">
                             <lightning-formatted-rich-text
-                                value={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Message__c}></lightning-formatted-rich-text>
+                                value={threadMsg}></lightning-formatted-rich-text>
                         </div>
                         <div class="slds-grid timeClass slds-p-left_xx-small">
                             <div class="slds-col slds-size_1-of-1">
@@ -114,7 +112,7 @@
                             </div>
                         </div>
                     </div>
-                    <template if:false={msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Closed_Thread__c}>
+                    <template if:false={threadClosed}>
                         <div class="slds-grid">
                             <div class="slds-col slds-size_2-of-12 slds-p-around_xx-small justifyCenter">
                                 <div class={msgStatus.tableTimelineClass__c}></div>

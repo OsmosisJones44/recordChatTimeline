@@ -1,65 +1,72 @@
 <template>
-    <lightning-card title={title} variant="narrow" icon-name="standard:live_chat">
-        <div slot="actions">
-            <lightning-button-group>
-                <template if:true={mainArea}>
-                    <template if:false={inThread}>
-                        <template if:true={mainArea}>
-                            <lightning-button-icon style="float:right" variant="container" tooltip="See Record Threads"
-                                icon-name="utility:comments" onclick={openThreadView}>
-                            </lightning-button-icon>
+    <lightning-card variant="narrow">
+        <div class="slds-grid slds-p-bottom_xx-small">
+            <div class="slds-col slds-size_1-of-12 slds-align_absolute-center">
+                <lightning-icon icon-name="utility:anywhere_chat" size="small">
+                </lightning-icon>
+            </div>
+            <div class="slds-col slds-size_5-of-12 slds-m-left_x-small">
+                <h3 class="userList slds-truncate">{title}</h3>
+            </div>
+            <div class="slds-col slds-size_6-of-12 slds-text-align_right slds-p-right_xxx-small marginVert moveUpTop"
+                data-id="seenSelect">
+                <lightning-button-group>
+                    <template if:true={mainArea}>
+                        <template if:false={inThread}>
+                            <template if:true={mainArea}>
+                                <lightning-button style="float:right" class="overrideButtonSpacing" size="small" variant={buttonVariant} label={buttonLabel}
+                                    icon-name="utility:comments" onclick={openThreadView}>
+                                </lightning-button>
+                            </template>
                         </template>
+                        <lightning-button-icon style="float:right" class="slds-m-right_small" variant="border" tooltip="Search Timeline Posts"
+                            icon-name="utility:search" onclick={toggleListFilters}>
+                        </lightning-button-icon>
                     </template>
-                    <lightning-button-icon style="float:right" variant="container" tooltip="Search Timeline Posts"
-                        icon-name="utility:search" onclick={toggleListFilters}>
-                    </lightning-button-icon>
-                </template>
-                <template if:false={mainArea}>
-                    <lightning-button-icon style="float:right" variant="brand" tooltip="See Record Threads"
-                        icon-name="utility:comments" onclick={closeThreadView}>
-                    </lightning-button-icon>
-                    <lightning-button-icon variant="border-filled" icon-name="utility:back" onclick={connectedCallback}>
-                    </lightning-button-icon>
-                </template>
-            </lightning-button-group>
-            <div class="slds-grid slds-wrap slds-border_right moveLeft">
-                <!-- <div class="slds-col slds-size_1-of-1">
-                    <div class="slds-grid slds-grid_align-end">
-                        <div class="slds-col slds-size_1-of-1">
-                            <template if:true={showFilters}>
-                                <div class="slds-grid slds-grid_align-end">
-                                    <div class="slds-col slds-size_1-of-2">
-                                        <lightning-checkbox-group label="Filters" options={typeOptions}
-                                            value={typeFilterArr} onchange={handleFilterType}>
-                                        </lightning-checkbox-group>
+                    <template if:false={mainArea}>
+                        <lightning-button-icon variant="border-filled" class="slds-m-right_small" icon-name="utility:back" onclick={connectedCallback}>
+                        </lightning-button-icon>
+                    </template>
+                </lightning-button-group>
+                <div class="slds-grid slds-wrap slds-border_right moveLeft">
+                    <!-- <div class="slds-col slds-size_1-of-1">
+                        <div class="slds-grid slds-grid_align-end">
+                            <div class="slds-col slds-size_1-of-1">
+                                <template if:true={showFilters}>
+                                    <div class="slds-grid slds-grid_align-end">
+                                        <div class="slds-col slds-size_1-of-2">
+                                            <lightning-checkbox-group label="Filters" options={typeOptions}
+                                                value={typeFilterArr} onchange={handleFilterType}>
+                                            </lightning-checkbox-group>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-2">
+                                            <lightning-checkbox-group label="Ticket Status" options={statusOptions}
+                                                value={statusFilterArr} onchange={handleFilterStatus}>
+                                            </lightning-checkbox-group>
+                                        </div>
                                     </div>
-                                    <div class="slds-col slds-size_1-of-2">
-                                        <lightning-checkbox-group label="Ticket Status" options={statusOptions}
-                                            value={statusFilterArr} onchange={handleFilterStatus}>
-                                        </lightning-checkbox-group>
-                                    </div>
-                                </div>
-                            </template>
+                                </template>
+                            </div>
                         </div>
-                    </div>
-                </div> -->
-                <div class="slds-col slds-size_1-of-1">
-                    <div class="slds-grid slds-grid_align-end">
-                        <div class="slds-col slds-size_1-of-1 slds-p-right_small">
-                            <template if:true={showSearch}>
-                                <lightning-input type="search" label="Search Timeline" onchange={handleSearch}>
-                                </lightning-input>
-                            </template>
+                    </div> -->
+                    <div class="slds-col slds-size_1-of-1">
+                        <div class="slds-grid slds-grid_align-end">
+                            <div class="slds-col slds-size_1-of-1 slds-p-right_small">
+                                <template if:true={showSearch}>
+                                    <lightning-input type="search" label="Search Timeline" onchange={handleSearch}>
+                                    </lightning-input>
+                                </template>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <template if:true={mainArea}>
-            <div class="slds-p-horizontal_small">
+            <div class="slds-p-horizontal_small slds-m-top_small">
                 <div class={timelineContainerClass}>
                     <template for:each={timelinePosts} for:item="timelinePost">
-                        <c-chat-timeline-tile key={timelinePost.Id} timeline-post={timelinePost}
+                        <c-chat-timeline-tile key={timelinePost.Id} timeline-post={timelinePost} record-id={timelinePost.Id} data-id={timelinePost.Id} show-bookmarked={showBookmarked}
                             show-pinned={showPinned} show-thread={showThread} onthread={openModal}
                             onrefresh={refreshPosts} onseen={openModal} current-name={curName}></c-chat-timeline-tile>
                     </template>
@@ -69,20 +76,26 @@
                     </lightning-spinner>
                 </template>
                 <div class="slds-grid slds-wrap">
-                    <div class="slds-col slds-size_11-of-12" data-id="selectRichText">
-                        <lightning-input-rich-text variant="bottom-toolbar" value={messageValue}
+                    <div class="slds-col slds-size_12-of-12" data-id="selectRichText">
+                        <lightning-input-rich-text variant="bottom-toolbar" data-id="inputRichText" class="overrideRichTextHeight" value={messageValue}
                             placeholder="Enter Timeline Message..." onchange={handleMessageChange} formats={formats}>
                             <lightning-rich-text-toolbar-button-group slot="toolbar"
                                 style="flex-grow:1;"></lightning-rich-text-toolbar-button-group>
+                                <!-- <lightning-rich-text-toolbar-button-group slot="toolbar" data-id="richTextVal"
+                                aria-label="Template Button Group">
+                                <lightning-rich-text-toolbar-button if:true={showTimelineFileButton} icon-name="utility:file"
+                                    data-id="richTextSelect" icon-alternative-text="Add/Attach File" onclick={toggleTimelineFile}></lightning-rich-text-toolbar-button>
+                                <lightning-rich-text-toolbar-button icon-name="utility:adduser"
+                                    data-id="richTextSelect" icon-alternative-text="Customize Notifications" onclick={toggleNotifications}></lightning-rich-text-toolbar-button>
+                            </lightning-rich-text-toolbar-button-group> -->
                             <lightning-rich-text-toolbar-button-group slot="toolbar" data-id="richTextVal"
                                 aria-label="Template Button Group">
-                                <lightning-rich-text-toolbar-button icon-name="utility:einstein" data-id="richTextSelect"
-                                    icon-alternative-text="Ask an AI" onclick={openAiPrompter}>
-                                </lightning-rich-text-toolbar-button>
+                                    <lightning-rich-text-toolbar-button icon-name="utility:send"
+                                    data-id="richTextSelect" icon-alternative-text="Send Timeline Message" onclick={createMessage} class="overrideColor"></lightning-rich-text-toolbar-button>
                             </lightning-rich-text-toolbar-button-group>
                         </lightning-input-rich-text>
                     </div>
-                    <div class="slds-col slds-size_1-of-12">
+                    <!-- <div class="slds-col slds-size_1-of-12">
                         <div class="slds-grid slds-wrap">
                             <div class="slds-col slds-size_1-of-1 slds-align_absolute-center">
                                 <lightning-button-icon data-id="timelineSendButton" class="slds-m-top_small" name="save"
@@ -90,130 +103,71 @@
                                     disabled={disableButton} tooltip="Send">
                                 </lightning-button-icon>
                             </div>
-                            <!-- <div class="slds-col slds-size_1-of-1 slds-align_absolute-center">
-                                <template if:false={timelineFile}>
-                                    <lightning-button-icon class="slds-m-top_small" name="save" icon-name="utility:add"
-                                        variant="border" onclick={openTimelineFile} icon-position="right"
-                                        tooltip="Add/Attach">
-                                    </lightning-button-icon>
-                                </template>
-                                <template if:true={timelineFile}>
-                                    <lightning-button-icon class="slds-m-top_small" name="save"
-                                        icon-name="utility:collapse_all" variant="border" onclick={closeTimelineFile}
-                                        icon-position="right" tooltip="Collapse">
-                                    </lightning-button-icon>
-                                </template>
-                            </div> -->
+                            <div class="slds-col slds-size_1-of-1 slds-align_absolute-center">
+                                <lightning-button-icon-stateful data-id="timelineAttachButton" class="slds-m-top_small"
+                                    name="save" variant="border" icon-name="utility:add" icon-position="right" selected={showTimelineOptions}
+                                    tooltip="Add/Attach" onclick={openTimelineMessageOptions}></lightning-button-icon-stateful>    
+                            </div>
                         </div>
-                    </div>
-                    <div class="slds-col slds-size_1-of-1">
-                        <!-- <template if:true={showMembers}>
-                            <c-chat-user-list ticket-users={ticketUsers} title={userTitle} record-id={recordId}
-                                onrefresh={refreshUsers} object-name={objectName}></c-chat-user-list>
-                        </template> -->
-                        <!-- <template> -->
-                            <h3 class="userList">Notifications</h3>
-                            <div class="slds-grid">
-                                <div class="slds-col slds-size_10-of-12 slds-align-bottom">
-                                    <lightning-record-edit-form object-api-name="User_Ticket_Relationship__c"
-                                        data-id="userSubmit">
-                                        <lightning-input-field field-name="User__c" data-id="userUpdate"
-                                            variant="label-hidden" style="margin-bottom: 0;"
-                                            onchange={handleUserChange}></lightning-input-field>
-
-                                    </lightning-record-edit-form>
+                    </div> -->
+                    <template if:true={showTimelineOptions}>
+                        <div class="slds-col slds-size_1-of-1 slds-p-top_x-small">
+                            <lightning-card icon-name="utility:notification">
+                                <div slot="title">
+                                    <h3 class="userList">Notifications</h3>
                                 </div>
-                                <div class="slds-col slds-size_1-of-12 slds-align-bottom slds-var-p-left_xx-small">
-                                    <lightning-button label="Add" variant="brand"
+                                <div slot="actions">
+                                    <lightning-button label="Add" variant="brand" size="small" icon-name="utility:add"
                                         onclick={handleAddUser}></lightning-button>
                                 </div>
-                            </div>
-                            <div class="slds-p-horizontal_x-small slds-p-top_x-small ticketUserContainer">
-                                <template if:true={notifications}>
-                                    <template for:each={notifications} for:item="ticketUser">
-                                        <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser}>
-                                        </c-ticket-view-user-list>
-                                    </template>
-                                </template>
-                                <!-- <template if:true={customNotifications}>
-                                    <template for:each={customNotifications} for:item="ticketUser">
-                                        <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser}>
-                                        </c-ticket-view-user-list>
-                                    </template>
-                                </template> -->
-                            </div>
-                        <!-- </template> -->
-                    </div>
-                </div>
-                <!-- <template if:true={timelineFile}>
-                        <div class="slds-col slds-size_1-of-1 slds-p-around_x-small">
-                            <lightning-file-upload label="Attach file" name="fileUploader" record-id={recordId}
-                                onuploadfinished={handleUploadFinished} multiple>
-                            </lightning-file-upload>
-                            <lightning-spinner if:true={isLoading} alternative-text="Loading"
-                                size="small"></lightning-spinner>
-                            <h3 class="userList">{fileTitle}</h3>
-                            <div class="slds-m-horizontal_x-small attachmentContainer">
-                                <ul>
-                                    <template if:true={loaded}>
-                                        <template for:each={attachments} for:item="attachment">
-                                            <li key={attachment.Id}
-                                                class="forceContentVirtualRelatedListStencil forceRecordLayout">
-                                                <div
-                                                    class="slds-list_horizontal slds-media_center slds-var-p-bottom_xx-small">
-                                                    <div class="slds-show_inline-block slds-align-middle thumbnailImg">
-                                                        <lightning-icon icon-name={attachment.icon}
-                                                            alternative-text="Doctype file" data-id={attachment.Id}
-                                                            title="Doctype"></lightning-icon>
-                                                        <img src={attachment.src} class="thumbnailImg slds-hide"
-                                                            data-id={attachment.Id} onload={handleLoad} />
-                                                    </div>
-                                                    <div
-                                                        class="slds-show_inline-block slds-var-p-left_x-small slds-truncate slds-var-m-right_x-small">
-                                                        <a class="itemTitle uiOutputText" onclick={openPreview}
-                                                            data-id={attachment.ContentDocumentId}>{attachment.ContentDocument.Title}</a>
-                                                        <p
-                                                            class="slds-m-around_none secondaryFields slds-text-body_small slds-truncate">
-                                                            <span>
-                                                                <lightning-formatted-date-time
-                                                                    value={attachment.ContentDocument.CreatedDate}>
-                                                                </lightning-formatted-date-time>
-                                                            </span>
-                                                            <span> {attachment.size} </span>
-                                                            <span>{attachment.ContentDocument.FileExtension}</span>
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                        </template>
-                                    </template>
-                                </ul>
-                                <template if:true={moreRecords}>
-                                    <a onclick={loadMore}>
-                                        <div class="slds-card__footer">
-                                            <template if:true={moreLoaded}>
-                                                <span>View More</span>
-                                            </template>
-                                            <template if:false={moreLoaded}>
-                                                <div style="position: relative; min-height:50px;">
-                                                    <lightning-spinner alternative-text="Loading" size="small">
-                                                    </lightning-spinner>
-                                                </div>
+                                <div class="slds-grid slds-p-horizontal_medium">
+                                    <div class="slds-col slds-align-bottom">
+                                        <lightning-record-edit-form object-api-name="User_Ticket_Relationship__c"
+                                            data-id="userSubmit">
+                                            <lightning-input-field field-name="User__c" data-id="userUpdate"
+                                                variant="label-hidden" style="margin-bottom: 0;"
+                                                onchange={handleUserChange}></lightning-input-field>
+                                        </lightning-record-edit-form>
+                                    </div>
+                                </div>
+                                <div class="slds-p-horizontal_medium slds-p-top_x-small ticketUserContainer">
+                                    <template if:true={customNotifications}>
+                                        <div class="slds-p-vertical_xx-small">
+                                            <template for:each={customNotifications} for:item="ticketUser">
+                                                <lightning-pill label={ticketUser.Name} onremove={handleRemove} class="slds-p-right_xxx-small slds-p-bottom_xxx-small" data-filter-id={ticketUser.Id} key={ticketUser.Id}>
+                                                    <lightning-avatar src={ticketUser.SmallPhotoUrl}
+                                                    fallback-icon-name="standard:user" size="x-small" variant="circle"  alternative-text="User avatar"></lightning-avatar>
+                                                </lightning-pill>
                                             </template>
                                         </div>
-                                    </a>
-                                </template>
+                                    </template>
+                                </div>
+                            </lightning-card>
+                        </div>
+                    </template>
+                </div>
+                <template if:true={timelineFile}>
+                    <div class="slds-col slds-size_1-of-1 slds-p-around_x-small slds-border_top">
+                        <div class="slds-grid">
+                            <div class="slds-col slds-size_1-of-1">
+                                <lightning-file-upload label="Attach file" name="fileUploader" record-id={userId}
+                                    onuploadfinished={handleUploadFinished} multiple>
+                                </lightning-file-upload>
+                                <c-upload-file-container record-id={recordId}></c-upload-file-container>
                             </div>
-                        </div> 
-                    </template> -->
+                        </div>
+                        <lightning-spinner if:true={isLoading} alternative-text="Loading"
+                            size="small"></lightning-spinner>
+                    </div>
+                </template>
             </div>
         </template>
         <template if:true={showRecordThreads}>
-            <div class="slds-border_top">
-                <c-thread-container record-id={recordId} chat-toggle
+            <div class="slds-border_top slds-p-top_x-small">
+                <c-thread-record-container record-id={recordId} chat-toggle source={source}
                     thread-box="slds-m-left_medium slds-box slds-box_xx-small"
                     thread-width="slds-col slds-size_1-of-1 slds-border_left slds-p-horizontal_x-small slds-p-top_x-small"
-                    preview-width="slds-col slds-size_1-of-1 slds-border_right"></c-thread-container>
+                    preview-width="slds-col slds-size_1-of-1"></c-thread-record-container>
             </div>
         </template>
     </lightning-card>
@@ -235,17 +189,8 @@
                 <div class="slds-modal__content slds-p-around_medium userContainer" id="modal-content-id-1">
                     <template if:true={showThreadModal}>
                         <template if:false={inThread}>
-                            <c-thread-tile record-id={ticketMessageId} ticket-msg={ticketMsg} main-area
-                                ticket-users={ticketUsers} show-pinned onrefresh={refreshUsers}>
-                                <!-- <div slot="seen">
-                                    <template if:true={ticketUsers}>
-                                        <template for:each={ticketUsers} for:item="ticketUser">
-                                            <c-ticket-view-user-list key={ticketUser.Id} ticket-user={ticketUser}
-                                                timeline-post-id={ticketMessageId} show-seen show-likes>
-                                            </c-ticket-view-user-list>
-                                        </template>
-                                    </template>
-                                </div> -->
+                            <c-thread-tile record-id={ticketMessageId} parent-record-id={ticketMsg.Record_Id_Form__c} thread-id={ticketMessageId} ticket-msg={ticketMsg} main-area
+                                show-pinned onrefresh={refreshPosts} show-msg>
                             </c-thread-tile>
                         </template>
                         <template if:true={inThread}>

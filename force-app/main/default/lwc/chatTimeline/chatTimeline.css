@@ -1,13 +1,27 @@
 .containerClass{
-    display:flex;
     max-height: 50vh;
     overflow-y: auto;
-    flex-direction:column-reverse;
+    overflow-x: hidden;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+/* Hide scrollbar for Chrome, Safari and Opera */
+.containerClass::-webkit-scrollbar {
+    display: none;
 }
 .threadTimelineClass{
-    display:flex;
-    max-height: 30vh;
+    max-height: 40vh;
     overflow-y: auto;
+    overflow-x: hidden;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+/* Hide scrollbar for Chrome, Safari and Opera */
+.threadTimelineClass::-webkit-scrollbar {
+    display: none;
+}
+.flexReverse{
+    display:flex;
     flex-direction:column-reverse;
 }
 .userList{
@@ -24,5 +38,22 @@
 }
 
 .modalExtender{
-    max-width: 50rem;
+    max-width: 90vw;
+}
+
+.overrideColor{
+    --slds-g-color-neutral-base-100: #3C648D;
+    --slds-g-color-neutral-base-50: rgb(255, 255, 255);
+    --slds-c-button-text-color-hover: rgb(215, 215, 215);
+}
+
+.overrideButtonSpacing{
+    --slds-c-button-brand-spacing-inline-start: 5px;
+    --slds-c-button-brand-spacing-inline-end: 5px;
+    --slds-c-button-neutral-spacing-inline-start: 5px;
+    --slds-c-button-neutral-spacing-inline-end: 5px;
+}
+.overrideRichTextHeight{
+    --slds-c-textarea-sizing-min-height: 2.5rem;
+    --slds-c-textarea-sizing-max-height: 30rem;
 }

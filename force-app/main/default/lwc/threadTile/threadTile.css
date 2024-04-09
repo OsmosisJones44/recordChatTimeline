@@ -1,9 +1,35 @@
 .userList{
     font-weight: bold; 
-    font-size: max(.65vw, 14px);
+    font-size: max(1rem, 14px);
     color: #3C648D;
     text-align: left;
     width: 97%;
     padding-bottom: 6px;
     padding-top: 12px;
+}
+.thumbnailImg{
+    height: auto;
+    min-width: 30px;
+    max-width: 30px;
+    max-height: 35px;
+}
+.secondaryFields span:after {
+    content: "\2022";
+    margin: 0 5px;
+}
+
+.secondaryFields span:last-child:after {
+    content: "";
+    margin: 0;
+}
+.attachmentContainer{
+    overflow:auto;
+    max-height:15rem;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+    border-bottom: 1px solid rgba(60, 100, 141, .5);
+}
+/* Hide scrollbar for Chrome, Safari and Opera */
+.attachmentContainer::-webkit-scrollbar {
+    display: none;
 }

@@ -1,34 +1,39 @@
-import { LightningElement, api, wire } from 'lwc';
+import { LightningElement, api } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { updateRecord } from 'lightning/uiRecordApi';
-import { refreshApex } from '@salesforce/apex';
 import getCurrentUserPhoto from '@salesforce/apex/BirthdayController.getCurrentUserPhoto';
 import getCurUser from '@salesforce/apex/BirthdayController.getCurUser';
+import getUserList from '@salesforce/apex/BirthdayController.getUserList';
 import createReadStatus from '@salesforce/apex/ChatController.createReadStatus';
 import getRecentThreadMsg from '@salesforce/apex/ChatController.getRecentThreadMsg';
+// import getVersionFilesNum from '@salesforce/apex/contentManager.getVersionFilesNum';
 import getUserMsgStatus from '@salesforce/apex/ChatController.getUserMsgStatus';
 // import MESSAGE_OBJECT from '@salesforce/schema/Help_Desk_Message_Status__c';
 // import TICKET_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Ticket_Message__c';
 // import READ_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Read__c';
 import ID_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Id';
 import LIKED_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Liked__c';
+import BOOKMARKED_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Bookmarked__c';
 import MSGID_FIELD from '@salesforce/schema/Ticket_Message__c.Id';
 import PINNED_FIELD from '@salesforce/schema/Ticket_Message__c.Pinned__c';
+
 // import OWNER_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.OwnerId';
 import USER_ID from '@salesforce/user/Id';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import EmailPreferencesAutoBccStayInTouch from '@salesforce/schema/User.EmailPreferencesAutoBccStayInTouch';
 
 export default class ChatTimelineTile extends NavigationMixin(LightningElement) {
     @api timelinePost;
+    @api recordId;
     @api curName;
     @api curUser;
     @api showPinned = false;
     @api showThread = false;
+    @api showBookmarked = false;
+    @api avatarSize;
     showLikes = false;
-    thread;
-    smallPhotoThreadArr = [];
-    smallPhotoThreads = [...new Set(this.smallPhotoThreadArr)];
+    smallPhotoThreadsList = [];
+    // smallPhotoThreadArr = [];
+    // smallPhotoThreads = [...new Set(this.smallPhotoThreadArr)];
     // smallPhotoThreads = [...new Set(array)];
     // smallPhotoThreadsSet = new Set();
     openThread = false;
@@ -42,14 +47,17 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
     smallPhotoUrl;
     showTime;
     seenBy; 
+    likedBy
     statusId;
     error;
     liked;
     pinned;
+    bookmarked;
     pinIcon;
+    bookmarkedIcon;
     userMsgStatus;
     showLikes = false;
-    editMsg;
+    editMsg = false;
     messageValue;
     isLoading;
     formats = [
@@ -77,94 +85,117 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
         } else {
             return '';
         }
+    } 
+    get viewThreadVal() {
+        if (this.timelinePost.Closed_Thread__c !== true) {
+            return 'View Open Thread';
+        } else {
+            return 'View Resolved Thread';
+        }
+    } 
+    get threadStatus() {
+        if (this.timelinePost.Closed_Thread__c !== true) {
+            return 'Open';
+        } else {
+            return 'Resolved';
+        }
     }    
+    get threadStatusClass() {
+        if (this.timelinePost.Closed_Thread__c !== true) {
+            return 'openThread slds-truncate';
+        } else {
+            return 'resolvedThread slds-truncate';
+        }
+    }   
 
     get thread() {
         return this.timelinePost.Thread__c;
     }
 
+    get timelineClassName() {
+        return this.timelinePost.timelineClassName__c + this.bookmarkedClassName;
+    }
+    
+    get bookmarkedClassName(){
+        if(this.bookmarked){
+             return ' bookmarkedClass';
+        }else{
+            return '';
+        }
+    }
+
     get smallPhotoThreadsList() {
         return this.removeDuplicates(this.smallPhotoThreads, "threadSmallPhotoUrl");
     }
-
-    // get postOwner(){
-    //     return this.recentThread[0].OwnerId;
-    // }
-
-    @wire(getRecentThreadMsg, {msgId: '$timelinePost.Id'})
-    threadSetup(result) {
-        this.recentThreadKey = result;
-        const {data,error} = result;
-        if(data){
-            this.recentThread = JSON.parse(JSON.stringify(data));
-            this.error = undefined;
-            this.threadLen = this.recentThread.length;
-            if (this.threadLen > 0) {
-                this.openThread = true;
-                this.recentMsg = this.recentThread[0];
-                this.createdDate = new Date(this.recentMsg.CreatedDate);
-                // console.log('ResultLen: ',this.threadLen);
-                // console.log('recentMsg: ', JSON.stringify(this.recentMsg));
-                // getCurrentUserPhoto({
-                //     userId: this.recentMsg.OwnerId
-                // })
-                //     .then(result => {
-                //         this.threadSmallPhotoUrl = result;
-                //         this.handleHoverThread();
-                //         this.handleNoHoverThread();
-                //         this.error = undefined;
-                //     })
-                //     .catch(error => {
-                //         this.threadSmallPhotoUrl = undefined;
-                //         this.error = error;
-                //         console.log(JSON.stringify(error));
-                //     })
-                this.recentThread.forEach(element => {
-                    getCurrentUserPhoto({
-                        userId: element.OwnerId
-                    })
-                        .then(result => {
-                            this.threadSmallPhotoUrl = {
-                                id: element.Id,
-                                threadSmallPhotoUrl: result
-                            };
-                            this.smallPhotoThreads.push(this.threadSmallPhotoUrl);
-                            this.handleHoverThread();
-                            this.handleNoHoverThread();
-                            this.error = undefined;
-                        })
-                        .catch(error => {
-                            this.threadSmallPhotoUrl = undefined;
-                            this.error = error;
-                            console.log(JSON.stringify(error));
-                        })
-                });
-                // console.log("Threads Before: "+JSON.stringify(this.smallPhotoThreads));
-                // this.removeDuplicates(this.smallPhotoThreads, "threadSmallPhotoUrl");
-                // console.log("Threads After: "+JSON.stringify(this.smallPhotoThreads))
-                this.error = undefined;
-            }
-        }else if(error){
-            console.log(JSON.stringify(error));
-        }else{
-            this.recentThread = [];
-            this.error = undefined
-        }
-    }
      
     connectedCallback() {
-        // console.log(this.timelinePost.Pinned__c);
         this.showRelDate = true;
         this.pinned = this.timelinePost.Pinned__c;
-        // this.thread = this.timelinePost.Thread__c;
         this.createdDateParent = new Date(this.timelinePost.CreatedDate);
-        // this.getThreadInfo();
         if (this.pinned) {
             this.pinIcon = 'utility:pinned';
         } else {
             this.pinIcon = 'utility:pin';
         }
-        // this.getThreadInfo();
+        // this.getVersionFilesNum();
+        this.getRecentThreadMsg();
+        this.getCurUserPhoto();
+        this.bookmarkedIcon = 'utility:bookmark_stroke';
+        this.createReadStatus();
+        this.getUserMsgStatus()
+    }
+    // getVersionFilesNum(){
+    //     getVersionFilesNum( { recordId: this.recordId })
+    //         .then(result =>{
+    //             this.numFiles = JSON.parse(JSON.stringify(result));
+    //         }).catch(err =>{
+    //             console.error(err);
+    //         })
+    // }
+    getRecentThreadMsg(){
+        getRecentThreadMsg({ msgId: this.recordId })
+        .then(result => {
+            if (result && result.length > 0) {
+                this.recentThread = [...result];
+                this.error = undefined;
+                this.threadLen = this.recentThread.length;
+                this.openThread = true;
+                this.recentMsg = this.recentThread[0];
+                this.createdDate = new Date(this.recentMsg.CreatedDate);
+
+                const userIdSet = new Set();
+                this.recentThread.forEach(thread => userIdSet.add(thread.OwnerId));
+
+                const userIdList = Array.from(userIdSet);
+
+                getUserList({
+                        userIds: userIdList
+                    })
+                    .then(result => {
+                        this.smallPhotoThreadsList = result.slice(0, 4);
+                        // this.handleHoverThread();
+                        // this.handleNoHoverThread();
+                        // this.handleHoverFile();
+                        // this.handleNoHoverFile();
+                        this.error = undefined;
+                    })
+                    .catch(error => {
+                        this.smallPhotoThreadsList = undefined;
+                        this.error = error;
+                        console.error(error);
+                    });
+            } else {
+                this.error = "No recent thread messages found.";
+            }
+        }).catch(err => {
+            console.error(err);
+        });
+    }
+    refresh(){
+        this.getRecentThreadMsg();
+        // this.getVersionFilesNum();
+    }
+    getCurUserPhoto(){
         getCurrentUserPhoto({
             userId: this.timelinePost.OwnerId
         })
@@ -177,14 +208,22 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
                 this.error = error;
                 console.log(error);
             })
+    }
+    getUserMsgStatus(){
         getUserMsgStatus({
             userId: this.userId,
-            msgId: this.timelinePost.Id
+            msgId: this.recordId
         })
             .then(result => {
                 this.showLikes = true;
                 this.userMsgStatus = result;
-                this.liked = this.userMsgStatus.Liked__c;
+                this.liked = this.userMsgStatus?.Liked__c;
+                this.bookmarked = this.userMsgStatus?.Bookmarked__c;
+                if (this.bookmarked) {
+                    this.bookmarkedIcon = 'utility:bookmark_alt';
+                } else {
+                    this.bookmarkedIcon = 'utility:bookmark_stroke';
+                }
                 this.error = undefined;
             })
             .catch(error => {
@@ -192,8 +231,10 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
                 this.error = error;
                 console.log(error);
             })
+    }
+    createReadStatus(){
         createReadStatus({
-            ticketMessageId: this.timelinePost.Id,
+            ticketMessageId: this.recordId,
             userId: this.userId
         })
             .then(result => {
@@ -205,8 +246,6 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
                 this.statusId = undefined;
                 this.error = error;
             })
-        this.editMsg = false;
-        this.setValues();
     }
     removeDuplicates(arr, prop) {
         let obj = {};
@@ -219,49 +258,12 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
     refreshThread() {
         const selectEvent = new CustomEvent('refresh', {
             detail: {
-                Id: this.timelinePost.Id,
+                Id: this.recordId,
                 parentId: this.timelinePost.Parent_Ticket__c
             }
         });
         this.dispatchEvent(selectEvent);  
-        return refreshApex(this.recentThreadKey);
-    }
-    getThreadInfo() {
-       getRecentThreadMsg({
-            msgId: this.timelinePost.Id
-        })
-            .then(result => {
-                this.recentThread = result;
-                this.threadLen = this.recentThread.length;
-                if (this.threadLen > 0) {
-                    this.openThread = true;
-                    this.recentMsg = this.recentThread[0];
-                    this.createdDate = new Date(this.recentMsg.CreatedDate);
-                    console.log('ResultLen: ',this.threadLen);
-                    console.log('recentMsg: ',JSON.stringify(this.recentMsg));
-                    getCurrentUserPhoto({
-                        userId: this.recentMsg.OwnerId
-                    })
-                        .then(result => {
-                            this.threadSmallPhotoUrl = result;
-                            this.handleHoverThread();
-                            this.handleNoHoverThread();
-                            this.error = undefined;
-                        })
-                        .catch(error => {
-                            this.threadSmallPhotoUrl = undefined;
-                            this.error = error;
-                            console.log(JSON.stringify(error));
-                        })
-                    this.error = undefined;
-                } else {
-                    this.openThread = false;
-                }
-            })
-            .catch(error => {
-                this.error = error;
-                console.log(JSON.stringify(error));
-            })
+        this.refresh();
     }
     openPreview(){
         //let elementId = event.currentTarget.dataset.id;
@@ -307,20 +309,20 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
     handlePinned(event) {
         event.preventDefault();
         this.pinned = !this.pinned;
-        if (this.pinned) {
-            this.pinIcon = 'utility:pinned';
-        } else {
-            this.handleSuccess(event);
-            this.pinIcon = 'utility:pin';
-        }
         const fields = {};
-        fields[MSGID_FIELD.fieldApiName] = this.timelinePost.Id;
+        fields[MSGID_FIELD.fieldApiName] = this.recordId;
         fields[PINNED_FIELD.fieldApiName] = this.pinned;
         
         const recordInput = { fields };
         
         updateRecord(recordInput)
         .then(() => {
+                if (this.pinned) {
+                    this.pinIcon = 'utility:pinned';
+                } else {
+                    // this.handleSuccess(event);
+                    this.pinIcon = 'utility:pin';
+                }
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'Success',
@@ -328,6 +330,7 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
                         variant: 'success'
                     })
                 );
+                this.fireRefresh();
             })
             .catch(error => {
                 this.dispatchEvent(
@@ -338,7 +341,55 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
                     })
                 );
             });
-    }    
+    }  
+    handleBookmarked(event) {
+        event.preventDefault();
+        this.bookmarked = !this.bookmarked;
+        const fields = {};
+        fields[ID_FIELD.fieldApiName] = this.userMsgStatus.Id;
+        fields[BOOKMARKED_FIELD.fieldApiName] = this.bookmarked;
+        
+        const recordInput = { fields };
+        
+        updateRecord(recordInput)
+        .then(() => {
+                if (this.bookmarked) {
+                    this.bookmarkedIcon = 'utility:bookmark_alt';
+                } else {
+                    // this.handleSuccess(event);
+                    this.bookmarkedIcon = 'utility:bookmark_stroke';
+                }
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Success',
+                        message: 'Message Updated',
+                        variant: 'success'
+                    })
+                );
+                this.fireRefresh();
+            })
+            .catch(error => {
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Error Bookmarking Message - Screenshot Me and send to your Salesoforce Administrator',
+                        message: error.body.message,
+                        variant: 'error'
+                    })
+                );
+            });
+    }  
+    handleUploadFinished(event) {
+        const uploadedFiles = event.detail.files;
+        this.dispatchEvent(
+            new ShowToastEvent({
+                title: "Success!",
+                message: uploadedFiles.length + " Files Uploaded Successfully.",
+                variant: "success"
+            })
+        );
+        this.refresh();
+        this.callRefreshFile();
+    }  
     handleHover(){
         const eventElement2 = this.template.querySelector('lightning-button-group[data-id="hoverSelectButtons"]');
         eventElement2.classList.remove('slds-hide');
@@ -357,11 +408,19 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
         const eventElement = this.template.querySelector('lightning-button-icon[data-id="hoverSelect"]');
         eventElement.classList.add('slds-hide');
     }
+    handleHoverFile() {
+        const eventElement = this.template.querySelector('c-record-chat-file-container');
+        eventElement.classList.remove('slds-hide');
+    }
+    handleNoHoverFile() {
+        const eventElement = this.template.querySelector('c-record-chat-file-container');
+        eventElement.classList.add('slds-hide');
+    }
     openSeenBy(event){
         event.preventDefault();
         const selectEvent = new CustomEvent('seen', {
             detail: {
-                id: this.timelinePost.Id,
+                id: this.recordId,
                 ticketMsg: this.timelinePost,
                 inThread: true
             }
@@ -369,24 +428,51 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
         this.dispatchEvent(selectEvent);  
     }
     handleOpenThread(event){
-        console.log('Thread Id: ' + this.timelinePost.Id);
+        // console.log('TimelinePost: ' + JSON.stringify(this.timelinePost));
         event.preventDefault();
         const selectEvent = new CustomEvent('thread', {
             detail: {
-                id: this.timelinePost.Id,
+                id: this.recordId,
                 ticketMsg: this.timelinePost,
                 inThread: false,
-                showInfo: false
             }
         });
         this.dispatchEvent(selectEvent);  
     }
+    handleOpenThreadIndividually() {
+        console.log('Navigation Attempt');
+        this[NavigationMixin.GenerateUrl](
+            {
+                type: "standard__app",
+                attributes: {
+                    appTarget: "c__TRPG_Timelines",
+                    pageRef: {
+                        type: 'standard__namedPage',
+                        attributes: {
+                            pageName: 'home'
+                        },
+                        state: {
+                            c__threadId: this.recordId,
+                        }
+                    }
+                }
+            }).then(url =>{
+                window.open(url, "_blank");
+            }).catch(err => {
+                console.error('NavError: '+err);
+            }).finally(() => 'Navigated');
+    } 
     editMessage() {
         this.editMsg = true;
+        this.showFiles = false;
+        this.isLoading = true;
     }
     handleMessageChange(event) {
         this.messageValue = event.target.value;
     }    
+    handleLoad(){
+        this.isLoading = false;
+    }
     handleSubmit() {
         this.isLoading = true;
     }
@@ -401,24 +487,35 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
                 variant: 'success'
             })
         );
+        this.fireRefresh();
+        this.cancelEdit();
+    }
+    fireRefresh(){
         const selectEvent = new CustomEvent('refresh', {
             detail: {
-                Id: this.timelinePost.Id,
+                Id: this.recordId,
                 parentId: this.timelinePost.Parent_Ticket__c
             }
         });
         this.dispatchEvent(selectEvent);  
-        this.cancelEdit();
     }
     cancelEdit() {
         this.editMsg = false;
+        this.refresh();
+        this.callRefreshFile();
+        this.connectedCallback();
+    }
+    @api
+    callRefreshFile(){
+        const el = this.template.querySelector('c-record-chat-file-container');
+        el.refresh();
     }
     closeTicket(event){
         event.preventDefault();
         event.stopPropagation();
         const selectEvent = new CustomEvent('close', {
             detail: {
-                Id: this.timelinePost.Id,
+                Id: this.recordId,
                 parentId: this.timelinePost.Parent_Ticket__c
             }
         });

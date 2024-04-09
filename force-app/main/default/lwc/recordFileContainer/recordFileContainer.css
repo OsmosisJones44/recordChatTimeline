@@ -1,0 +1,40 @@
+.userList{
+    font-weight: bold; 
+    font-size: 1rem;
+    color: #3C648D;
+    text-align: left;
+    width: 97%;
+    padding-bottom: 6px;
+    padding-top: 12px;
+}
+.thumbnailImg{
+    height: 90px;
+    width:120px;
+    background-size: cover;
+    aspect-ratio: 4/3;
+    /* max-height: 50px; */
+}
+.secondaryFields span:after {
+    content: "\2022";
+    margin: 0 5px;
+}
+
+.secondaryFields span:last-child:after {
+    content: "";
+    margin: 0;
+}
+.attachmentContainer{
+    overflow:auto;
+    max-height:20rem;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+    /* border-bottom: 1px solid rgba(60, 100, 141, .5); */
+}
+/* Hide scrollbar for Chrome, Safari and Opera */
+.attachmentContainer::-webkit-scrollbar {
+    display: none;
+}
+.itemTitle{
+    font-size: 1rem;
+    font-weight: bold;
+}

@@ -1,0 +1,23 @@
+.overrideBg{
+    --slds-g-color-neutral-base-100: rgb(243,243,243);
+}
+.topEdges{
+    border-top-left-radius: .5rem;
+    border-top-right-radius: .5rem;
+}
+.bottomEdges{
+    border-bottom-left-radius: .5rem;
+    border-bottom-right-radius: .5rem;
+}
+.cursorPointer{
+    cursor: pointer;
+}
+.bgTransparent{
+    background-color: rgb(243,243,243);
+}
+.removeTextDecoration{
+    text-decoration: none;
+}
+.colorBlack{
+    color: black;
+}

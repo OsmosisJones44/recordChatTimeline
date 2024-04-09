@@ -1,15 +1,16 @@
 import { LightningElement, api, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import getCurUser from '@salesforce/apex/BirthdayController.getCurUser';
-import initFiles from "@salesforce/apex/contentManager.initFiles";
 import getReadUsers from '@salesforce/apex/BirthdayController.getReadUsers';
-import queryFiles from "@salesforce/apex/contentManager.queryFiles";
-import loadFiles from "@salesforce/apex/contentManager.loadFiles";
+import deleteThreadMember from '@salesforce/apex/ChatController.deleteThreadMember';
+// import initFiles from "@salesforce/apex/contentManager.initFiles";
+// import queryFiles from "@salesforce/apex/contentManager.queryFiles";
+// import loadFiles from "@salesforce/apex/contentManager.loadFiles";
 import USER_ID from '@salesforce/user/Id';
-import MESSAGE_OBJECT from '@salesforce/schema/Ticket_Message__c';
-import MESSAGE_FIELD from '@salesforce/schema/Ticket_Message__c.Message__c';
-import OWNER_FIELD from '@salesforce/schema/Ticket_Message__c.OwnerId';
-import PARENT_FIELD from '@salesforce/schema/Ticket_Message__c.Parent_Record_Id__c';
+// import MESSAGE_OBJECT from '@salesforce/schema/Ticket_Message__c';
+// import MESSAGE_FIELD from '@salesforce/schema/Ticket_Message__c.Message__c';
+// import OWNER_FIELD from '@salesforce/schema/Ticket_Message__c.OwnerId';
+// import PARENT_FIELD from '@salesforce/schema/Ticket_Message__c.Parent_Record_Id__c';
 import PARENTID_FIELD from '@salesforce/schema/Ticket_Message__c.Id';
 import CLOSED_FIELD from '@salesforce/schema/Ticket_Message__c.Closed_Thread__c';
 import STATUS_OBJECT from '@salesforce/schema/Help_Desk_Message_Status__c';
@@ -17,24 +18,28 @@ import HDOWNER_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.OwnerI
 import READ_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Read__c';
 import HDMESSAGE_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Ticket_Message__c';
 // import HIDDEN_FIELD from '@salesforce/schema/Ticket_Message__c.Hidden__c';
-import DOC_FIELD from '@salesforce/schema/Ticket_Message__c.DocumentId__c';
+// import DOC_FIELD from '@salesforce/schema/Ticket_Message__c.DocumentId__c';
 import { createRecord, updateRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from '@salesforce/apex';
 
 
 export default class ThreadTile extends NavigationMixin(LightningElement) {
-    // @api ticketMsg;
     @api recordId;
+    @api threadId;
     @api mainArea;
+    @api preview;
+    @api iconName;
+    @api parentRecordId;
     // @api ticketUsers = [];
     @api customRecipients;
     @api showThread = false;
     @api threadBox = "slds-m-left_xx-large slds-box slds-box_xx-small";
-    @api timelineContainerClass = 'threadTimelineClass';
+    @api timelineContainerClass = 'threadTimelineClass flexReverse slds-p-top_medium';
     @api ticketMsg;
+    @api showMsg = false;
+    @api showParentTimeline = false;
     userId = USER_ID;
-    closedThread;
     isLoading = false;
     disableButton;
     curUser;
@@ -44,10 +49,22 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
     ticketMessageId;
     ticketUsers;
     ticketSeenUsers;
+    title;
     moreLoaded = true;
     loaded = false;
     attachments = {};
     totalFiles;
+    fids = '';
+    tempIds = [];
+    uploadedFiles = []; 
+    tempTicketUsers = [];
+    file; 
+    fileContents; 
+    fileReader; 
+    content; 
+    fileName;    
+    fileName = '';
+    filesUploaded = [];
     moreRecords;
     offset=0;
     sortIcon = 'utility:arrowdown';
@@ -71,6 +88,17 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
             'checked' : true
         }
     ];
+    formats = [
+        'bold',
+        'italic',
+        'underline',
+        'strike',
+        'list',
+        'link',
+        'image',
+        'table',
+        'header',
+    ];
     title;
     conditions;
     documentForceUrl;
@@ -86,10 +114,6 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
     get noRecords(){
         return this.totalFiles == 0;
     }
-    get closedThread() {
-        return this.ticketMsg.Closed_Thread__c;
-    }
-
     @wire(getReadUsers, { ticketMessageId: '$recordId' })
     userSetup(result) {
         this.ticketSeenUsers = result;
@@ -110,7 +134,8 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
     };
 
     connectedCallback() {
-        this.runGetUser();    
+        this.closedThread = this.ticketMsg.Closed_Thread__c;
+        this.runGetUser();   
     }
 
     runGetUser(){
@@ -138,6 +163,29 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
             }
         });
     }
+    handleOpenThreadIndividually() {
+        console.log('Navigation Attempt');
+        this[NavigationMixin.GenerateUrl](
+            {
+                type: "standard__app",
+                attributes: {
+                    appTarget: "c__TRPG_Timelines",
+                    pageRef: {
+                        type: 'standard__namedPage',
+                        attributes: {
+                            pageName: 'home'
+                        },
+                        state: {
+                            c__threadId: this.recordId,
+                        }
+                    }
+                }
+            }).then(url =>{
+                window.open(url, "_blank");
+            }).catch(err => {
+                console.error('NavError: '+err);
+            }).finally(() => 'Navigated');
+    } 
     @api
     showInfoTab() {
         const el = this.template.querySelector('lightning-tabset[data-id="threadTabs"]');
@@ -149,7 +197,7 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
         this.isLoading = true;
         this.disableButton = true;
         const fields = {};
-        fields[PARENTID_FIELD.fieldApiName] = this.ticketMsg.Id;
+        fields[PARENTID_FIELD.fieldApiName] = this.recordId;
         fields[CLOSED_FIELD.fieldApiName] = true;
 
         const recordInput = { fields };
@@ -169,7 +217,7 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
                 this.handleRefresh();
             })
             .catch(error => {
-                console.log(JSON.stringify(error));
+                console.error(error);
                 this.isLoading = false;
                 this.disableButton = false;
                 this.dispatchEvent(
@@ -187,7 +235,7 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
         this.isLoading = true;
         this.disableButton = true;
         const fields = {};
-        fields[PARENTID_FIELD.fieldApiName] = this.ticketMsg.Id;
+        fields[PARENTID_FIELD.fieldApiName] = this.recordId;
         fields[CLOSED_FIELD.fieldApiName] = false;
 
         const recordInput = { fields };
@@ -209,7 +257,7 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
             .catch(error => {
                 this.isLoading = false;
                 this.disableButton = false;
-                console.log(JSON.stringify(error));
+                console.error(error);
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'Error Re-Opening Message Thread',
@@ -219,31 +267,9 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
                 );
             });
     }    
-    toggleSortOrder(){
-        if(this.sortOrder == 'ASC'){
-            this.sortOrder = 'DESC';
-            this.sortIcon = 'utility:arrowdown';
-        }else{
-            this.sortOrder = 'ASC';
-            this.sortIcon = 'utility:arrowup';
-        }
-    }
-    openPreview(event){
-        let elementId = event.currentTarget.dataset.id;
-        this[NavigationMixin.Navigate]({
-            type: 'standard__namedPage',
-            attributes: {
-                pageName: 'filePreview'
-            },
-            state : {
-                selectedRecordId: elementId,
-                recordIds: this.fids
-            }
-        })
-    }
     handleRefresh(){
         const selectEvent = new CustomEvent('refresh', {
-            detail: this.ticketMsg.Id
+            detail: this.recordId
         });
         this.dispatchEvent(selectEvent);  
     }
@@ -276,7 +302,7 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
             } else {
                 const fields = {};
                 fields[HDOWNER_FIELD.fieldApiName] = this.userNameValue;
-                fields[HDMESSAGE_FIELD.fieldApiName] = this.ticketMsg.Id;
+                fields[HDMESSAGE_FIELD.fieldApiName] = this.recordId;
                 fields[READ_FIELD.fieldApiName] = true;
                 const recordInput = { apiName: STATUS_OBJECT.objectApiName, fields };
                 createRecord(recordInput)
@@ -317,6 +343,9 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
             );
         }
     }
+    handleDeleteThreadMember(){
+        deleteThreadMember({recordId: this.recordId})
+    }
     sendCustomNotifications(result) {
         console.log(result);
         console.log(this.customRecipients);
@@ -342,187 +371,5 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
                     });
             })
         }
-    }    
-    loadMore(){
-        this.moreLoaded = false;
-        var self = this;
-        loadFiles({ 
-            recordId: this.this.ticketMsg.Parent_Record_Id__c, 
-            filters: this.conditions, 
-            defaultLimit: this.defaultNbFileDisplayed, 
-            offset: this.offset, 
-            sortField: this.sortField, 
-            sortOrder: this.sortOrder 
-        })
-        .then(result => {
-            for(var cdl of result){
-                self.attachments.push(self.calculateFileAttributes(cdl));
-                self.fileCreated = true;
-                if (this.fids != '') this.fids += ',';
-                this.fids += cdl.ContentDocumentId;
-            }
-            self.updateCounters(result.length);
-            self.moreLoaded = true;
-        });
-    }
-    showNotification(title, message, variant) {
-        const event = new ShowToastEvent({
-            title: title,
-            message: message,
-            variant: variant
-        });
-        this.dispatchEvent(event);
-    }
-    updateCounters(recordCount){
-        this.offset += recordCount;
-        this.moreRecords = this.offset < this.totalFiles;
-    }    
-    formatBytes(bytes,decimals) {
-        if(bytes == 0) return '0 Bytes';
-        var k = 1024,
-            dm = decimals || 2,
-            sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
-            i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-    }    
-    handleLoad(event){
-        let elementId = event.currentTarget.dataset.id;
-        const eventElement = event.currentTarget;
-        eventElement.classList.remove('slds-hide');
-        let dataId = 'lightning-icon[data-id="' + elementId + '"]';
-        this.template.querySelector(dataId).classList.add('slds-hide');
-    }
-    calculateFileAttributes(item){
-        let imageExtensions = ['png','jpg','gif'];
-        let supportedIconExtensions = ['ai','attachment','audio','box_notes','csv','eps','excel','exe','flash','folder','gdoc','gdocs','gform','gpres','gsheet','html','image','keynote','library_folder','link','mp4','overlay','pack','pages','pdf','ppt','psd','quip_doc','quip_sheet','quip_slide','rtf','slide','stypi','txt','unknown','video','visio','webex','word','xml','zip'];
-        item.src = this.documentForceUrl + '/sfc/servlet.shepherd/version/renditionDownload?rendition=THUMB120BY90&versionId=' + item.ContentDocument.LatestPublishedVersionId;
-        item.size = this.formatBytes(item.ContentDocument.ContentSize, 2);
-        item.icon = 'doctype:attachment';
-        let fileType = item.ContentDocument.FileType.toLowerCase();
-        if(imageExtensions.includes(fileType)){
-            item.icon = 'doctype:image';
-        }else{
-            if(supportedIconExtensions.includes(fileType)){
-                item.icon = 'doctype:' + fileType;
-            }
-        }
-        return item;
-    }
-    initRecords() {
-        initFiles({ 
-            recordId: this.ticketMsg.Parent_Record_Id__c, 
-            filters: this.conditions, 
-            defaultLimit: this.defaultNbFileDisplayed, 
-            sortField: this.sortField, 
-            sortOrder: this.sortOrder 
-        })
-        .then(result => {
-            this.fids = '';
-            let listAttachments = new Array();
-            let contentDocumentLinks = result.contentDocumentLinks;
-            this.documentForceUrl = result.documentForceUrl;
-            for(var item of contentDocumentLinks){
-                listAttachments.push(this.calculateFileAttributes(item));
-                if (this.fids != '') this.fids += ',';
-                this.fids += item.ContentDocumentId;
-            }
-            this.attachments = listAttachments;
-            this.totalFiles = result.totalCount;
-            this.moreRecords = result.totalCount > 3 ? true : false;
-            let nbFiles = listAttachments.length;
-            if (this.defaultNbFileDisplayed === undefined){
-                this.defaultNbFileDisplayed = 6;
-            }
-            if (this.limitRows === undefined){
-                this.limitRows = 3;
-            }
-            this.offset = this.defaultNbFileDisplayed;
-            if(result.totalCount > this.defaultNbFileDisplayed){
-                nbFiles = this.defaultNbFileDisplayed + '+';
-            }
-            this.title = 'Files (' + nbFiles + ')';
-            this.disabled = false;
-            this.loaded = true;
-        })
-        .catch(error => {
-            this.showNotification("", "Error", "error");
-        }).finally(() => {
-            this.isLoading = false;
-        });
-    }    
-    handleFilesChange(event) {
-        if(event.target.files.length > 0) {
-            this.filesUploaded = event.target.files;
-
-            for(let item in filesUploaded){
-                attachments.push(item);
-            }
-            for(let i = 0; filesUploaded.length; i++){
-                this.fileName = event.target.files[i].name;
-                this.fileSize = this.formatBytes(event.target.files[i].size,2);                
-            }
-        }
-    }
-    getBaseUrl(){
-        let baseUrl = 'https://'+location.host+'/';
-        return baseUrl;
-    }
-    handleUploadFinished(event) {
-        var self = this;
-        //let baseUrl = this.getBaseUrl();
-        // Get the list of uploaded files
-        const uploadedFiles = event.detail.files;
-        var contentDocumentIds = new Array();
-        for(var file of uploadedFiles){
-            console.log(JSON.stringify(file));
-            contentDocumentIds.push(file.documentId);
-            const fields = {};
-            //this.messageValue = this.curName + ' just posted a New File<a href="' + baseUrl+'sfc/servlet.shepherd/version/renditionDownload?rendition=THUMB720BY480&versionId='+file.contentVersionId + '">file</a>';
-            this.messageValue = this.curName + ' has just attached a New File to this ticket';
-            fields[MESSAGE_FIELD.fieldApiName] = this.messageValue;
-            fields[OWNER_FIELD.fieldApiName] = this.userId;
-            fields[PARENT_FIELD.fieldApiName] = this.this.ticketMsg.Parent_Record_Id__c;
-            fields[DOC_FIELD.fieldApiName] = file.documentId;
-            const recordInput = { apiName: MESSAGE_OBJECT.objectApiName, fields };
-            createRecord(recordInput)
-                .then(() => {
-                    this.dispatchEvent(
-                        new ShowToastEvent({
-                            title: 'Success',
-                            message: 'Timeline Updated',
-                            variant: 'success',
-                        }),
-                    );
-                    refreshApex(this.timelinePosts)
-                    .then(() => {
-                        this.messageValue = '';
-                        this.scrollToBottom();                
-                    })
-                })
-                .catch(error => {
-                    //console.log(JSON.stringify(error));
-                    this.dispatchEvent(
-                        new ShowToastEvent({
-                            title: 'Error Creating Record',
-                            message: 'Screenshot this and Contact your Salesforce Admin: ' + error.body.message ,
-                            variant: 'error',
-                        }),
-                    );
-                });
-        }
-        queryFiles({ 
-            recordId: this.this.ticketMsg.Parent_Record_Id__c, 
-            contentDocumentIds: contentDocumentIds 
-        })
-        .then(result => {
-            for(var cdl of result){
-                self.attachments.unshift(self.calculateFileAttributes(cdl));
-                self.fileCreated = true;
-                this.fids = cdl.ContentDocumentId + (this.fids=='' ? '' : ',' + this.fids);
-            }
-            self.updateCounters(result.length);
-            this.totalFiles += result.length;
-            this.initRecords();
-        });
-    }       
+    }      
 }

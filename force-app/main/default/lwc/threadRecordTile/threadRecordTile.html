@@ -1,0 +1,41 @@
+<template>
+    <div class="slds-box slds-box_small slds-m-vertical_x-small">
+        <lightning-card>
+                <div class="slds-p-vertical_xx-small slds-m-bottom_xx-small">
+                    <c-thread-record-tile-message timeline-post={ticketMsg} show-pinned onrefresh={handleRefresh} 
+                        current-name={curName}>
+                        <lightning-button-group>
+                            <lightning-button-icon onclick={handleOpenThreadIndividually} tooltip="Open Individually" icon-name="utility:new_window" variant="border-filled"></lightning-button-icon>
+                            <template if:false={closedThread}>
+                                <lightning-button-icon onclick={handleResolve} tooltip="Resolve" icon-name="utility:success" variant="brand"
+                                    ></lightning-button-icon>
+                            </template>
+                            <template if:true={closedThread}>
+                                <lightning-button-icon onclick={handleReopen} tooltip="Re-Open Resolved Thread" icon-name="utility:email_open" variant="border-filled"
+                                    ></lightning-button-icon>
+                            </template>
+                        </lightning-button-group>
+                    </c-thread-record-tile-message>
+                </div>
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading">
+                </lightning-spinner>
+            </template>
+            <template if:true={mainArea}>
+                <template if:false={closedThread}>
+                    <lightning-tabset variant="scoped" data-id="threadTabs">
+                        <lightning-tab label="Thread" icon-name="utility:comments" value="thread">
+                            <div class={threadBox}>
+                                <c-chat-timeline record-id={recordId} title="" icon-name="utility:comments" ticket-users={ticketUsers} timeline-container-class={timelineContainerClass} in-thread recipients={customRecipients} notifications={ticketUsers}></c-chat-timeline>
+                            </div>
+                        </lightning-tab>
+                        <lightning-tab label="Files" icon-name="utility:file" value="filesTab">
+                            <c-record-file-container record-id={recordId} title-prefix="Thread "></c-record-file-container>
+                            <c-record-file-container record-id={ticketMsg.Record_Id_Form__c} title-prefix="Parent "></c-record-file-container>
+                        </lightning-tab>
+                    </lightning-tabset>
+                </template>
+            </template>
+        </lightning-card>
+    </div>
+</template>

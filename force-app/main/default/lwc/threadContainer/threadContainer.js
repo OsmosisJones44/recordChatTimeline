@@ -24,9 +24,11 @@ export default class ThreadContainer extends NavigationMixin(LightningElement) {
     @api showThreadVal = false;
     @api threadBox = "slds-m-left_xx-large slds-box slds-box_xx-small";
     @api recordId;
+    @api threadId;
     @api chatToggle = false;
     @api parentRecordId = '';
     showPreview;
+    tempNum;
     userId = USER_ID;
     post;
     showThread = false;
@@ -69,6 +71,7 @@ export default class ThreadContainer extends NavigationMixin(LightningElement) {
         const { data, error } = result;
         if (data) {
             this.recentThreadMsgs = JSON.parse(JSON.stringify(data));
+            console.log('RecentThreadMsgs: '+JSON.stringify(this.recentThreadMsgs));
             this.error = undefined;
         } else if (error) {
             this.recentThreadMsgs = undefined;
@@ -124,10 +127,6 @@ export default class ThreadContainer extends NavigationMixin(LightningElement) {
         this.showPreview = true;
         this.showTimeline = false;
     }
-    // renderedCallback(){
-    //     refreshApex(this.recentThreadMsgKey);
-    //     refreshApex(this.recentMsgKey);
-    // }
     handleTrainingRedirect() {
         window.open('https://trpg.my.trailhead.com/content/operations/trails/internal-process-hub--timelines', '_blank');
     }

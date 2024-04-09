@@ -1,5 +1,5 @@
 <template>
-    <lightning-card title={ticketMsg.Preview__c} icon-name={ticketMsg.Icon_Name__c}>
+    <lightning-card title={preview} icon-name={iconName}>
         <div slot="actions">
             <lightning-button-group>
                 <lightning-button-icon onclick={handleOpen} icon-name="utility:new_window" tooltip="Open Parent Record"
@@ -14,24 +14,69 @@
                 </template>
             </lightning-button-group>
         </div>
-        <template if:true={isLoading}>
+        <!-- <template if:true={isLoading}>
             <lightning-spinner alternative-text="Loading">
             </lightning-spinner>
-        </template>
+        </template> -->
         <template if:true={mainArea}>
-            <div class="slds-p-around-large slds-m-bottom_small">
-                <c-chat-timeline-tile timeline-post={ticketMsg} show-pinned onrefresh={refreshPosts} 
-                    current-name={curName}></c-chat-timeline-tile>
+            <div class="slds-p-around-large slds-m-vertical_small">
+                <template if:false={showMsg}>
+                    <lightning-spinner alternative-text="Loading">
+                    </lightning-spinner>
+                </template>
+                <template if:true={showMsg}>
+                    <c-chat-timeline-tile timeline-post={ticketMsg} show-pinned onrefresh={refreshPosts} record-id={recordId}
+                        current-name={curName} avatar-size="large"></c-chat-timeline-tile>
+                </template>
             </div>
             <lightning-tabset data-id="threadTabs">
                 <lightning-tab label="Thread" icon-name="utility:comments" value="thread">
                     <div class={threadBox}>
-                        <c-chat-timeline record-id={recordId} title="Message Thread" ticket-users={ticketUsers} timeline-container-class={timelineContainerClass} in-thread recipients={customRecipients} notifications={ticketUsers}></c-chat-timeline>
+                        <c-chat-timeline record-id={recordId} title="Message Thread" source="thread" ticket-users={ticketUsers} timeline-container-class={timelineContainerClass} in-thread recipients={customRecipients} notifications={ticketUsers}></c-chat-timeline>
                     </div>
                 </lightning-tab>
-                <lightning-tab label="Parent Timeline" icon-name="utility:chat" value="parent">
-                    <c-chat-timeline record-id={ticketMsg.Parent_Record_Id__c} title="Timeline" source={source} show-pinned></c-chat-timeline>
+                <template if:true={showParentTimeline}>
+                    <lightning-tab label="Parent Timeline" icon-name="utility:chat" value="parent">
+                        <c-chat-timeline record-id={parentRecordId} title="Timeline" source={source} show-pinned></c-chat-timeline>
+                    </lightning-tab>
+                </template>
+                <lightning-tab label="Files" icon-name="utility:file">
+                    <c-record-file-container record-id={recordId} title-prefix="Thread "></c-record-file-container>
+                    <c-record-file-container record-id={parentRecordId} title-prefix="Parent "></c-record-file-container>
                 </lightning-tab>
+                <!-- <lightning-tab label="Thread Members" icon-name="utility:group">
+                    <lightning-card icon-name="utility:notification">
+                        <div slot="title">
+                            <h3 class="userList">Notifications</h3>
+                        </div>
+                        <div slot="actions">
+                            <lightning-button label="Add" variant="brand" size="small" icon-name="utility:add"
+                                onclick={handleAddUser}></lightning-button>
+                        </div>
+                        <div class="slds-grid slds-p-horizontal_medium">
+                            <div class="slds-col slds-align-bottom">
+                                <lightning-record-edit-form object-api-name="User_Ticket_Relationship__c"
+                                    data-id="userSubmit">
+                                    <lightning-input-field field-name="User__c" data-id="userUpdate"
+                                        variant="label-hidden" style="margin-bottom: 0;"
+                                        onchange={handleUserChange}></lightning-input-field>
+                                </lightning-record-edit-form>
+                            </div>
+                        </div>
+                        <div class="slds-p-horizontal_medium slds-p-top_x-small ticketUserContainer">
+                            <template if:true={customNotifications}>
+                                <div class="slds-p-vertical_xx-small">
+                                    <template for:each={customNotifications} for:item="ticketUser">
+                                        <lightning-pill label={ticketUser.Name} onremove={handleRemove} class="slds-p-right_xxx-small slds-p-bottom_xxx-small" key={ticketUser.Id}>
+                                            <lightning-avatar src={ticketUser.SmallPhotoUrl}
+                                            fallback-icon-name="standard:user" size="x-small" variant="circle"  alternative-text="User avatar"></lightning-avatar>
+                                        </lightning-pill>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </lightning-card>
+                </lightning-tab> -->
             </lightning-tabset>
         </template>
     </lightning-card>

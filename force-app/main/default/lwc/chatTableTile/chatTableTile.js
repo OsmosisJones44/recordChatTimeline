@@ -24,6 +24,7 @@ export default class ChatTableTile extends NavigationMixin(LightningElement) {
     @api curUser;
     @api showConversation = false;
     @api showThread = false;
+    @api timelinePostId;
     userId = USER_ID;
     smallPhotoUrl;
     showTime;
@@ -36,87 +37,68 @@ export default class ChatTableTile extends NavigationMixin(LightningElement) {
     isLoading;
     disableButton;
 
-    @wire(getCurrentUserPhoto, {
-        userId: '$msgStatus.Ticket_Message__r.OwnerId'
-    })
-    ticketSetup(result) {
-        this.smallPhotoUrlKey = result;
-        const { data, error } = result;
-        if (data) {
-            this.smallPhotoUrl = JSON.parse(JSON.stringify(data));
-            this.error = undefined;
-        } else if (error) {
-            this.smallPhotoUrl = undefined;
-            this.error = error;
-            console.error(error);
-        } else {
-            this.error = undefined;
-            this.smallPhotoUrl = undefined;
-        }
-        this.lastSavedData = this.smallPhotoUrl;
-        this.isLoading = false;
-    };   
-    @wire(getUserMsgStatus, {
-        userId: '$ticketUser.Id',
-        msgId: '$timelinePostId'
-    })
-    statusSetup(result) {
-        this.msgStatusKey = result;
-        const { data, error } = result;
-        if (data) {
-            this.userMsgStatus = JSON.parse(JSON.stringify(data));
-            this.liked = this.userMsgStatus.Liked__c;
-            this.error = undefined;
-        } else if (error) {
-            this.userMsgStatus = undefined;
-            this.error = error;
-            console.error(error);
-        } else {
-            this.error = undefined;
-            this.userMsgStatus = undefined;
-        }
-        this.lastSavedData = this.userMsgStatus;
-        this.isLoading = false;
-    };
+    get threadPreview (){
+        return this.msgStatus.Ticket_Message__r?.Parent_Ticket_Message__r?.Preview__c ?? 'Preview';
+    }
+    get threadIcon (){
+        return this.msgStatus.Ticket_Message__r?.Parent_Ticket_Message__r?.Icon_Name__c ?? 'utility:comments';
+    }
+    get threadMsg (){
+        return this.msgStatus.Ticket_Message__r?.Parent_Ticket_Message__r?.Message__c ?? '<b>Contact your Salesforce Admin to Properly Connect the Parent Message to this Thread</b>';
+    }
+   
+    get threadDate (){
+        return this.msgStatus.Ticket_Message__r?.Parent_Ticket_Message__r?.CreatedDate ?? null;
+    }
 
     connectedCallback() {
         this.showLikes = true;
         this.createdDateParent = new Date(this.msgStatus.Ticket_Message__r.CreatedDate);
-        // getCurrentUserPhoto({
-        //     userId: this.msgStatus.Ticket_Message__r.OwnerId
-        // })
-        //     .then(result => {
-        //         this.smallPhotoUrl = result;
-        //         this.error = undefined;
-        //     })
-        //     .catch(error => {
-        //         this.smallPhotoUrl = undefined;
-        //         this.error = error;
-        //         console.log(error);
-        //     })
-        // getUserMsgStatus({
-        //     userId: this.userId,
-        //     msgId: this.msgStatus.Ticket_Message__r.Id
-        // })
-        //     .then(result => {
-        //         this.userMsgStatus = result;
-        //         this.liked = this.userMsgStatus.Liked__c;
-        //         this.error = undefined;
-        //         console.log(this.userMsgStatus);
-        //     })
-        //     .catch(error => {
-        //         this.userMsgStatus = undefined;
-        //         this.error = error;
-        //         console.log(error);
-        //     })
         this.seenBy = this.msgStatus.Ticket_Message__r.SeenBy__c;
         // this.closedTicket = this.msgStatus.Ticket_Message__r.Parent_Ticket_Message__r.Closed_Thread__c;
         this.setValues();
     }
     renderedCallback(){
-        refreshApex(this.smallPhotoUrlKey);
-        refreshApex(this.msgStatusKey);
+        this.getCurUserPhoto();
+        // this.getUserMsgStatus();
     }
+
+    getCurUserPhoto(){
+        getCurrentUserPhoto({
+            userId: this.msgStatus.Ticket_Message__r.OwnerId
+        })
+            .then(result => {
+                this.smallPhotoUrl = result;
+                this.error = undefined;
+            })
+            .catch(error => {
+                this.smallPhotoUrl = undefined;
+                console.log(error);
+            })
+    }
+    // getUserMsgStatus(){
+    //     getUserMsgStatus({
+    //         userId: this.ticketUser.Id,
+    //         msgId: this.timelinePostId
+    //     })
+    //         .then(result => {
+    //             this.showLikes = true;
+    //             this.userMsgStatus = [...result];
+    //             this.liked = this.userMsgStatus?.Liked__c;
+    //             this.bookmarked = this.userMsgStatus?.Bookmarked__c;
+    //             if (this.bookmarked) {
+    //                 this.bookmarkedIcon = 'utility:bookmark_alt';
+    //             } else {
+    //                 this.bookmarkedIcon = 'utility:bookmark_stroke';
+    //             }
+    //             this.error = undefined;
+    //         })
+    //         .catch(error => {
+    //             this.userMsgStatus = undefined;
+    //             this.error = error;
+    //             console.log(error);
+    //         })
+    // }
     openPreview(){
         //let elementId = event.currentTarget.dataset.id;
         this[NavigationMixin.Navigate]({
@@ -264,7 +246,7 @@ export default class ChatTableTile extends NavigationMixin(LightningElement) {
         const eventElement = this.template.querySelector('lightning-formatted-date-time[data-id="hoverSelect"]');
         eventElement.classList.add('slds-hide');
     }
-    handleSelect(event){
+    handleSelect(){
         // event.preventDefault();
         // event.stopPropagation();
         if (this.showThread) {

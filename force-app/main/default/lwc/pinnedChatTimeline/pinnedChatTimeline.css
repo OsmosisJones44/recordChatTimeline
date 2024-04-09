@@ -1,0 +1,9 @@
+.userList{
+    font-weight: bold; 
+    font-size: max(.65vw, 14px);
+    color: #3C648D;
+    text-align: left;
+    width: 97%;
+    padding-bottom: 6px;
+    padding-top: 6px;
+}

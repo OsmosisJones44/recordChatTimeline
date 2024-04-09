@@ -9,7 +9,6 @@
 .rightClass:hover{
     text-align: left;
     background-color: rgb(209, 209, 209);
-    border-bottom: 2px solid #cccccc;
 }
 .leftClass{
     text-align: left;
@@ -19,7 +18,6 @@
 .leftClass:hover{
     text-align: left;
     background-color: rgb(243, 243, 243);
-    border-bottom: 2px solid #ededed;
 }
 .timeClass{
     font-size: smaller;
@@ -28,8 +26,19 @@
 .opacityClass{
     opacity: .4;
 }
+.fontSize{
+    font-size: .7rem;
+}
 .animateFade{
     animation: fadeIn .25s;
+}
+.bookmarkedClass{
+    border: 2px solid rgb(60,100,141) !important;
+}
+.moveUpTop{
+    /* position: absolute; */
+    transform: translateY(-110%);
+    z-index:40;
 }
 .borderClass{
     border: 1px solid transparent;
@@ -70,9 +79,15 @@
 }
 
 .setThreadWidth{
-    width: min(100%,600px)
+    width: min(100%,600px);
+    overflow: hidden;
 }
-
+.openThread{
+    font-weight: bold;
+}
+.closedThread{
+    font-weight: lighter;
+}
 
 @keyframes fadeIn {
     from {

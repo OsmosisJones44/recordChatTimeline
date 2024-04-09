@@ -1,5 +1,8 @@
 <template>
-    <lightning-card title={title} variant="narrow" icon-name="standard:live_chat_visitor">
+    <lightning-card variant="narrow" icon-name="utility:pinned">
+        <div slot="title">
+            <h3 class="userList">{title}</h3>
+        </div>
         <div slot="actions">
             <template if:true={mainArea}>
                 <lightning-button-icon style="float:right" variant="container" tooltip="Search Timeline Posts"
@@ -47,7 +50,7 @@
             <div class="containerClass">
                 <template if:true={timelinePosts}>
                     <template for:each={timelinePosts} for:item="timelinePost">
-                        <c-chat-timeline-tile key={timelinePost.Id} timeline-post={timelinePost} show-pinned={showPinned}
+                        <c-chat-timeline-tile key={timelinePost.Id} record-id={timelinePost.Id} timeline-post={timelinePost} show-pinned={showPinned}
                             show-thread={showThread} onthread={openModal} onrefresh={refreshPosts} onseen={openModal}
                             current-name={curName}></c-chat-timeline-tile>
                     </template>

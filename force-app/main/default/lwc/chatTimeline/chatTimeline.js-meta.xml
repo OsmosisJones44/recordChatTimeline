@@ -10,11 +10,15 @@
     </targets>
     <targetConfigs>
         <targetConfig targets="lightning__FlowScreen">
-            <property name="recordId" label="recordId" type="String" />
+            <property name="recordId" label="Record ID" type="String" />
+            <property name="source" type="String" />
+
         </targetConfig>
         <targetConfig targets="lightning__RecordPage">
-              <property name="showPinned" type="Boolean" />
-              <property name="showThread" type="Boolean" />
+              <property name="showPinned" label="Show Pinned Button?" type="Boolean" />
+              <property name="showThread" label="Show Thread Button?" type="Boolean" />
+              <property name="showBookmarked" label="Show Bookmarked Button?" type="Boolean" />
+              <property name="source" label="Source" type="String" />
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>

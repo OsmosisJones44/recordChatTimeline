@@ -1,0 +1,95 @@
+<template>
+    <template if:true={timelinePost}>
+        <div class={timelinePost.timelineClassName__c} onclick={handleSelect}>
+            <lightning-card>
+                    <div class="slds-grid">
+                        <div class="slds-col slds-size_1-of-12 slds-align_absolute-center">
+                            <lightning-avatar slot="media" size="large" src={smallPhotoUrl} fallback-icon-name="standard:user">
+                            </lightning-avatar>
+                        </div>
+                        <div class="slds-col slds-size_7-of-12 slds-m-left_small">
+                            <a href={timelinePost.Owner_URL__c} class="titleClass">{timelinePost.OwnerName__c}</a>
+                            <div class="slds-grid">
+                                <div class="slds-col flexNone">
+                                    <lightning-relative-date-time value={createdDateParent} class="opacityClass"></lightning-relative-date-time>
+                                </div>
+                                <div class="slds-col flexNone opacityClass slds-m-horizontal_xx-small slds-align_absolute-center">|</div>
+                                <div class="slds-col flexNone">
+                                    <lightning-formatted-date-time data-id="hoverSelect" class="animateFade opacityClass"
+                                        value={timelinePost.CreatedDate} year="numeric" month="short" day="2-digit"
+                                        hour="2-digit" minute="2-digit" hour12="true">
+                                    </lightning-formatted-date-time>
+                                </div>
+                                <!-- TODO: Add logic for seenBy and likedBy format "Seen By X/Y" where Y is number of notifications sent out for the timeline msg, same for likes -->
+                                <!-- <div class="slds-col flexNone opacityClass slds-m-horizontal_xx-small">|</div>
+                                <span class="slds-col flexNone opacityClass slds-truncate">{seenBy}</span>
+                                <div class="slds-col flexNone opacityClass slds-m-horizontal_xx-small">|</div>
+                                <span class="slds-col flexNone opacityClass slds-truncate">{likedBy}</span> -->
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_4-of-12 slds-text-align_right slds-p-right_medium">
+                            <slot></slot>
+                        </div>
+
+                    </div>
+                <template if:true={isLoading}>
+                    <lightning-spinner alternative-text="content loading"></lightning-spinner>
+                </template>
+                    <template if:false={editMsg}>
+                        <div class="slds-p-around_medium">
+                            <lightning-formatted-rich-text value={timelinePost.Message__c}>
+                            </lightning-formatted-rich-text>
+                        </div>
+                    </template>
+                    <template if:true={editMsg}>
+                        <lightning-record-edit-form record-id={timelinePost.Id} object-api-name="Ticket_Message__c" onsubmit={handleSubmit}
+                            onsuccess={handleSuccess}>
+                            <lightning-input-field field-name="Message__c" onchange={handleMessageChange}>
+                            </lightning-input-field>
+                            <div class="slds-align_absolute-center">
+                                <lightning-button-group>
+                                    <lightning-button type="submit" label="Cancel" onclick={cancelEdit}></lightning-button>
+                                    <lightning-button type="submit" label="Save" variant="brand"></lightning-button>
+                                </lightning-button-group>
+                            </div>
+                        </lightning-record-edit-form>
+                    </template>
+                    <c-record-chat-file-container record-id={timelinePost.Id}></c-record-chat-file-container>
+                    <div class="slds-grid slds-wrap timeClass slds-p-top_xx-small">
+                        <div class="slds-col slds-p-right_xxx-small slds-p-left_small marginVert"
+                            data-id="seenSelect">
+                            <lightning-button-group data-id="hoverSelectButtons">
+                                <lightning-button variant="base" onclick={editMessage} size="small" label="Edit"
+                                    icon-name="utility:edit"></lightning-button>
+                                <!-- <lightning-button-icon variant="border-filled" onclick={openSeenBy} size="small" tooltip="Open Info"
+                                    icon-name="utility:info"></lightning-button-icon> -->
+
+                            </lightning-button-group>
+                            </div>
+                            <div class="slds-col slds-col_bump-left slds-text-align_right slds-p-right_small">
+                            <lightning-button-group>
+                                <template if:true={showThread}>
+                                        <lightning-button-icon-stateful variant="container" icon-name="utility:comments" size="small" tooltip="Reply in thread"
+                                            selected={timelinePost.Thread__c} alternative-text="Message thread"
+                                            onclick={handleOpenThread}></lightning-button-icon-stateful>
+                                </template>
+                                <template if:true={showLikes}>
+                                        <lightning-button-icon-stateful variant="container" icon-name="utility:like" size="small" selected={liked} tooltip="Like Message"
+                                            alternative-text="Like" onclick={handleLiked}>
+                                        </lightning-button-icon-stateful>
+                                </template>
+                                <template if:true={showPinned}>
+                                        <lightning-button-icon-stateful variant="container" icon-name={pinIcon} size="small" selected={pinned} tooltip="Pin Message"
+                                            alternative-text="Pin" onclick={handlePinned}>
+                                        </lightning-button-icon-stateful>
+                                        <lightning-button-icon-stateful variant="container" icon-name={bookmarkedIcon} size="small" selected={bookmarked} tooltip="Bookmark Message"
+                                            alternative-text="Bookmark" onclick={handleBookmarked}>
+                                        </lightning-button-icon-stateful>
+                                </template>
+                            </lightning-button-group>
+                        </div>
+                    </div>
+            </lightning-card>
+        </div>
+    </template>
+</template>
