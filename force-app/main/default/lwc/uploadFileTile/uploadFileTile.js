@@ -7,8 +7,22 @@ export default class UploadFileTile extends NavigationMixin(LightningElement) {
     @api thumbnail;
   
     get title(){
-        return this.file.Title + "." + this.file.Extension
+        return this.sanitizedTitle + "." + this.file.Extension
     }
+
+    get sanitizedTitle() {
+      if (!this.file || !this.file.Title) {
+          return 'No Title';
+      }
+      const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
+      const lowerTitle = this.file.Title.toLowerCase();
+      for (const ext of imageExtensions) {
+          if (lowerTitle.endsWith(ext)) {
+              return this.file.Title.slice(0, -ext.length);
+          }
+      }
+      return this.file.Title;
+  }
     
     get iconName() {
       if (this.file.Extension) {

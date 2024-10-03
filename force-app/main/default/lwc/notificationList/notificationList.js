@@ -127,9 +127,9 @@ export default class NotificationList extends LightningElement {
         this.recentMsgKey = result;
         const { data, error } = result;
         if (data) {
-            console.log("reg: "+JSON.stringify(data));
+            // console.log("reg: "+JSON.stringify(data));
             this.recentMsgs = JSON.parse(JSON.stringify(data));
-            console.log(JSON.stringify(this.recentMsgs));
+            // console.log(JSON.stringify(this.recentMsgs));
             // this.recentMsgs = data;
             this.error = undefined;
         } else if (error) {
@@ -169,7 +169,7 @@ export default class NotificationList extends LightningElement {
         const { data, error } = result;
         if (data) {
             this.bookmarkedMsgs = JSON.parse(JSON.stringify(data));
-            console.log("Bookmarked: "+JSON.stringify(this.bookmarkedMsgs));
+            // console.log("Bookmarked: "+JSON.stringify(this.bookmarkedMsgs));
             this.error = undefined;
         } else if (error) {
             this.bookmarkedMsgs = undefined;

@@ -39,6 +39,8 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
     @api ticketMsg;
     @api showMsg = false;
     @api showParentTimeline = false;
+    closedThread;
+    disableThreadStatus;
     userId = USER_ID;
     isLoading = false;
     disableButton;
@@ -195,7 +197,7 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
         event.stopPropagation();
         event.preventDefault();
         this.isLoading = true;
-        this.disableButton = true;
+        this.disableThreadStatus = true;
         const fields = {};
         fields[PARENTID_FIELD.fieldApiName] = this.recordId;
         fields[CLOSED_FIELD.fieldApiName] = true;
@@ -206,6 +208,7 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
             .then(() => {
                 this.isLoading = false;
                 this.closedThread = true;
+                this.disableThreadStatus = false;
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'Success',
@@ -213,13 +216,12 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
                         variant: 'success'
                     })
                 );
-                this.disableButton = false;
                 this.handleRefresh();
             })
             .catch(error => {
                 console.error(error);
                 this.isLoading = false;
-                this.disableButton = false;
+                this.disableThreadStatus = false;
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'Error Resolving Message Thread',
@@ -233,7 +235,7 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
         event.stopPropagation();
         event.preventDefault();
         this.isLoading = true;
-        this.disableButton = true;
+        this.disableThreadStatus = true;
         const fields = {};
         fields[PARENTID_FIELD.fieldApiName] = this.recordId;
         fields[CLOSED_FIELD.fieldApiName] = false;
@@ -243,7 +245,7 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
         updateRecord(recordInput)
             .then(() => {
                 this.isLoading = false;
-                this.disableButton = false;
+                this.disableThreadStatus = false;
                 this.closedThread = false;
                 this.dispatchEvent(
                     new ShowToastEvent({
@@ -256,7 +258,7 @@ export default class ThreadTile extends NavigationMixin(LightningElement) {
             })
             .catch(error => {
                 this.isLoading = false;
-                this.disableButton = false;
+                this.disableThreadStatus = false;
                 console.error(error);
                 this.dispatchEvent(
                     new ShowToastEvent({

@@ -302,6 +302,9 @@ export default class ChatTimeline extends LightningElement {
             .then(result => {
                 this.recordMembersVal = result;
                 this.customNotifications = [...this.recordMembersVal];
+                // if(this.customNotifications.length === 0){
+                //     this.customNotifications = [...this.recordMembersVal];
+                // }
                 this.setRecipients();
                 this.error = undefined;
                 this.lastSavedMembers = this.recordMembersVal;
@@ -329,6 +332,7 @@ export default class ChatTimeline extends LightningElement {
         }
         this.handleEdit(event);
     }
+    
     @api
     refreshTimelinePosts(rowId) {
         this.recordId = rowId;
