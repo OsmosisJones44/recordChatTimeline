@@ -92,8 +92,8 @@ export default class ChatTableContainer extends NavigationMixin(LightningElement
         this.showTimeline = true;
         this.recordId = event.detail.id;
         this.ticketMsg = event.detail.timelinePost;
-        // const el = this.template.querySelector('c-chat-timeline');
-        // el.refreshTimelinePosts(event.detail.id);
+        const el = this.template.querySelector('c-chat-timeline');
+        el.refreshTimelinePosts(this.recordId);
     }
     handleOpen() {
         const parentId = this.ticketMsg.Parent_Record_Id__c;
