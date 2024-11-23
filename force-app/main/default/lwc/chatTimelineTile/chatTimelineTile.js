@@ -8,6 +8,7 @@ import createReadStatus from '@salesforce/apex/ChatController.createReadStatus';
 import getRecentThreadMsg from '@salesforce/apex/ChatController.getRecentThreadMsg';
 // import getVersionFilesNum from '@salesforce/apex/contentManager.getVersionFilesNum';
 import getUserMsgStatus from '@salesforce/apex/ChatController.getUserMsgStatus';
+import getUserMsgStatuses from '@salesforce/apex/ChatController.getUserMsgStatuses';
 // import MESSAGE_OBJECT from '@salesforce/schema/Help_Desk_Message_Status__c';
 // import TICKET_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Ticket_Message__c';
 // import READ_FIELD from '@salesforce/schema/Help_Desk_Message_Status__c.Read__c';
@@ -32,6 +33,7 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
     @api avatarSize;
     showLikes = false;
     smallPhotoThreadsList = [];
+    msgStatusList;
     // smallPhotoThreadArr = [];
     // smallPhotoThreads = [...new Set(this.smallPhotoThreadArr)];
     // smallPhotoThreads = [...new Set(array)];
@@ -142,7 +144,7 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
         this.getCurUserPhoto();
         this.bookmarkedIcon = 'utility:bookmark_stroke';
         this.createReadStatus();
-        this.getUserMsgStatus()
+        this.getUserMsgStatuses()
     }
     // getVersionFilesNum(){
     //     getVersionFilesNum( { recordId: this.recordId })
@@ -209,14 +211,40 @@ export default class ChatTimelineTile extends NavigationMixin(LightningElement) 
                 console.log(error);
             })
     }
-    getUserMsgStatus(){
-        getUserMsgStatus({
-            userId: this.userId,
+    // getUserMsgStatus(){
+    //     getUserMsgStatus({
+    //         userId: this.userId,
+    //         msgId: this.recordId
+    //     })
+    //         .then(result => {
+    //             this.showLikes = true;
+    //             this.userMsgStatus = result;
+    //             this.liked = this.userMsgStatus?.Liked__c;
+    //             this.bookmarked = this.userMsgStatus?.Bookmarked__c;
+    //             if (this.bookmarked) {
+    //                 this.bookmarkedIcon = 'utility:bookmark_alt';
+    //             } else {
+    //                 this.bookmarkedIcon = 'utility:bookmark_stroke';
+    //             }
+    //             this.error = undefined;
+    //         })
+    //         .catch(error => {
+    //             this.userMsgStatus = undefined;
+    //             this.error = error;
+    //             console.log(error);
+    //         })
+    // }
+    getUserMsgStatuses(){
+        getUserMsgStatuses({
             msgId: this.recordId
         })
             .then(result => {
                 this.showLikes = true;
-                this.userMsgStatus = result;
+                const res = result;
+                this.msgStatusList = res;
+                this.userMsgStatus = res.filter(el => {
+                    el.Id === this.userId;
+                });
                 this.liked = this.userMsgStatus?.Liked__c;
                 this.bookmarked = this.userMsgStatus?.Bookmarked__c;
                 if (this.bookmarked) {

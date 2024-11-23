@@ -52,9 +52,13 @@ public with sharing class ChatController {
             }
         }
     }
-    @AuraEnabled
+    @AuraEnabled(cacheable=true)
     public static Help_Desk_Message_Status__c getUserMsgStatus(string userId, string msgId){
         return [SELECT Id, CreatedDate, Name, Ticket_Message__c, OwnerId,Read__c,Liked__c, Pinned__c,Bookmarked__c FROM Help_Desk_Message_Status__c WHERE OwnerId = :userId AND Ticket_Message__c = :msgId WITH SECURITY_ENFORCED LIMIT 1];       
+    }
+    @AuraEnabled(cacheable=true)
+    public static List<Help_Desk_Message_Status__c> getUserMsgStatuses(string msgId){
+        return [SELECT Id, CreatedDate, Name, Ticket_Message__c, OwnerId,Read__c,Liked__c, Pinned__c,Bookmarked__c FROM Help_Desk_Message_Status__c WHERE Ticket_Message__c = :msgId WITH SECURITY_ENFORCED];       
     }
     @AuraEnabled
     public static List<Ticket_Message__c> getRecentThreadMsg(string msgId){

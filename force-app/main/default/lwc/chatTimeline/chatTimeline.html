@@ -75,10 +75,10 @@
                     <lightning-spinner alternative-text="Loading">
                     </lightning-spinner>
                 </template>
-                <div class="slds-grid slds-wrap">
+                <div class="slds-grid slds-wrap" data-id="scrollMeIn">
                     <div class="slds-col slds-size_12-of-12" data-id="selectRichText">
                         <lightning-input-rich-text variant="bottom-toolbar" data-id="inputRichText" class="overrideRichTextHeight" value={messageValue}
-                            placeholder="Enter Timeline Message..." onchange={handleMessageChange} formats={formats}>
+                            placeholder="Enter Timeline Message..." onchange={handleMessageChange} formats={formats} share-with-entity-id={userId}>
                             <lightning-rich-text-toolbar-button-group slot="toolbar"
                                 style="flex-grow:1;"></lightning-rich-text-toolbar-button-group>
                                 <!-- <lightning-rich-text-toolbar-button-group slot="toolbar" data-id="richTextVal"
@@ -95,71 +95,74 @@
                             </lightning-rich-text-toolbar-button-group>
                         </lightning-input-rich-text>
                     </div>
-                    <!-- <div class="slds-col slds-size_1-of-12">
-                        <div class="slds-grid slds-wrap">
-                            <div class="slds-col slds-size_1-of-1 slds-align_absolute-center">
-                                <lightning-button-icon data-id="timelineSendButton" class="slds-m-top_small" name="save"
-                                    variant="brand" onclick={createMessage} icon-name="utility:send"
-                                    disabled={disableButton} tooltip="Send">
-                                </lightning-button-icon>
-                            </div>
-                            <div class="slds-col slds-size_1-of-1 slds-align_absolute-center">
-                                <lightning-button-icon-stateful data-id="timelineAttachButton" class="slds-m-top_small"
-                                    name="save" variant="border" icon-name="utility:add" icon-position="right" selected={showTimelineOptions}
-                                    tooltip="Add/Attach" onclick={openTimelineMessageOptions}></lightning-button-icon-stateful>    
-                            </div>
-                        </div>
-                    </div> -->
-                    <template if:true={showTimelineOptions}>
-                        <div class="slds-col slds-size_1-of-1 slds-p-top_x-small">
-                            <lightning-card icon-name="utility:notification">
-                                <div slot="title">
-                                    <h3 class="userList">Notifications</h3>
+                    <div class="slds-col slds-size_1-of-1 slds-border_bottom slds-border_left slds-border_right">
+                        <!-- <div class="slds-col slds-size_1-of-12">
+                            <div class="slds-grid slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-align_absolute-center">
+                                    <lightning-button-icon data-id="timelineSendButton" class="slds-m-top_small" name="save"
+                                        variant="brand" onclick={createMessage} icon-name="utility:send"
+                                        disabled={disableButton} tooltip="Send">
+                                    </lightning-button-icon>
                                 </div>
-                                <div slot="actions">
-                                    <lightning-button label="Add" variant="brand" size="small" icon-name="utility:add"
-                                        onclick={handleAddUser}></lightning-button>
+                                <div class="slds-col slds-size_1-of-1 slds-align_absolute-center">
+                                    <lightning-button-icon-stateful data-id="timelineAttachButton" class="slds-m-top_small"
+                                        name="save" variant="border" icon-name="utility:add" icon-position="right" selected={showTimelineOptions}
+                                        tooltip="Add/Attach" onclick={openTimelineMessageOptions}></lightning-button-icon-stateful>    
                                 </div>
-                                <div class="slds-grid slds-p-horizontal_medium">
-                                    <div class="slds-col slds-align-bottom">
-                                        <lightning-record-edit-form object-api-name="User_Ticket_Relationship__c"
-                                            data-id="userSubmit">
-                                            <lightning-input-field field-name="User__c" data-id="userUpdate"
-                                                variant="label-hidden" style="margin-bottom: 0;"
-                                                onchange={handleUserChange}></lightning-input-field>
-                                        </lightning-record-edit-form>
+                            </div>
+                        </div> -->
+                        <template if:true={showTimelineOptions}>
+                            <div class="slds-p-top_x-small">
+                                <lightning-card icon-name="utility:notification">
+                                    <div slot="title">
+                                        <h3 class="userList">Notifications</h3>
+                                    </div>
+                                    <div slot="actions">
+                                        <lightning-button label="Add" variant="brand" size="small" icon-name="utility:add"
+                                            onclick={handleAddUser}></lightning-button>
+                                    </div>
+                                    <div class="slds-grid slds-p-horizontal_medium">
+                                        <div class="slds-col slds-align-bottom">
+                                            <lightning-record-edit-form object-api-name="User_Ticket_Relationship__c"
+                                                data-id="userSubmit">
+                                                <lightning-input-field field-name="User__c" data-id="userUpdate"
+                                                    variant="label-hidden" style="margin-bottom: 0;"
+                                                    onchange={handleUserChange}></lightning-input-field>
+                                            </lightning-record-edit-form>
+                                        </div>
+                                    </div>
+                                    <div class="slds-p-horizontal_medium slds-p-top_x-small ticketUserContainer">
+                                        <template if:true={customNotifications}>
+                                            <div class="slds-p-vertical_xx-small">
+                                                <template for:each={customNotifications} for:item="ticketUser">
+                                                    <lightning-pill label={ticketUser.Name} onremove={handleRemove} class="slds-p-right_xxx-small slds-p-bottom_xxx-small" data-filter-id={ticketUser.Id} key={ticketUser.Id}>
+                                                        <lightning-avatar src={ticketUser.SmallPhotoUrl}
+                                                        fallback-icon-name="standard:user" size="x-small" variant="circle"  alternative-text="User avatar"></lightning-avatar>
+                                                    </lightning-pill>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </lightning-card>
+                            </div>
+                        </template>
+                        <template if:true={timelineFile}>
+                            <div class="slds-p-around_x-small slds-border_top">
+                                <div class="slds-grid">
+                                    <div class="slds-col slds-size_1-of-1">
+                                        <lightning-helptext content="Files attached here are only saved if they are sent into the timeline"></lightning-helptext>
+                                        <lightning-file-upload label="Attach file to message" name="fileUploader" record-id={userId}
+                                            onuploadfinished={handleUploadFinished} multiple>
+                                        </lightning-file-upload>
+                                        <c-upload-file-container record-id={recordId}></c-upload-file-container>
                                     </div>
                                 </div>
-                                <div class="slds-p-horizontal_medium slds-p-top_x-small ticketUserContainer">
-                                    <template if:true={customNotifications}>
-                                        <div class="slds-p-vertical_xx-small">
-                                            <template for:each={customNotifications} for:item="ticketUser">
-                                                <lightning-pill label={ticketUser.Name} onremove={handleRemove} class="slds-p-right_xxx-small slds-p-bottom_xxx-small" data-filter-id={ticketUser.Id} key={ticketUser.Id}>
-                                                    <lightning-avatar src={ticketUser.SmallPhotoUrl}
-                                                    fallback-icon-name="standard:user" size="x-small" variant="circle"  alternative-text="User avatar"></lightning-avatar>
-                                                </lightning-pill>
-                                            </template>
-                                        </div>
-                                    </template>
-                                </div>
-                            </lightning-card>
-                        </div>
-                    </template>
-                </div>
-                <template if:true={timelineFile}>
-                    <div class="slds-col slds-size_1-of-1 slds-p-around_x-small slds-border_top">
-                        <div class="slds-grid">
-                            <div class="slds-col slds-size_1-of-1">
-                                <lightning-file-upload label="Attach file" name="fileUploader" record-id={userId}
-                                    onuploadfinished={handleUploadFinished} multiple>
-                                </lightning-file-upload>
-                                <c-upload-file-container record-id={recordId}></c-upload-file-container>
+                                <lightning-spinner if:true={isLoading} alternative-text="Loading"
+                                    size="small"></lightning-spinner>
                             </div>
-                        </div>
-                        <lightning-spinner if:true={isLoading} alternative-text="Loading"
-                            size="small"></lightning-spinner>
+                        </template>
                     </div>
-                </template>
+                </div>
             </div>
         </template>
         <template if:true={showRecordThreads}>

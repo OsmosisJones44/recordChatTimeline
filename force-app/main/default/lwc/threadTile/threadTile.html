@@ -5,7 +5,7 @@
                 <lightning-button-icon onclick={handleOpen} icon-name="utility:new_window" tooltip="Open Parent Record"
                     size="small"></lightning-button-icon>
                 <template if:false={closedThread}>
-                    <lightning-button-icon onclick={handleResolve} icon-name="utility:success" variant="brand" tooltip="Resolve Thread"
+                    <lightning-button-icon onclick={handleResolve} icon-name="utility:success" variant="brand" tooltip="Resolve Thread" disable={disableThreadStatus}
                         size="small"></lightning-button-icon>
                 </template>
                 <template if:true={closedThread}>

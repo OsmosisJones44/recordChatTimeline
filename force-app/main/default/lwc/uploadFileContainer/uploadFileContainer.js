@@ -7,7 +7,7 @@ import getDocumentsById from "@salesforce/apex/contentManager.getDocumentsById";
 export default class UploadFileContainer extends NavigationMixin(LightningElement) {
     loaded = false;
     @track fileList;
-    @api recordId;
+    // @api recordId;
     @api thumbnailSize = 'THUMB240BY180';
     @track files = [];
     fids = '';

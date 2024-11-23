@@ -202,7 +202,7 @@ export default class ChatTimeline extends LightningElement {
     //     this.lastSavedData = this.timelinePosts;
     //     this.isLoading = false;
     // };
-    @wire(getReadUsers, { ticketMessageId: '$ticketMessageId' })
+    @wire(getReadUsers, { ticketMessageId: '$ticketMessageId', userId: '$userId' })
     userSetup(result) {
         this.ticketSeenUsers = result;
         const { data, error } = result;
@@ -376,7 +376,95 @@ export default class ChatTimeline extends LightningElement {
         this.isModalOpen = false;
     }
     handleMessageChange(event) {
-        this.messageValue = event.target.value;
+        const htmlContent = event.target.value;
+        console.log(JSON.stringify(htmlContent));
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+        if(tempDiv.querySelector('img')){
+            this.isLoading = true;
+            this.extractAndRemoveImgTags(tempDiv);
+            const updatedHtmlContent = tempDiv.innerHTML;
+            this.messageValue = updatedHtmlContent;
+            const el2 = this.template.querySelector('div[data-id="scrollMeIn"]');
+            const el = this.template.querySelector('c-upload-file-container');
+            el.refresh(this.versionIds);
+            const rect = el2.getBoundingClientRect();
+            const isVisible = rect.bottom <= (window.innerHeight || document.documentElement.clientHeight);
+
+            if (!isVisible) {
+                el2.scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'nearest' });
+            }
+            this.isLoading = false;
+        } else {
+            this.messageValue = htmlContent;
+        }
+
+    }
+    extractAndRemoveImgTags(element) {
+        if (!element) return;
+    
+        // Process the current node
+        this.processNode(element);
+    
+        // Traverse all child nodes of the element
+        const childNodes = element.childNodes;
+        for (let i = 0; i < childNodes.length; i++) {
+            const childNode = childNodes[i];
+            // Recursively call extractAndRemoveImgTags for each child node
+            this.extractAndRemoveImgTags(childNode);
+        }
+    }
+    
+    processNode(node) {
+        // If the node is an img tag, process it
+        if (node.nodeType === Node.ELEMENT_NODE && node.tagName.toLowerCase() === 'img') {
+            const src = node.getAttribute('src');
+            if (src && src.includes('/version/download/')) {
+                const versionId = this.extractVersionId(src);
+                if (versionId) {
+                    this.versionIds.push(versionId);
+                }
+            }
+            // Remove the img tag
+            node.parentNode.removeChild(node);
+        }
+    }
+    
+    // extractAndRemoveImgTags(element) {
+    //     if (!element) return;
+    
+    //     // Traverse all child nodes of the element
+    //     const childNodes = element.childNodes;
+    //     for (let i = 0; i < childNodes.length; i++) {
+    //         const childNode = childNodes[i];
+    
+    //         // If the child node is an img tag, process it
+    //         if (childNode.nodeType === Node.ELEMENT_NODE && childNode.tagName.toLowerCase() === 'img') {
+    //             const src = childNode.getAttribute('src');
+    //             if (src && src.includes('/version/download/')) {
+    //                 const versionId = this.extractVersionId(src);
+    //                 if (versionId) {
+    //                     this.versionIds.push(versionId);
+    //                 }
+    //             }
+    //             // Remove the img tag
+    //             childNode.parentNode.removeChild(childNode);
+    //         } else {
+    //             // If the child node is not an img tag, recursively process its children
+    //             this.extractAndRemoveImgTags(childNode);
+    //         }
+    //     }
+    // }
+    extractVersionId(src) {
+        const urlParts = src.split('/');
+        const versionIdIndex = urlParts.indexOf('version') + 2; // versionId is 2 indices after 'version'
+        let versionIdString = urlParts[versionIdIndex];
+        let versionId = '';
+        // Remove any query parameters
+        if (versionIdString.includes('?')) {
+            versionId = versionIdString.split('?')[0];
+        }
+        return versionId;
     }
     handleSubjectChange(event) {
         this.subjectValue = event.detail.value;
@@ -505,7 +593,7 @@ export default class ChatTimeline extends LightningElement {
                 createRecord(recordInput)
                     .then(result => {
                         let resId = result;
-                        console.log('Notification Sent :' + JSON.stringify(resId));
+                        // console.log('Notification Sent :' + resId);
                     })
                     .catch(error => {
                         console.error(JSON.stringify(error));
@@ -533,7 +621,7 @@ export default class ChatTimeline extends LightningElement {
             createRecord(recordInput)
                 .then(result => {
                     let resId = result;
-                    console.log('DocumentLinkCreated :' + JSON.stringify(resId));
+                    // console.log('DocumentLinkCreated :' + resId);
                 })
                 .catch(error => {
                     console.error(JSON.stringify(error));
@@ -593,8 +681,12 @@ export default class ChatTimeline extends LightningElement {
                         }),
                     );
                     this.createMessageStatus(result.id);
-                    this.sendCustomNotifications(result);
-                    this.createContentDocumentLinks(result);
+                    if(this.customRecipients.length > 0){
+                        this.sendCustomNotifications(result);
+                    }
+                    if(this.contentDocumentIds.length > 0){
+                        this.createContentDocumentLinks(result);
+                    }
                     this.refreshPosts();
                     let tempDocumentIds = [];
                     const el = this.template.querySelector('c-upload-file-container');

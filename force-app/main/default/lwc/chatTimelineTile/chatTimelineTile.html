@@ -145,6 +145,14 @@
                     </div>
                 </div>
             </div> -->
+            <div class="slds-grid slds-wrap timeClass slds-p-top_xx-small slds-p-horizontal_small slds-grid_align-end" onclick={openSeenBy}>
+                <div class="slds-col">
+                    <template for:each={smallPhotoMemberList} for:item="photo" for:index="index">
+                        <c-chat-avatar size="small" photo={photo.SmallPhotoUrl} key={photo.id}
+                            container-class="slds-col flexNone slds-m-horizontal_xxx-small"></c-chat-avatar>
+                    </template>
+                </div>
+            </div>
         </div>
     </template>
 </template>
